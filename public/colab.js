@@ -489,7 +489,7 @@ function updateColabCode(userProfile) {
   if (email === 'randersoncontato@gmail.com') {
     ghUser = 'efeitodigitalcontato-ops';
     ghEmail = 'efeitodigitalcontato@gmail.com';
-    renderCode(ghUser, ghEmail);
+    renderCode(ghUser, ghEmail, email);
   } else if (userProfile && userProfile.githubToken) {
     // Buscar login do GitHub a partir do token
     fetch('https://api.github.com/user', {
@@ -504,22 +504,25 @@ function updateColabCode(userProfile) {
         ghUser = 'seu-usuario-github';
         ghEmail = userProfile.email || 'seu-email@github.com';
       }
-      renderCode(ghUser, ghEmail);
+      renderCode(ghUser, ghEmail, email);
     })
     .catch(err => {
       console.error('Erro ao decodificar token GitHub:', err);
-      renderCode('seu-usuario-github', userProfile.email || 'seu-email@github.com');
+      renderCode('seu-usuario-github', userProfile.email || 'seu-email@github.com', email);
     });
   } else {
-    renderCode('seu-usuario-github', email || 'seu-email@github.com');
+    renderCode('seu-usuario-github', email || 'seu-email@github.com', email);
   }
 }
 
-function renderCode(ghUser, ghEmail) {
+function renderCode(ghUser, ghEmail, accountEmail) {
   let code = COLAB_CELL_3_CODE;
   // Substituir os valores hardcoded do template pelo do usuário atual
   code = code.replace("GH_USER     = 'efeitodigitalcontato-ops'", `GH_USER     = '${ghUser}'`);
   code = code.replace("GH_EMAIL    = 'efeitodigitalcontato@gmail.com'", `GH_EMAIL    = '${ghEmail}'`);
+  
+  const emailToUse = accountEmail || ghEmail || 'efeitodigitalcontato@gmail.com';
+  code = code.replace(/\{\{USER_EMAIL\}\}/g, emailToUse);
   
   activeColabCode = code;
   
