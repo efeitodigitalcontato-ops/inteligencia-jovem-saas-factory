@@ -1,0 +1,245 @@
+---
+// Search.astro
+---
+
+<div class="search-widget">
+  <div class="search-input-wrapper">
+    <input type="text" id="site-search-input" placeholder="Pesquisar posts e avaliações..." aria-label="Pesquisar" autocomplete="off" />
+    <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <button id="search-clear-btn" class="clear-btn" style="display: none;">&times;</button>
+  </div>
+  
+  <div id="search-results-dropdown" class="search-results-container" style="display: none;">
+    <div class="search-loading" style="display: none;">Carregando resultados...</div>
+    <div id="search-results-list" class="results-list"></div>
+    <div class="search-no-results" style="display: none;">Nenhum artigo encontrado. Tente outros termos.</div>
+  </div>
+</div>
+
+<style>
+  .search-widget {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  #site-search-input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 9999px;
+    background-color: #f8fafc;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  #site-search-input:focus {
+    background-color: #ffffff;
+    border-color: var(--primary-color, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 1rem;
+    width: 18px;
+    height: 18px;
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .clear-btn {
+    position: absolute;
+    right: 2.5rem;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .clear-btn:hover {
+    color: #64748b;
+  }
+
+  .search-results-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 50;
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+
+  .results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .search-loading, .search-no-results {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  /* Item de resultado individual */
+  :global(.search-result-item) {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    color: inherit;
+    text-decoration: none !important;
+    transition: background-color 0.2s ease;
+  }
+
+  :global(.search-result-item:hover) {
+    background-color: #f1f5f9;
+  }
+
+  :global(.search-result-title) {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.15rem;
+  }
+
+  :global(.search-result-desc) {
+    font-size: 0.75rem;
+    color: #64748b;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  :global(.search-result-meta) {
+    font-size: 0.7rem;
+    color: var(--primary-color, #6366f1);
+    margin-top: 0.25rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    let searchIndex = null;
+    let isFetching = false;
+
+    const input = document.getElementById('site-search-input');
+    const clearBtn = document.getElementById('search-clear-btn');
+    const dropdown = document.getElementById('search-results-dropdown');
+    const list = document.getElementById('search-results-list');
+    const loadingEl = dropdown?.querySelector('.search-loading');
+    const noResultsEl = dropdown?.querySelector('.search-no-results');
+
+    if (!input) return;
+
+    const fetchIndex = async () => {
+      if (searchIndex || isFetching) return;
+      isFetching = true;
+      if (loadingEl) loadingEl.style.display = 'block';
+      try {
+        const res = await fetch('/search.json');
+        searchIndex = await res.json();
+      } catch (e) {
+        console.error('Failed to fetch search index:', e);
+      } finally {
+        isFetching = false;
+        if (loadingEl) loadingEl.style.display = 'none';
+      }
+    };
+
+    const performSearch = (query) => {
+      if (!searchIndex) return;
+      const cleanQuery = query.toLowerCase().trim();
+      if (!cleanQuery) {
+        list.innerHTML = '';
+        dropdown.style.display = 'none';
+        if (noResultsEl) noResultsEl.style.display = 'none';
+        return;
+      }
+
+      const matches = searchIndex.filter(item => {
+        return (
+          item.title.toLowerCase().includes(cleanQuery) ||
+          item.description.toLowerCase().includes(cleanQuery) ||
+          item.category.toLowerCase().includes(cleanQuery)
+        );
+      }).slice(0, 8); // Max 8 results
+
+      list.innerHTML = '';
+      dropdown.style.display = 'block';
+
+      if (matches.length === 0) {
+        if (noResultsEl) noResultsEl.style.display = 'block';
+      } else {
+        if (noResultsEl) noResultsEl.style.display = 'none';
+        matches.forEach(item => {
+          const a = document.createElement('a');
+          a.className = 'search-result-item';
+          a.href = `/${item.slug}`;
+          a.innerHTML = `
+            <span class="search-result-title">${item.title}</span>
+            <span class="search-result-desc">${item.description}</span>
+            ${item.category ? `<span class="search-result-meta">${item.category}</span>` : ''}
+          `;
+          list.appendChild(a);
+        });
+      }
+    };
+
+    input.addEventListener('focus', fetchIndex);
+    input.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (clearBtn) clearBtn.style.display = val ? 'block' : 'none';
+      if (!searchIndex) {
+        fetchIndex().then(() => performSearch(val));
+      } else {
+        performSearch(val);
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.style.display = 'none';
+        list.innerHTML = '';
+        dropdown.style.display = 'none';
+        if (noResultsEl) noResultsEl.style.display = 'none';
+        input.focus();
+      });
+    }
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,694 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductReviewCard from '../components/ProductReviewCard.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
+import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+
+const hasProducts = post.data.reviewedProducts && post.data.reviewedProducts.length > 0;
+
+const mlAffiliateLink = post.data.affiliateLink || 'https://www.mercadolivre.com.br/social/ninjafreire?matt_word=colchoes&matt_tool=13927859&forceInApp=true';
+
+const recommendedProducts = [
+  {
+    title: 'Colchão Emma Original Casal',
+    image: '/recommended-emma.jpg',
+    rating: 4.8,
+    reviews: '3.420',
+    link: mlAffiliateLink,
+    priceRange: 'R$ 2.500 - R$ 3.000'
+  },
+  {
+    title: 'Colchão Luiza Molas Ensacadas',
+    image: '/recommended-luiza.jpg',
+    rating: 4.6,
+    reviews: '1.850',
+    link: mlAffiliateLink,
+    priceRange: 'R$ 1.200 - R$ 1.500'
+  },
+  {
+    title: 'Colchão Ortopédico Castor D45',
+    image: '/recommended-castor.jpg',
+    rating: 4.7,
+    reviews: '2.100',
+    link: mlAffiliateLink,
+    priceRange: 'R$ 1.400 - R$ 1.800'
+  }
+];
+
+// LOGICA SILO
+let silo = null;
+let categoryInfo = null;
+let subcategoryInfo = null;
+let relatedSiloPosts = [];
+
+try {
+  const siloPath = path.resolve('./src/data/silo.json');
+  if (fs.existsSync(siloPath)) {
+    silo = JSON.parse(fs.readFileSync(siloPath, 'utf-8'));
+    for (const cat of silo.categories || []) {
+      for (const subcat of cat.subcategories || []) {
+        const found = (subcat.articles || []).find(art => art.slug === post.slug);
+        if (found) {
+          categoryInfo = { name: cat.name, slug: cat.slug };
+          subcategoryInfo = { name: subcat.name, slug: subcat.slug };
+          relatedSiloPosts = (subcat.articles || []).filter(art => art.slug !== post.slug);
+          break;
+        }
+      }
+      if (categoryInfo) break;
+    }
+  }
+} catch (e) {
+  console.error("Error reading silo config:", e);
+}
+---
+
+<Layout title={`${post.data.title} | Melhores Colchões`} description={post.data.description} preloadImage={post.data.heroImage}>
+  <article class="blog-post">
+    <!-- Breadcrumbs SILO -->
+    {categoryInfo && subcategoryInfo && (
+      <nav class="silo-breadcrumbs" style="margin-bottom: 2rem; font-size: 0.95rem; color: #475569; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="/" style="color: #6366f1; text-decoration: none; font-weight: 500;">Home</a>
+        <span style="color: #94a3b8;">&gt;</span>
+        <a href={`/categoria/${categoryInfo.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 500;">{categoryInfo.name}</a>
+        <span style="color: #94a3b8;">&gt;</span>
+        <a href={`/subcategoria/${subcategoryInfo.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 500;">{subcategoryInfo.name}</a>
+        <span style="color: #94a3b8;">&gt;</span>
+        <span style="color: #64748b;">{post.data.title}</span>
+      </nav>
+    )}
+
+    <!-- Categoria -->
+    {post.data.category && (
+      <span class="post-cat-badge">{post.data.category}</span>
+    )}
+    
+    <!-- Título Principal -->
+    <h1 class="post-main-title">{post.data.title}</h1>
+    
+    <!-- Meta Dados -->
+    <div class="post-meta-row">
+      <span class="meta-item author-name">Por {post.data.author || 'Equipe Melhores Colchões'}</span>
+      <span class="meta-divider">&bull;</span>
+      <span class="meta-item publish-date">
+        Publicado em {new Date(post.data.pubDate).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        })}
+      </span>
+    </div>
+
+    <!-- Imagem de Destaque -->
+    {post.data.heroImage && (
+      <div class="post-hero-image">
+        <img src={post.data.heroImage} alt={post.data.title} width="800" height="450" fetchpriority="high" loading="eager" decoding="async" />
+      </div>
+    )}
+
+    <!-- Sumário / Tabela de Conteúdos (Se houver produtos) -->
+    {hasProducts && (
+      <div class="table-of-contents">
+        <h3 class="toc-title">O que você verá neste artigo:</h3>
+        <ol class="toc-list">
+          <li>
+            <a href="#produtos-analisados">Modelos Analisados:</a>
+            <ul class="toc-sublist">
+              {post.data.reviewedProducts.map(prod => (
+                <li>
+                  <a href={`#${prod.id || prod.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+                    {prod.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li><a href="#guia-de-compra">Guia de Compra: Como escolher o Colchão Ideal</a></li>
+          <li><a href="#conclusao">Conclusão e Recomendações Finais</a></li>
+        </ol>
+      </div>
+    )}
+
+    {hasProducts && (
+      <ComparisonTable products={post.data.reviewedProducts} />
+    )}
+
+    <!-- Introdução / Corpo Superior do Markdown -->
+    <div class="blog-post-content animate-html" id="blog-content">
+      <Content />
+    </div>
+
+    <!-- Rodapé de CTA se NÃO tiver produtos listados (como artigos informativos e guias) -->
+    {!hasProducts && post.data.affiliateLink && (
+      <div class="conclusion-cta-standalone">
+        <p class="cta-standalone-text">Quer garantir o seu colchão pelo melhor preço? Clique no botão abaixo e confira as melhores ofertas recomendadas:</p>
+        <div class="conclusion-cta">
+          <a href={mlAffiliateLink} target="_blank" rel="noopener noreferrer nofollow" class="conclusion-btn">
+            Ver Preço Aqui
+          </a>
+        </div>
+      </div>
+    )}
+
+    <!-- Recomendações de Produtos Horizontais no meio do conteúdo (Injetado via script) -->
+    <div id="horizontal-recommendations-template" style="display: none;" data-has-affiliate={post.data.affiliateLink ? "true" : "false"}>
+      <section class="horizontal-recommendations-section">
+        <h3 class="recommendations-title">💡 Recomendados em Destaque</h3>
+        <div class="horizontal-products-grid">
+          {recommendedProducts.map(prod => (
+            <div class="horizontal-prod-card">
+              <div class="horizontal-prod-img">
+                <img src={prod.image} alt={prod.title} loading="lazy" width="100" height="100" decoding="async" />
+              </div>
+              <div class="horizontal-prod-info">
+                <h4 class="horizontal-prod-title" title={prod.title}>{prod.title}</h4>
+                <div class="horizontal-prod-rating">
+                  <span class="stars">{"★".repeat(Math.floor(prod.rating)) + (prod.rating % 1 >= 0.5 ? "½" : "")}</span>
+                  <span class="rating-val">{prod.rating} ({prod.reviews})</span>
+                </div>
+                <p class="horizontal-prod-price">{prod.priceRange}</p>
+                <a href={prod.link} target="_blank" rel="noopener noreferrer nofollow" class="horizontal-buy-button">
+                  Ver preço aqui
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        const content = document.getElementById('blog-content');
+        const template = document.getElementById('horizontal-recommendations-template');
+        if (content && template && template.getAttribute('data-has-affiliate') === 'true') {
+          const paragraphs = content.querySelectorAll('p');
+          if (paragraphs.length >= 3) {
+            const middleIndex = Math.floor(paragraphs.length / 2);
+            const middleParagraph = paragraphs[middleIndex];
+            
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.removeAttribute('id');
+            
+            middleParagraph.parentNode.insertBefore(clone, middleParagraph.nextSibling);
+          } else {
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.removeAttribute('id');
+            content.appendChild(clone);
+          }
+        }
+      });
+    </script>
+
+    <!-- Seção de Produtos Analisados (se houver) -->
+    {hasProducts && (
+      <div class="products-analysis-section" id="produtos-analisados">
+        <h2 class="section-title">Análise Detalhada dos Melhores Modelos</h2>
+        
+        {post.data.reviewedProducts.map((prod, index) => (
+          <div class="product-review-wrapper">
+            <span class="product-rank-badge">#{index + 1}</span>
+            <ProductReviewCard
+              id={prod.id || prod.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+              title={prod.title}
+              image={prod.image}
+              rating={prod.rating}
+              reviewsCount={prod.reviewsCount}
+              amazonLink={prod.amazonLink}
+              priceEstimate={prod.priceEstimate}
+              specs={prod.specs}
+              pros={prod.pros}
+              cons={prod.cons}
+              description={prod.description}
+            />
+          </div>
+        ))}
+      </div>
+    )}
+    
+    <!-- Rodapé do Artigo se tiver produtos -->
+    {hasProducts && (
+      <div class="post-conclusion-section" id="conclusao">
+        <h2 class="section-title">Nossa Conclusão: Qual Colchão Comprar?</h2>
+        <p>A melhor escolha de colchão depende muito da sua necessidade e do seu orçamento:</p>
+        <ul>
+          <li>Para <strong>conforto individual sem interferência</strong>, os colchões de molas ensacadas individualmente (pocket) são a escolha perfeita.</li>
+          <li>Para <strong>suporte ortopédico e firmeza</strong>, os modelos de espuma de alta densidade (D33 ou D45) ajudam no alinhamento correto da coluna.</li>
+          <li>Se você busca <strong>tecnologia e maciez premium</strong>, os colchões de molas ensacadas combinados com Pillow Top de látex ou espuma viscoelástica são o investimento mais recomendado.</li>
+        </ul>
+        <p>Esperamos que este guia tenha facilitado sua escolha! Lembre-se de clicar em nossos links afiliados para conferir o melhor preço atual e as avaliações de outros usuários.</p>
+        <div class="conclusion-cta">
+          <a href={mlAffiliateLink} target="_blank" rel="noopener noreferrer nofollow" class="conclusion-btn">
+            Ver Preço Aqui
+          </a>
+        </div>
+      </div>
+    )}
+    <!-- Navegacao Silo -->
+    {categoryInfo && subcategoryInfo && (
+      <div class="silo-internal-links" style="margin-top: 3rem; padding: 2rem; border: 1px solid var(--border-color, #e2e8f0); border-radius: 12px; background: rgba(0,0,0,0.02); text-align: left;">
+        <h3 style="margin-top: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-main, #0f172a);">Navegação Otimizada (Estrutura SILO)</h3>
+        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted, #475569); margin-bottom: 1.25rem;">
+          Este artigo faz parte do Hub de Conteúdo <strong><a href={`/categoria/${categoryInfo.slug}`} style="color: #6366f1; text-decoration: underline;">{categoryInfo.name}</a></strong> na subcategoria <strong><a href={`/subcategoria/${subcategoryInfo.slug}`} style="color: #6366f1; text-decoration: underline;">{subcategoryInfo.name}</a></strong>.
+        </p>
+        {relatedSiloPosts.length > 0 && (
+          <div style="margin-top: 1rem;">
+            <h4 style="font-size: 1rem; font-weight: 600; color: var(--text-main, #0f172a); margin-bottom: 0.5rem;">Leia também outras avaliações recomendadas:</h4>
+            <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8; color: #6366f1; list-style-type: disc;">
+              {relatedSiloPosts.map(art => (
+                <li>
+                  <a href={`/${art.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 500; hover: underline;">{art.title}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )}
+  </article>
+</Layout>
+
+<style>
+  .blog-post {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  @media (min-width: 768px) {
+    .blog-post {
+      padding: 3rem;
+    }
+  }
+
+  .post-cat-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: #ffedd5;
+    color: var(--primary-color);
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .post-main-title {
+    font-size: 2rem;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+    color: #0f172a;
+  }
+
+  @media (min-width: 768px) {
+    .post-main-title {
+      font-size: 2.5rem;
+    }
+  }
+
+  .post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .post-hero-image {
+    width: 100%;
+    max-height: 450px;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .post-hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Tabela de Conteúdos */
+  .table-of-contents {
+    background-color: #f8fafc;
+    border-left: 4px solid var(--primary-color);
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .toc-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+  }
+
+  .toc-list {
+    padding-left: 1.25rem;
+  }
+
+  .toc-list li {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    color: #334155;
+  }
+
+  .toc-list a {
+    color: #334155;
+    font-weight: 500;
+  }
+
+  .toc-list a:hover {
+    color: var(--primary-color);
+  }
+
+  .toc-sublist {
+    list-style: none;
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+  }
+
+  .toc-sublist li {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .toc-sublist a {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .toc-sublist a:hover {
+    color: var(--primary-color);
+  }
+
+  /* Seções de Produtos */
+  .products-analysis-section {
+    margin-top: 3.5rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    color: #0f172a;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .product-review-wrapper {
+    position: relative;
+    margin-bottom: 3.5rem;
+  }
+
+  .product-rank-badge {
+    position: absolute;
+    top: -12px;
+    left: 20px;
+    background-color: #0f172a;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    z-index: 10;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .post-conclusion-section {
+    margin-top: 3.5rem;
+    background-color: #fffbef;
+    border: 1px solid #fef3c7;
+    border-radius: 0.75rem;
+    padding: 2rem;
+  }
+
+  .post-conclusion-section h2 {
+    border-bottom-color: #fde68a;
+  }
+
+  .post-conclusion-section ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .post-conclusion-section li {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #334155;
+  }
+
+  .post-conclusion-section p {
+    font-size: 1.05rem;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .conclusion-cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.75rem;
+  }
+
+  .conclusion-btn {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 0.85rem 2.25rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+    text-align: center;
+  }
+
+  .conclusion-btn:hover {
+    background-color: #c2410c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35);
+  }
+
+  .conclusion-btn:active {
+    transform: translateY(0);
+  }
+
+  .conclusion-cta-standalone {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    background-color: #fffbef;
+    border: 1px solid #fef3c7;
+    border-radius: 0.75rem;
+    text-align: center;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .cta-standalone-text {
+    font-size: 1.05rem;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+  }
+
+  /* Estilos para renderização de HTML importado do WordPress */
+  .animate-html img {
+    margin: 1.5rem auto;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .animate-html img.alignleft {
+    float: left;
+    margin-right: 1.5rem;
+    margin-top: 0.5rem;
+    max-width: 250px;
+  }
+
+  .animate-html img.alignright {
+    float: right;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    max-width: 250px;
+  }
+
+  .animate-html img.aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .animate-html::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .animate-html h2 {
+    font-size: 1.6rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    clear: both;
+  }
+
+  .animate-html h3 {
+    font-size: 1.3rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-main);
+    clear: both;
+  }
+
+  /* Estilos das Recomendações Horizontais no Meio do Post */
+  .horizontal-recommendations-section {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .recommendations-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .horizontal-products-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .horizontal-products-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .horizontal-prod-card {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .horizontal-prod-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--primary-color);
+  }
+
+  .horizontal-prod-img {
+    width: 90px;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    border-radius: 0.35rem;
+    overflow: hidden;
+  }
+
+  .horizontal-prod-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .horizontal-prod-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  .horizontal-prod-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.3rem;
+  }
+
+  .horizontal-prod-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .horizontal-prod-rating .stars {
+    color: #eab308;
+    letter-spacing: -1px;
+  }
+
+  .horizontal-prod-rating .rating-val {
+    color: var(--text-muted);
+  }
+
+  .horizontal-prod-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: auto;
+    margin-bottom: 0.75rem;
+  }
+
+  .horizontal-buy-button {
+    display: block;
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: background-color 0.2s ease;
+    width: 100%;
+  }
+
+  .horizontal-buy-button:hover {
+    background-color: #c2410c;
+  }
+</style>

@@ -1,0 +1,394 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import siteConfig from '../siteConfig.json';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await getCollection('blog');
+  // Ordenar por data de publicação (mais recentes primeiro)
+  const sortedPosts = posts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+  return paginate(sortedPosts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+
+// Identificar se é a primeira página
+const isFirstPage = page.currentPage === 1;
+
+// Post em destaque na primeira página
+const heroPost = isFirstPage ? page.data[0] : null;
+// Posts da grade
+const gridPosts = isFirstPage ? page.data.slice(1) : page.data;
+---
+
+<Layout title={`${siteConfig.title} - Página ${page.currentPage}`} description={siteConfig.description} preloadImage={heroPost?.data?.heroImage}>
+  <div class="home-container">
+    {isFirstPage && (
+      <div class="intro-card">
+        <h2>{siteConfig.slogan}</h2>
+        <p>{siteConfig.description}</p>
+      </div>
+    )}
+
+    {page.data.length > 0 ? (
+      <div class="posts-layout">
+        <!-- Post em Destaque (Hero) - Apenas na primeira página -->
+        {isFirstPage && heroPost && (
+          <article class="hero-post-card">
+            {heroPost.data.heroImage && (
+              <div class="hero-img-box">
+                <img src={heroPost.data.heroImage} alt={heroPost.data.title} width="600" height="340" fetchpriority="high" loading="eager" decoding="async" />
+              </div>
+            )}
+            <div class="hero-content-box">
+              <span class="post-category">{heroPost.data.category || 'analise'}</span>
+              <h2 class="hero-title">
+                <a href={`/${heroPost.slug}`}>{heroPost.data.title}</a>
+              </h2>
+              <p class="hero-desc">{heroPost.data.description}</p>
+              <div class="hero-meta">
+                <span class="meta-author">Por {heroPost.data.author || 'Equipe Melhores Colchões'}</span>
+                <span class="meta-separator">&bull;</span>
+                <span class="meta-date">
+                  {new Date(heroPost.data.pubDate).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+              <a href={`/${heroPost.slug}`} class="btn read-more-btn">Ler Análise Completa</a>
+            </div>
+          </article>
+        )}
+
+        <!-- Grid de posts -->
+        <div class="posts-grid">
+          {gridPosts.map(post => (
+            <article class="post-card">
+              {post.data.heroImage && (
+                <div class="card-img-box">
+                  <a href={`/${post.slug}`}>
+                    <img src={post.data.heroImage} alt={post.data.title} loading="lazy" width="360" height="203" decoding="async" />
+                  </a>
+                </div>
+              )}
+              <div class="card-content-box">
+                <span class="post-category">{post.data.category || 'analise'}</span>
+                <h3 class="card-title">
+                  <a href={`/${post.slug}`}>{post.data.title}</a>
+                </h3>
+                <p class="card-desc">{post.data.description}</p>
+                <div class="card-meta">
+                  <span>
+                    {new Date(post.data.pubDate).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <!-- Controles de Paginação -->
+        {(page.url.prev || page.url.next) && (
+          <nav class="pagination-nav" aria-label="Navegação de páginas">
+            {page.url.prev ? (
+              <a href={page.url.prev} class="pagination-btn prev-btn">&larr; Anterior</a>
+            ) : (
+              <span class="pagination-btn disabled">&larr; Anterior</span>
+            )}
+            
+            <span class="pagination-indicator">
+              Página <strong>{page.currentPage}</strong> de <strong>{page.lastPage}</strong>
+            </span>
+            
+            {page.url.next ? (
+              <a href={page.url.next} class="pagination-btn next-btn">Próximo &rarr;</a>
+            ) : (
+              <span class="pagination-btn disabled">Próximo &rarr;</span>
+            )}
+          </nav>
+        )}
+      </div>
+    ) : (
+      <div class="no-posts">
+        <p>Nenhum artigo encontrado.</p>
+        <a href="/" class="btn">Voltar para a Home</a>
+      </div>
+    )}
+  </div>
+</Layout>
+
+<style>
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .intro-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .intro-card h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+    color: #0f172a;
+  }
+
+  .intro-card p {
+    color: #475569;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  /* Layout de Posts */
+  .posts-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  /* Hero Card */
+  .hero-post-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .hero-post-card {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .hero-img-box {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+  }
+
+  .hero-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-content-box {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .post-category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: #ffedd5;
+    color: var(--primary-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-title a {
+    color: #0f172a;
+    text-decoration: none;
+  }
+
+  .hero-title a:hover {
+    color: var(--primary-color);
+  }
+
+  .hero-desc {
+    color: #475569;
+    font-size: 1.05rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .read-more-btn {
+    font-size: 0.95rem;
+  }
+
+  /* Grid de Posts Secundários */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .posts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .post-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-img-box {
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .card-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .post-card:hover .card-img-box img {
+    transform: scale(1.03);
+  }
+
+  .card-content-box {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    margin: 0.5rem 0 0.75rem 0;
+    line-height: 1.4;
+  }
+
+  .card-title a {
+    color: #0f172a;
+    text-decoration: none;
+  }
+
+  .card-title a:hover {
+    color: var(--primary-color);
+  }
+
+  .card-desc {
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: auto;
+  }
+
+  .no-posts {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .no-posts p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+  }
+
+  /* Paginação */
+  .pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .pagination-btn:hover:not(.disabled) {
+    color: #ffffff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .pagination-btn.disabled {
+    color: var(--text-muted);
+    background-color: #f1f5f9;
+    border-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .pagination-indicator {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .pagination-indicator strong {
+    color: #0f172a;
+  }
+</style>

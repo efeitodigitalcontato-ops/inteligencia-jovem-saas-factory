@@ -1,0 +1,3036 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador Ninja - Fábrica de Blogs IA</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="dark-theme">
+
+  <!-- Background Glow Orbs -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+  <div class="glow-orb orb-3"></div>
+
+  <!-- Main Navigation Header -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo" id="nav-logo-btn">
+        <img src="/logo-ninja.jpg" alt="Gerador Ninja" style="width: 32px; height: 32px; border-radius: 8px; margin-right: 8px; object-fit: cover; border: 1px solid var(--border-color);">
+        <span class="logo-text">Gerador<span class="gradient-text">Ninja</span></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features" class="nav-link public-only">Recursos</a>
+        <a href="#pricing" class="nav-link public-only">Preços</a>
+        <a href="#dashboard" class="nav-link private-only hidden">Meu Painel</a>
+        <a href="#niche" class="nav-link private-only hidden">Nicho</a>
+        <a href="#new-site" class="nav-link private-only hidden">Criar Blog</a>
+        <a href="#multi-generator" class="nav-link private-only hidden">Artigos em Lote</a>
+        <a href="#silo-structure" class="nav-link private-only hidden">Estrutura SILO</a>
+        <a href="#site-position" class="nav-link private-only hidden">Posição no Google</a>
+        <a href="#backlink-tracker" class="nav-link private-only hidden">Backlinks</a>
+        <a href="#neto-salva" class="nav-link private-only hidden">Backup</a>
+        <a href="#settings" class="nav-link private-only hidden">Configurações</a>
+        <a href="#" id="open-safira-btn" class="nav-link private-only hidden" style="color: var(--secondary); font-weight: bold; border: 1px solid var(--secondary-glow); padding: 2px 8px; border-radius: 8px; background: var(--secondary-glow);">💬 Safira</a>
+      </nav>
+      <div class="nav-auth-buttons">
+        <button class="btn btn-outline public-only" id="login-nav-btn">Entrar</button>
+        <button class="btn btn-primary public-only" id="register-nav-btn">Solicitar Cadastro</button>
+        <div class="user-profile private-only hidden">
+          <span class="user-avatar">👤</span>
+          <span class="user-email" id="user-display-email">admin@test.com</span>
+          <button class="btn btn-sm btn-outline" id="logout-btn">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Center -->
+  <div id="toast-container"></div>
+
+  <!-- VIEWS CONTAINER -->
+  <main class="main-content">
+
+    <!-- 1. LANDING PAGE VIEW -->
+    <section id="view-landing" class="view-section active">
+      <div class="hero-section">
+        <div class="badge">Lançamento Especial v2.0</div>
+        <h1 class="hero-title">Crie Blogs de Afiliados <span class="gradient-text">Lucrativos</span> em Segundos</h1>
+        <p class="hero-subtitle">
+          Gerencie e deploye blogs estáticos Astro ultra-velozes no GitHub e Vercel diretamente do seu celular ou PC. Painel Sveltia CMS e gerador de artigos IA integrados por padrão.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-lg btn-primary" id="hero-cta-btn">Solicitar Acesso</button>
+          <a href="#features" class="btn btn-lg btn-secondary">Conhecer Recursos</a>
+        </div>
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <div class="mockup-url">https://saas.inteligenciajovem.com.br/dashboard</div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-sidebar">
+              <div class="mockup-side-item active">⚡ Painel</div>
+              <div class="mockup-side-item">➕ Novo Blog</div>
+              <div class="mockup-side-item">⚙️ Configurações</div>
+            </div>
+            <div class="mockup-main">
+              <div class="mockup-card-grid">
+                <div class="mockup-card">
+                  <h4>Total de Blogs</h4>
+                  <p class="mockup-card-val">5</p>
+                </div>
+                <div class="mockup-card">
+                  <h4>Cliques IA</h4>
+                  <p class="mockup-card-val">1.2K</p>
+                </div>
+              </div>
+              <div class="mockup-list">
+                <div class="mockup-list-item">
+                  <span>🚲 blog-bicicletas.vercel.app</span>
+                  <span class="badge badge-success">Online</span>
+                </div>
+                <div class="mockup-list-item">
+                  <span>🛏️ blog-colchoes.vercel.app</span>
+                  <span class="badge badge-success">Online</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features Section -->
+      <div id="features" class="features-section">
+        <h2 class="section-title">Tecnologia de Ponta na Nuvem</h2>
+        <p class="section-subtitle">Tudo o que você precisa para dominar o nicho de afiliados sem escrever uma única linha de código.</p>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <h3>100% Serverless</h3>
+            <p>Nenhuma pasta ou lixo é criado no seu computador ou celular. Tudo roda diretamente na nuvem.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <h3>Astro Ultra-Veloz</h3>
+            <p>O template Gerador Ninja entrega nota 100 no Google PageSpeed para máxima conversão.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📝</div>
+            <h3>Sveltia CMS Integrado</h3>
+            <p>Gerencie seus posts de forma visual, leve e elegante diretamente do celular com o Sveltia.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>Gerador IA Embutido</h3>
+            <p>Escreva reviews completas, descrições de produtos e posts otimizados para SEO usando IA.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <div id="pricing" class="pricing-section">
+        <h2 class="section-title">Planos Flexíveis</h2>
+        <p class="section-subtitle">Venda acesso à plataforma e lucre alto ajudando criadores de conteúdo.</p>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Plano Inicial</h3>
+            <div class="price">R$ 49<span>/mês</span></div>
+            <ul class="pricing-features">
+              <li>Até 3 Blogs estáticos Astro</li>
+              <li>Sveltia CMS e Gerador IA</li>
+              <li>Deploy 1-Clique no Gerador Ninja</li>
+              <li>Suporte via WhatsApp</li>
+            </ul>
+             <button class="btn btn-outline full-width auth-trigger-btn">Solicitar Cadastro</button>
+          </div>
+          <div class="pricing-card popular">
+            <div class="popular-badge">Mais Vendido</div>
+            <h3>Plano Pro</h3>
+            <div class="price">R$ 99<span>/mês</span></div>
+            <ul class="pricing-features">
+              <li>Blogs Ilimitados</li>
+              <li>Domínio Próprio Customizado</li>
+              <li>Sveltia CMS e Gerador IA Pro</li>
+              <li>Hospedagem inclusa no Gerador Ninja</li>
+              <li>Prioridade de suporte</li>
+            </ul>
+             <button class="btn btn-primary full-width auth-trigger-btn">Solicitar Cadastro</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 2. LOGIN / REGISTER VIEW -->
+    <section id="view-auth" class="view-section">
+      <div class="auth-container card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login-btn">Entrar</button>
+          <button class="auth-tab" id="tab-register-btn">Registrar</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form active">
+          <h3>Bem-vindo de volta!</h3>
+          <p class="auth-desc">Entre com seus dados para gerenciar seus blogs.</p>
+          <div class="form-group">
+            <label for="login-email">E-mail</label>
+            <input type="email" id="login-email" required placeholder="seuemail@exemplo.com">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Senha</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Entrar no Painel</button>
+          
+          <div style="margin: 1rem 0; text-align: center; font-size: 0.85rem; color: var(--text-muted);">ou</div>
+          <div class="google-login-btn-container" style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <div id="google-login-btn"></div>
+          </div>
+
+           <p class="demo-notice">💡 As contas cadastradas precisam ser aprovadas pelo administrador para obter acesso.</p>
+        </form>
+
+        <!-- Two Factor Login Form -->
+        <form id="two-factor-login-form" class="auth-form" style="display: none; width: 100%;">
+          <h3>Autenticação de Dois Fatores (2FA)</h3>
+          <p class="auth-desc">Digite o código de 6 dígitos gerado pelo seu aplicativo de autenticação.</p>
+          <div class="form-group" style="text-align: center; margin-bottom: 1.5rem;">
+            <label for="login-2fa-code" style="display: block; margin-bottom: 0.5rem; text-align: center;">Código de Verificação</label>
+            <input type="text" id="login-2fa-code" placeholder="000 000" required maxLength="6" style="text-align: center; font-size: 1.8rem; letter-spacing: 6px; font-weight: bold; background: rgba(255, 255, 255, 0.05); color: var(--primary); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.5rem; width: 100%; max-width: 250px; box-sizing: border-box; margin: 0 auto; outline: none; transition: border-color 0.2s;">
+          </div>
+          <button type="submit" class="btn btn-primary full-width">Verificar e Entrar</button>
+          <button type="button" id="btn-cancel-2fa-login" class="btn btn-outline full-width" style="margin-top: 0.75rem;">Voltar ao Login</button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="register-form" class="auth-form">
+           <h3>Solicitar Cadastro</h3>
+           <p class="auth-desc">Os cadastros passam pela aprovação do administrador.</p>
+          <div class="form-group">
+            <label for="register-name">Nome Completo</label>
+            <input type="text" id="register-name" required placeholder="Seu Nome">
+          </div>
+          <div class="form-group">
+            <label for="register-email">E-mail de Trabalho</label>
+            <input type="email" id="register-email" required placeholder="seuemail@exemplo.com">
+          </div>
+          <div class="form-group">
+            <label for="register-password">Senha de Acesso</label>
+            <input type="password" id="register-password" required placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label for="register-gemini-key">Chave de API do Google Gemini (Opcional)</label>
+            <input type="password" id="register-gemini-key" placeholder="AIzaSy••••••••••••••••••••••••••••">
+          </div>
+           <button type="submit" class="btn btn-primary full-width">Enviar Solicitação</button>
+           
+           <div style="margin: 1rem 0; text-align: center; font-size: 0.85rem; color: var(--text-muted);">ou</div>
+           <div class="google-login-btn-container" style="display: flex; justify-content: center; margin-bottom: 1rem;">
+             <div id="google-register-btn"></div>
+           </div>
+        </form>
+      </div>
+    </section>
+
+
+    <!-- PAYMENT VIEW -->
+    <section id="view-payment" class="view-section">
+      <div class="auth-container">
+        <div class="auth-card" style="text-align: center; max-width: 480px; margin: 0 auto; padding: 2.5rem;">
+          <div style="font-size: 3.5rem; margin-bottom: 1rem;">🥷</div>
+          <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--primary);">Ative sua conta Premium</h2>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">
+            Para ter acesso ilimitado ao Gerador Ninja e começar a criar blogs automáticos de alta conversão, ative sua assinatura via Pix ou Cartão de Crédito.
+          </p>
+          
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1.5px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <span style="font-weight: 500; color: var(--text-main);">Acesso Premium</span>
+              <span style="font-size: 1.25rem; font-weight: 700; color: #10b981;">R$ 29,90</span>
+            </div>
+            <ul style="text-align: left; padding-left: 1.2rem; color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin: 0;">
+              <li>Criação de blogs ilimitados (Astro / WordPress)</li>
+              <li>Geração automática de artigos otimizados para SEO</li>
+              <li>Acesso à Inteligência Artificial Safira</li>
+              <li>Estruturação automática de Silos e Backlinks</li>
+            </ul>
+          </div>
+
+          <button id="btn-pay-now" class="btn btn-primary full-width" style="padding: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🥑 Pagar com AbacatePay (Pix/Cartão)</span>
+          </button>
+          
+          <button id="btn-payment-logout" class="btn btn-outline full-width" style="margin-top: 0.8rem; padding: 0.8rem;">
+            Voltar ao Login
+          </button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 3. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section">
+      <div class="dashboard-header">
+        <div>
+          <h1 class="welcome-title">Olá, <span id="dashboard-user-name">Empreendedor</span>!</h1>
+          <p class="welcome-desc">Gerencie seus blogs estáticos e gere novas fontes de renda.</p>
+        </div>
+        <button class="btn btn-primary" id="dash-new-blog-btn">➕ Criar Novo Blog</button>
+      </div>
+
+      <!-- Warning Banner for Missing Gemini Key -->
+      <div id="gemini-warning-banner" class="gemini-warning-card" style="display: none;">
+        <div class="warning-banner-header">
+          <div class="warning-banner-title">
+            <span class="warning-banner-icon">⚠️</span>
+            <h3>Configuração Necessária: Chave de API do Google Gemini</h3>
+          </div>
+          <button class="btn btn-sm btn-primary" id="btn-show-tutorial" style="background: rgba(99, 102, 241, 0.2); border-color: var(--primary);">Como Obter a Chave</button>
+        </div>
+        <p class="warning-banner-text">
+          Você ainda não configurou sua chave do Gemini. Sem ela, a geração automática de posts com Inteligência Artificial para os seus blogs não funcionará. 
+          <a href="#settings" id="link-go-to-settings" style="color: var(--primary); font-weight: 600; text-decoration: underline;">Clique aqui para configurar agora</a>.
+        </p>
+        
+        <!-- Collapsible Tutorial Content -->
+        <div id="gemini-tutorial-content" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <div class="tutorial-steps-container">
+            <div>
+              <h4 style="margin-bottom: 1rem; color: var(--primary);">Passo a Passo Rápido:</h4>
+              <ol class="tutorial-steps-list">
+                <li>Acesse o site <a href="https://aistudio.google.com/" target="_blank" class="text-gradient-pro" style="font-weight: 600; text-decoration: underline;">Google AI Studio</a>.</li>
+                <li>Faça login com sua conta do Gmail (Google).</li>
+                <li>Clique no botão azul <strong>"Get API key"</strong> no menu esquerdo superior.</li>
+                <li>Clique no botão azul <strong>"Create API key"</strong>.</li>
+                <li>Clique em <strong>"Create API key in new project"</strong> (ou selecione um projeto existente).</li>
+                <li>Copie a chave gerada (ela começa com <code>AIzaSy...</code>).</li>
+                <li>Vá nas <a href="#settings" id="link-go-to-settings-tutorial" style="color: var(--primary); text-decoration: underline; font-weight: 600;">Configurações</a> no menu superior da plataforma, cole no campo <strong>"Chave de API do Google Gemini"</strong> e clique em <strong>"Salvar"</strong>.</li>
+              </ol>
+            </div>
+            
+            <div class="tutorial-video-placeholder">
+              <div class="mock-video-frame">
+                <span style="font-size: 2.2rem; margin-bottom: 0.5rem;">📺</span>
+                <p style="margin: 0; font-weight: 600; font-size: 0.95rem;">Vídeo Tutorial de 1 Minuto</p>
+                <p style="font-size: 0.75rem; color: var(--text-muted); max-width: 250px; margin: 0.35rem auto 0.75rem;">Aprenda visualmente a criar sua chave do Gemini de graça:</p>
+                <a href="https://aistudio.google.com/" target="_blank" class="btn btn-sm btn-primary" style="font-size: 0.8rem; padding: 6px 12px;">Ir para o AI Studio</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card card">
+          <span class="stat-icon">🌐</span>
+          <div>
+            <h4>Blogs Ativos</h4>
+            <p class="stat-value" id="stat-total-blogs">0</p>
+          </div>
+        </div>
+        <div class="stat-card card">
+          <span class="stat-icon">✍️</span>
+          <div>
+            <h4>Artigos IA</h4>
+            <p class="stat-value" id="stat-articles-count">0</p>
+          </div>
+        </div>
+        <div class="stat-card card">
+          <span class="stat-icon">⚡</span>
+          <div>
+            <h4>Plano Atual</h4>
+            <p class="stat-value text-gradient-pro">Plano Pro</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog Sites List -->
+      <div class="card blog-list-card">
+        <div class="card-header">
+          <h3>Seus Blogs de Afiliados</h3>
+          <span class="badge badge-outline" id="site-list-count">0 blogs cadastrados</span>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="blog-table">
+            <thead>
+              <tr>
+                <th>Blog / Repositório</th>
+                <th>Tema / Nicho</th>
+                <th>Status Deploy</th>
+                <th>Links e Ações</th>
+              </tr>
+            </thead>
+            <tbody id="blog-list-tbody">
+              <!-- Dynamically populated via JS -->
+              <tr class="empty-state-row">
+                <td colspan="4" class="empty-state">
+                  <div class="empty-icon">🛸</div>
+                  <h4>Nenhum blog criado ainda</h4>
+                  <p>Clique no botão para criar o seu primeiro blog em menos de 1 minuto!</p>
+                  <button class="btn btn-sm btn-primary" id="empty-state-create-btn">Criar Meu Primeiro Blog</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 3.5 NICHE SELECTOR VIEW -->
+    <section id="view-niche" class="view-section">
+      <div class="niche-container card">
+        <div class="niche-header">
+          <span class="niche-step-indicator" id="niche-step-label">Passo 1 de 4</span>
+          <h2>Detector de Micro Nichos Lucrativos</h2>
+          <p>Explore a árvore de nichos abaixo e descubra oportunidades validadas e inspiradas em cases de sucesso americanos para criar seu blog.</p>
+        </div>
+
+        <!-- Progress Tracker Bar -->
+        <div class="niche-progress-bar">
+          <div class="niche-progress-step active" data-step="1" id="prog-step-1">1. Macro Nicho</div>
+          <div class="niche-progress-step" data-step="2" id="prog-step-2">2. Sub-nicho</div>
+          <div class="niche-progress-step" data-step="3" id="prog-step-3">3. Micro Nicho</div>
+          <div class="niche-progress-step" data-step="4" id="prog-step-4">4. Cases & Decisão</div>
+        </div>
+
+        <!-- Step 1: Macro Niches Grid -->
+        <div id="niche-step-1" class="niche-step-content active">
+          <h3 class="niche-subtitle">Escolha um Macro Nicho de interesse:</h3>
+          <div class="macro-niche-grid" id="macro-niche-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- Step 2: Sub-niches List -->
+        <div id="niche-step-2" class="niche-step-content" style="display: none;">
+          <div class="niche-back-nav">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-back-to-step1">← Voltar para Macro Nichos</button>
+          </div>
+          <h3 class="niche-subtitle" id="sub-niche-title">Selecione uma especialidade (Sub-nicho):</h3>
+          <div class="sub-niche-grid" id="sub-niche-list">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- Step 3: Micro-niches List -->
+        <div id="niche-step-3" class="niche-step-content" style="display: none;">
+          <div class="niche-back-nav">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-back-to-step2">← Voltar para Sub-nichos</button>
+          </div>
+          <h3 class="niche-subtitle" id="micro-niche-title">Escolha uma ideia de Micro Nicho:</h3>
+          <div class="micro-niche-grid" id="micro-niche-list">
+            <!-- Dynamically populated via JS (4 micro-niches cards) -->
+          </div>
+        </div>
+
+        <!-- Step 4: Micro-niche Detail and Success Cases -->
+        <div id="niche-step-4" class="niche-step-content" style="display: none;">
+          <div class="niche-back-nav">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-back-to-step3">← Voltar para Micro Nichos</button>
+          </div>
+          <h3 class="niche-subtitle" id="micro-detail-title">Análise de Lucratividade e Cases de Sucesso:</h3>
+          <div class="micro-niche-detail-container" id="micro-niche-detail-container">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 4. SITE CREATOR WIZARD VIEW -->
+    <section id="view-new-site" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator">Passo Único</span>
+          <h2>Assistente Inteligente de Criação</h2>
+          <p>Selecione as opções do seu novo site e nossa nuvem gerará tudo de forma 100% autônoma.</p>
+        </div>
+
+        <form id="wizard-form">
+          <div class="wizard-grid">
+            <div class="wizard-fields">
+              <div class="form-group">
+                <label for="site-theme">Tema / Nicho do Blog *</label>
+                <select id="site-theme" required>
+                  <option value="custom">✨ Tema Customizado</option>
+                  <option value="multicategorias">📰 AnalisaMelhor (Portal Multicategorias)</option>
+                  <option value="produtos" selected>🛍️ Template para Divulgar Produtos Amazon e ML</option>
+                </select>
+              </div>
+
+              <!-- Custom theme input (always visible) -->
+              <div class="form-group" id="custom-theme-group">
+                <label for="site-custom-theme">Descreva o nicho customizado *</label>
+                <input type="text" id="site-custom-theme" placeholder="Ex: Perfumes Importados, Geladeiras Side by Side">
+              </div>
+
+              <div class="form-group">
+                <label for="site-description">Descrição do Site <span>(Opcional)</span></label>
+                <textarea id="site-description" rows="3" placeholder="Ex: Um blog premium focado em reviews e avaliações sinceras das melhores marcas de colchões do mercado brasileiro."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="site-repo-name">Nome do Repositório (Slug) *</label>
+                <input type="text" id="site-repo-name" required placeholder="afiliados-blog-colchoes">
+                <span class="field-hint">Este será o nome do repositório no GitHub e do subdomínio na Vercel.</span>
+              </div>
+            </div>
+
+            <div class="wizard-visuals">
+              <div class="form-group">
+                <label>Paleta de Cores do Design</label>
+                <div class="palette-options">
+                  <label class="palette-option active">
+                    <input type="radio" name="color-palette" value="dark" checked>
+                    <span class="palette-preview palette-dark"></span>
+                    <span class="palette-name">Classic Dark</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="indigo">
+                    <span class="palette-preview palette-indigo"></span>
+                    <span class="palette-name">Neon Indigo</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="emerald">
+                    <span class="palette-preview palette-emerald"></span>
+                    <span class="palette-name">Forest Emerald</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="amber">
+                    <span class="palette-preview palette-amber"></span>
+                    <span class="palette-name">Sunset Amber</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="ocean">
+                    <span class="palette-preview palette-ocean"></span>
+                    <span class="palette-name">Ocean Blue</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="rose">
+                    <span class="palette-preview palette-rose"></span>
+                    <span class="palette-name">Sakura Rose</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="orange">
+                    <span class="palette-preview palette-orange"></span>
+                    <span class="palette-name">Volcanic Orange</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="crimson">
+                    <span class="palette-preview palette-crimson"></span>
+                    <span class="palette-name">Steel Crimson</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="gold">
+                    <span class="palette-preview palette-gold"></span>
+                    <span class="palette-name">Royal Gold</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="mint">
+                    <span class="palette-preview palette-mint"></span>
+                    <span class="palette-name">Mint Sage</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="teal">
+                    <span class="palette-preview palette-teal"></span>
+                    <span class="palette-name">Tropical Teal</span>
+                  </label>
+                  <label class="palette-option">
+                    <input type="radio" name="color-palette" value="fuchsia">
+                    <span class="palette-preview palette-fuchsia"></span>
+                    <span class="palette-name">Cyberpunk Fuchsia</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Infraestrutura Inclusa</label>
+                <div class="infra-feature-list">
+                  <div class="infra-item">
+                    <span class="infra-check">✓</span>
+                    <span>Repositório GitHub Automático</span>
+                  </div>
+                  <div class="infra-item">
+                    <span class="infra-check">✓</span>
+                    <span>Provisionamento Gerador Ninja Serverless</span>
+                  </div>
+                  <div class="infra-item">
+                    <span class="infra-check">✓</span>
+                    <span>Sveltia CMS (Decap) Pré-Configurado</span>
+                  </div>
+                  <div class="infra-item">
+                    <span class="infra-check">✓</span>
+                    <span>Gerador de Artigos IA Prontinho</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn btn-outline" id="wizard-cancel-btn">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="wizard-submit-btn">⚡ Site 100% Online e Seguro</button>
+          </div>
+        </form>
+
+        <!-- Generation Progress Overlay -->
+        <div id="generation-overlay" class="hidden">
+          <div class="progress-box">
+            <!-- Container de Frases Motivacionais -->
+            <div id="motivational-phrases-container" style="min-height: 54px; margin-bottom: 20px; font-size: 15px; font-style: italic; color: #a5b4fc; max-width: 90%; line-height: 1.5; text-align: center; font-weight: 500; text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3); transition: opacity 0.5s ease-in-out; opacity: 0;"></div>
+            <div class="ninjinha-container">
+              <div class="ninjinha-body">
+                <div class="ninjinha-headband">
+                  <div class="headband-tail-1"></div>
+                  <div class="headband-tail-2"></div>
+                </div>
+                <div class="ninjinha-face-mask">
+                  <div class="ninjinha-eyes"></div>
+                </div>
+              </div>
+              <div class="ninjinha-meditation-ring"></div>
+            </div>
+            <h3>Fabricando o seu Blog...</h3>
+            <p id="progress-status-text">Iniciando conexão de APIs...</p>
+            <div class="progress-bar-container">
+              <div id="progress-bar-fill"></div>
+            </div>
+            <ul class="progress-steps" id="progress-steps-list">
+              <li class="step" id="step-github">Criando Repositório GitHub...</li>
+              <li class="step" id="step-template">Customizando Template Novo Inteligência Jovem...</li>
+              <li class="step" id="step-github-push">Enviando arquivos e publicando...</li>
+              <li class="step" id="step-vercel">Registrando e configurando na Vercel...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: GERAÇÃO DE ARTIGOS EM LOTE (MULTI-GERADOR) -->
+    <section id="view-multi-generator" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator" style="background: var(--primary);">Passo 1</span>
+          <h2>Gerador de Títulos (Palavras-Chave)</h2>
+          <p>Encontre caudas longas de intenção de busca baseadas em IA e copie-as para gerar seus artigos.</p>
+        </div>
+
+        <!-- Passo 1: Busca de Títulos -->
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label for="multi-seed-keyword">Palavra-Chave Semente / Nicho *</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="multi-seed-keyword" placeholder="Ex: Sofá Retrátil, Bicicleta de Carbono, Perfume Doce" style="flex: 1;">
+            <button type="button" class="btn btn-primary" id="btn-get-ideas">🔍 Gerar Ideias de Títulos</button>
+          </div>
+          <span class="field-hint">O Gerador buscará ideias focadas em intenção de busca e termos de cauda longa (Long-Tail).</span>
+        </div>
+
+        <!-- Passo 2: Exibição dos Títulos Gerados para Cópia -->
+        <div id="container-ideas-list" style="display: none; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="color: var(--primary); margin: 0;">Títulos Gerados (SEO Cauda Longa)</h3>
+            <button type="button" class="btn btn-primary" id="btn-copy-titles" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">📋 Copiar Todos os Títulos</button>
+          </div>
+          <p class="auth-desc" style="margin-bottom: 1.5rem;">Estes títulos foram otimizados pela IA para máxima conversão. Copie e cole na ferramenta abaixo para gerar os artigos.</p>
+          
+          <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem;">
+            <ol id="titles-list" style="margin-left: 1.5rem; line-height: 1.8; color: var(--text-main); font-size: 1.05rem;">
+              <!-- Populados via JS -->
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div style="margin: 3.5rem 0; border-top: 2px dashed rgba(255, 255, 255, 0.1); position: relative;">
+        <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--bg-primary); padding: 0 15px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;">Painéis Multi-Blog</span>
+      </div>
+
+      <!-- MULTI-PANEL GENERATOR -->
+      <div class="multi-panel-generator">
+        <style>
+          .multi-panel-generator {
+            margin-top: 1rem;
+          }
+
+          .mp-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+          }
+
+          .mp-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+          }
+
+          .mp-add-btn {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.7rem 1.4rem;
+            color: #FFF;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+          }
+          .mp-add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.45);
+          }
+
+          .mp-panel-count {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.45rem 0.9rem;
+          }
+
+          .mp-api-key-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            min-width: 250px;
+          }
+          .mp-api-key-bar label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            white-space: nowrap;
+          }
+          .mp-api-key-bar input {
+            flex: 1;
+            max-width: 380px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+          }
+          .mp-api-key-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+          }
+
+          .mp-panels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+            gap: 1.5rem;
+          }
+          @media (max-width: 600px) {
+            .mp-panels-grid {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          .mp-card {
+            background: rgba(15, 20, 35, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            animation: mpAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .mp-card:hover { border-color: rgba(139,92,246,0.2); }
+          .mp-card.mp-generating {
+            border-color: rgba(34,211,238,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35), 0 0 25px rgba(6,182,212,0.15);
+          }
+          .mp-card.mp-done {
+            border-color: rgba(16,185,129,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.35), 0 0 25px rgba(16,185,129,0.15);
+          }
+
+          @keyframes mpAppear {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+
+          .mp-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.015);
+          }
+          .mp-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #A78BFA;
+            display: flex; align-items: center; gap: 0.4rem;
+          }
+          .mp-badge {
+            font-size: 0.6rem; font-weight: 600;
+            background: #8B5CF6; color: #fff;
+            padding: 0.15rem 0.5rem; border-radius: 50px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+          }
+          .mp-close {
+            background: none; border: 1px solid transparent;
+            color: var(--text-muted); font-size: 1.2rem; cursor: pointer;
+            width: 28px; height: 28px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+          }
+          .mp-close:hover {
+            color: #EF4444; background: rgba(239,68,68,0.1);
+            border-color: rgba(239,68,68,0.3);
+          }
+
+          .mp-card-body {
+            padding: 1.2rem;
+            display: flex; flex-direction: column; gap: 1rem;
+          }
+
+          .mp-card-body label {
+            display: block; margin-bottom: 0.3rem;
+            color: var(--text-muted); font-size: 0.78rem; font-weight: 500;
+          }
+
+          .mp-select {
+            width: 100%; appearance: none;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 0.9rem; padding-right: 2.2rem;
+            color: var(--text-main); font-family: inherit; font-size: 0.9rem;
+            cursor: pointer; transition: border-color 0.2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 0.9rem center;
+          }
+          .mp-select:focus { outline: none; border-color: var(--primary); }
+          .mp-select option { background: #0F1423; color: var(--text-main); }
+
+          .mp-input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 0.9rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+          }
+          .mp-input:focus {
+            outline: none;
+            border-color: var(--primary);
+          }
+
+          .mp-textarea {
+            width: 100%; background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 0.65rem 0.9rem; color: var(--text-main);
+            font-family: inherit; font-size: 0.85rem; line-height: 1.6;
+            min-height: 80px; resize: vertical;
+            transition: border-color 0.2s, box-shadow 0.2s;
+          }
+          .mp-textarea:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(139,92,246,0.12);
+          }
+          .mp-textarea::placeholder { color: var(--text-muted); }
+
+          .mp-counter {
+            text-align: right; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;
+          }
+
+          .mp-action-row {
+            display: flex; gap: 0.6rem;
+          }
+
+          .mp-btn-gen {
+            flex: 1;
+            background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+            border: none; border-radius: 10px;
+            padding: 0.75rem; color: #FFF; font-family: inherit;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 4px 14px rgba(139,92,246,0.25);
+            display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+          }
+          .mp-btn-gen:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(139,92,246,0.4); }
+          .mp-btn-gen:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+          .mp-btn-deploy {
+            background: transparent;
+            border: 1.5px solid #10B981; border-radius: 10px;
+            padding: 0.75rem 1rem; color: #10B981; font-family: inherit;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.25s;
+            display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+            white-space: nowrap;
+          }
+          .mp-btn-deploy:hover { background: rgba(16,185,129,0.08); box-shadow: 0 0 18px rgba(16,185,129,0.15); }
+          .mp-btn-deploy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+          .mp-progress {
+            background: rgba(255,255,255,0.015);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 0.8rem;
+          }
+          .mp-progress-info {
+            display: flex; justify-content: space-between;
+            margin-bottom: 0.4rem; font-size: 0.78rem;
+          }
+          .mp-progress-info .mp-label { color: var(--text-muted); }
+          .mp-progress-info .mp-count { color: #06B6D4; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+          .mp-track {
+            background: rgba(255,255,255,0.04); border-radius: 50px;
+            height: 7px; overflow: hidden;
+          }
+          .mp-fill {
+            height: 100%; width: 0%; border-radius: 50px;
+            background: linear-gradient(90deg, #8B5CF6, #06B6D4);
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+          }
+
+          .mp-terminal {
+            background: #030509;
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 0.7rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            overflow-y: auto; max-height: 180px; min-height: 60px;
+            display: flex; flex-direction: column; gap: 0.3rem;
+            box-shadow: inset 0 4px 18px rgba(0,0,0,0.7);
+          }
+          .mp-t { line-height: 1.45; word-break: break-word; }
+          .mp-t-info { color: #818CF8; }
+          .mp-t-success { color: #34D399; }
+          .mp-t-warning { color: #FBBF24; }
+          .mp-t-error { color: #F87171; }
+          .mp-t-status { color: #67E8F9; font-weight: 500; }
+          .mp-t-countdown { color: #F472B6; }
+          .mp-t-done { color: #34D399; font-weight: 600; }
+
+          .mp-empty {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 4rem 2rem; text-align: center;
+            grid-column: 1 / -1;
+          }
+          .mp-empty .mp-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+          .mp-empty h3 { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+          .mp-empty p { color: var(--text-muted); font-size: 0.9rem; opacity: 0.7; }
+
+          @keyframes mpSpin {
+            to { transform: rotate(360deg); }
+          }
+          .mp-spinner {
+            display: inline-block; width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: #fff; border-radius: 50%;
+            animation: mpSpin 0.7s linear infinite;
+          }
+        </style>
+
+        <!-- ============================================================ -->
+        <!-- COLAB NINJA INLINE PANEL                                      -->
+        <!-- ============================================================ -->
+        <div id="colabNinjaPanel" style="display:none; margin-bottom: 2rem; border: 1px solid rgba(99,102,241,0.35); border-radius: 18px; background: linear-gradient(135deg, rgba(99,102,241,0.07) 0%, rgba(139,92,246,0.05) 100%); overflow: hidden;">
+
+          <!-- Header do painel -->
+          <div style="padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(99,102,241,0.2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+              <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center; font-size:1.3rem; box-shadow:0 4px 15px rgba(99,102,241,0.35);">🧠</div>
+              <div>
+                <div style="font-size:1rem; font-weight:700; color:#f3f4f6;">Sua Máquina Ninja Infinita <span style="font-size:0.7rem; background:rgba(99,102,241,0.25); color:#a78bfa; padding:0.15rem 0.5rem; border-radius:6px; margin-left:0.3rem;">GEMMA 2 – 27B</span></div>
+                <div style="font-size:0.78rem; color:#9ca3af;">Controle sua máquina de conteúdo do Colab daqui — sem abrir outra aba</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <div id="cn-status-badge" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.3rem 0.8rem; border-radius:20px; font-size:0.75rem; font-weight:600; background:rgba(239,68,68,0.12); color:#fca5a5; border:1px solid rgba(239,68,68,0.25);">
+                <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
+                <span id="cn-status-text">Desconectado</span>
+              </div>
+              <button onclick="toggleColabPanel()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#9ca3af; border-radius:8px; padding:0.3rem 0.8rem; font-size:0.78rem; cursor:pointer; font-family:inherit;">✕ Fechar</button>
+            </div>
+          </div>
+
+          <!-- Corpo do painel -->
+          <div style="padding: 1.5rem;">
+
+            <!-- Linha 1: URL ngrok + Logar + Testar + Ver Código -->
+            <div style="display:grid; grid-template-columns:1fr auto auto auto; gap:0.6rem; margin-bottom:1rem; align-items:stretch;">
+              <input type="url" id="cn-ngrok-url" placeholder="https://abc123.ngrok-free.app  ← Cole a URL do Colab aqui"
+                style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.7rem 1rem; color:#f3f4f6; font-family:inherit; font-size:0.85rem; transition:border-color 0.3s;"
+                oninput="cnSaveUrl()" onfocus="this.style.borderColor='rgba(99,102,241,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+              <button onclick="cnCopyCell3()" id="cn-login-colab-btn"
+                style="padding:0.7rem 1rem; border-radius:10px; border:1px solid rgba(16, 185, 129, 0.3); background:rgba(16, 185, 129, 0.08); color:#34d399; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(16, 185, 129, 0.18)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.08)'">🔓 Logar no Colab (Plug & Play)</button>
+              <button onclick="cnTestConnection()" id="cn-test-btn"
+                style="padding:0.7rem 1rem; border-radius:10px; border:1px solid rgba(99,102,241,0.35); background:rgba(99,102,241,0.1); color:#a78bfa; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(99,102,241,0.2)'" onmouseout="this.style.background='rgba(99,102,241,0.1)'">🔍 Testar</button>
+              <button onclick="cnShowCell3()" id="cn-cell3-btn"
+                style="padding:0.7rem 1rem; border-radius:10px; border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.08); color:#fcd34d; font-family:inherit; font-size:0.82rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(245,158,11,0.18)'" onmouseout="this.style.background='rgba(245,158,11,0.08)'">📦 Ver Código do Colab</button>
+            </div>
+
+            <!-- Barra de Progresso Colab (oculta por padrão) -->
+            <div id="cn-colab-progress" style="display:none; margin-bottom:1rem; padding: 1rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; text-align:center; overflow:hidden; position:relative;">
+              <div style="position:absolute; top:0; left:0; height:100%; width:100%; background:linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.4) 50%, transparent 100%); animation: cnLoading 1.5s infinite;"></div>
+              <span style="color:#34d399; font-weight:bold; font-size:0.9rem; position:relative; z-index:1;">⚙️ Aguardando a Máquina Infinita carregar no Colab...</span>
+              <style>@keyframes cnLoading { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }</style>
+            </div>
+
+            <!-- Célula 3 code block (oculto por padrão) -->
+            <div id="cn-cell3-block" style="display:none; margin-bottom:1rem; border-radius:10px; overflow:hidden; border:1px solid rgba(99,102,241,0.25);">
+              <div style="background:rgba(99,102,241,0.12); padding:0.6rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.78rem; color:#a78bfa; font-weight:600;">🤖 Código Único - Cole no Google Colab e execute</span>
+                <button onclick="cnCopyCell3()" style="background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.3); color:#a78bfa; padding:0.25rem 0.7rem; border-radius:6px; font-size:0.72rem; cursor:pointer; font-family:inherit; font-weight:600;">Copiar</button>
+              </div>
+              <pre id="cn-cell3-code" style="padding:1rem; font-size:0.72rem; color:#9ca3af; overflow-x:auto; line-height:1.7; white-space:pre-wrap; max-height:200px; overflow-y:auto; margin:0; background:rgba(0,0,0,0.4);"></pre>
+            </div>
+
+            <!-- Linha 2: Blog (token carregado automaticamente) -->
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; font-size:0.75rem; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">🌐 Blog de Destino</label>
+              <div style="position:relative;">
+                <select id="cn-blog-select" onchange="cnOnBlogChange()"
+                  style="width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.7rem 1rem; color:#f3f4f6; font-family:inherit; font-size:0.85rem; appearance:none;">
+                  <option value="">⏳ Carregando blogs...</option>
+                </select>
+                <span style="position:absolute; right:0.8rem; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none;">▾</span>
+              </div>
+              <!-- Token status (visível ao usuário, campo oculto) -->
+              <div id="cn-token-status" style="margin-top:0.4rem; font-size:0.73rem; color:#6ee7b7; display:none;">
+                ✅ Token GitHub carregado automaticamente
+              </div>
+            </div>
+            <!-- Token oculto (preenchido automaticamente pelo servidor) -->
+            <input type="hidden" id="cn-gh-token">
+
+            <!-- Área de temas -->
+            <div style="margin-bottom:1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                <label style="font-size:0.75rem; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em;">📋 Temas (um por linha)</label>
+                <span id="cn-counter" style="background:rgba(99,102,241,0.12); color:#a78bfa; padding:0.2rem 0.7rem; border-radius:20px; font-size:0.75rem; font-weight:700; border:1px solid rgba(99,102,241,0.2);">0 temas</span>
+              </div>
+              <textarea id="cn-topics" rows="8"
+                placeholder="Cole seus temas aqui, um por linha (numerados ou não):&#10;&#10;Descubra o Colchão Híbrido: A Fusão Perfeita de Conforto e Suporte&#10;Desvende os Segredos dos Colchões Híbridos&#10;..."
+                style="width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:0.9rem; color:#f3f4f6; font-family:inherit; font-size:0.85rem; line-height:1.6; resize:vertical; min-height:160px; transition:border-color 0.3s;"
+                oninput="cnCountTopics()" onfocus="this.style.borderColor='rgba(99,102,241,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+            </div>
+
+            <!-- Botões de ação -->
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+              <button id="cn-gen-btn" onclick="cnStartGeneration()"
+                style="flex:1; min-width:180px; padding:0.9rem 1.2rem; border:none; border-radius:12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-family:inherit; font-size:0.95rem; font-weight:700; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 18px rgba(99,102,241,0.3); display:flex; align-items:center; justify-content:center; gap:0.5rem;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 28px rgba(99,102,241,0.45)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 18px rgba(99,102,241,0.3)'">
+                🚀 Gerar com Gemma 2:27b
+              </button>
+              <button id="cn-stop-btn" onclick="cnStopGeneration()"
+                style="display:none; padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.1); color:#fca5a5; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer;">
+                ⏹ Parar
+              </button>
+              <button onclick="cnTriggerDeploy()"
+                style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.08); color:#6ee7b7; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(16,185,129,0.18)'" onmouseout="this.style.background='rgba(16,185,129,0.08)'">
+                ✈️ Deploy
+              </button>
+              <button onclick="cnClearLocalQueue()"
+                style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(239,68,68,0.3); background:rgba(239,68,68,0.08); color:#fca5a5; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(239,68,68,0.18)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'">
+                🗑️ Limpar Fila
+              </button>
+            </div>
+
+            <!-- Área de progresso -->
+            <div id="cn-progress-area" style="display:none; margin-top:1.2rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                <span id="cn-prog-status" style="font-size:0.85rem; font-weight:500; color:#a78bfa;">⏳ Preparando...</span>
+                <span id="cn-timer" style="font-size:0.8rem; color:#9ca3af; font-variant-numeric:tabular-nums;">00:00</span>
+              </div>
+              <div style="height:7px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; margin-bottom:0.8rem;">
+                <div id="cn-prog-fill" style="height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899); background-size:200%; transition:width 0.5s ease; animation:mpShimmer 2s linear infinite;"></div>
+              </div>
+              <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                <span id="cn-chip-ok" style="padding:0.25rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; background:rgba(16,185,129,0.12); color:#6ee7b7;">✅ 0</span>
+                <span id="cn-chip-fail" style="padding:0.25rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; background:rgba(239,68,68,0.12); color:#fca5a5;">❌ 0</span>
+                <span id="cn-chip-pend" style="padding:0.25rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; background:rgba(245,158,11,0.12); color:#fcd34d;">⏳ 0</span>
+                <span id="cn-chip-speed" style="padding:0.25rem 0.7rem; border-radius:8px; font-size:0.75rem; font-weight:600; background:rgba(99,102,241,0.12); color:#a78bfa;">⚡ ~0/h</span>
+              </div>
+              <div id="cn-log-box" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:0.8rem 1rem; font-family:'Courier New',monospace; font-size:0.75rem; color:#9ca3af; max-height:220px; overflow-y:auto; white-space:pre-wrap; line-height:1.6;">Aguardando início...</div>
+            </div>
+
+          </div>
+        </div>
+        <!-- /COLAB NINJA INLINE PANEL -->
+
+        <div class="mp-toolbar" style="margin-bottom: 1.5rem;">
+          <div class="mp-toolbar-left">
+            <button type="button" onclick="toggleColabPanel()" class="mp-add-btn" id="colabNinjaBtn" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); margin-right: 0.5rem; border:none; box-shadow: 0 2px 12px rgba(99,102,241,0.4); border-radius: 12px; padding: 0.7rem 1.4rem; color: #FFF; font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+              <span style="font-size:1.1rem;">♾️</span> Máquina Infinita
+            </button>
+          </div>
+        </div>
+
+        <!-- CLASSIC GENERATOR CONTAINER -->
+        <div class="classic-generator-container" style="display: flex; gap: 24px; margin-top: 1.5rem; flex-wrap: wrap;">
+          
+          <!-- Left panel (Inputs) -->
+          <div class="input-panel" style="flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel-header">
+              <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 8px;">✨ Gerar Novo Artigo</h2>
+            </div>
+ 
+            <!-- Config Panel (Collapsible) -->
+            <div class="settings-panel" style="border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; background-color: rgba(255,255,255,0.015);">
+              <div class="settings-toggle" onclick="toggleSettings()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--primary);">
+                <span>⚙️ Configurações da API & Tokens</span>
+                <span id="settings-chevron">▼</span>
+              </div>
+              <div class="settings-content" id="settings-content" style="margin-top: 14px; display: none; flex-direction: column; gap: 12px;">
+                <div class="form-group">
+                  <label for="post-gemini-key">Chave de API do Google Gemini</label>
+                  <input type="password" id="post-gemini-key" class="form-control" placeholder="Cole sua API Key do Google AI Studio">
+                </div>
+                <div class="form-group">
+                  <label for="post-github-token">Token do GitHub</label>
+                  <input type="password" id="post-github-token" class="form-control" placeholder="GitHub Personal Access Token">
+                </div>
+              </div>
+            </div>
+ 
+            <!-- Generator Form -->
+            <form id="generator-form" onsubmit="event.preventDefault(); startGeneration();">
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- Blog de Destino -->
+                <div class="form-group">
+                  <label for="multi-select-site">🌐 Blog de Destino *</label>
+                  <select id="multi-select-site" class="form-control" style="width: 100%; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background-color: rgba(255,255,255,0.03); color: var(--text-main); font-size: 0.9rem;" required>
+                    <!-- Preenchido via JavaScript -->
+                  </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.02); padding: 5px; border-radius: 8px; border: 1px solid var(--border-color);">
+                  <button type="button" id="tab-single" class="btn-tab active" onclick="setGeneratorMode('single')" style="flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: inherit; font-size: 0.85rem; color: #fff; background: var(--primary); transition: all 0.3s;">✍️ Artigo Único</button>
+                  <button type="button" id="tab-bulk" class="btn-tab" onclick="setGeneratorMode('bulk')" style="flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: inherit; font-size: 0.85rem; color: var(--text-muted); background: transparent; transition: all 0.3s;">📚 Em Lote (Vários)</button>
+                </div>
+ 
+                <div id="single-fields" style="display: flex; flex-direction: column; gap: 20px;">
+                  <div class="form-group">
+                    <label for="post-title">Título do Artigo *</label>
+                    <input type="text" id="post-title" class="form-control" placeholder="Ex: Colchão Emma Original é bom? Vale a Pena? Resenha Completa" required>
+                  </div>
+ 
+                  <div class="form-group">
+                    <label for="post-subtitles">Tópicos e Subtítulos sugeridos <span>(Um por linha - Opcional)</span></label>
+                    <textarea id="post-subtitles" class="form-control" style="min-height: 100px; resize: vertical;" placeholder="1. Como é a potência e graves?&#10;2. Conectividade e bateria&#10;3. Conclusão: Vale a Pena comprar?"></textarea>
+                  </div>
+                </div>
+ 
+                <div id="bulk-fields" style="display: none; flex-direction: column; gap: 20px;">
+                  <div class="form-group">
+                    <label for="bulk-titles">Lista de Títulos * <span>(Um por linha - Máximo 10)</span></label>
+                    <textarea id="bulk-titles" class="form-control" style="height: 280px; line-height: 1.8; white-space: pre; overflow-x: auto; min-height: 150px; resize: vertical;" wrap="off" placeholder="Ex:&#10;Melhor Colchão de Casal em 2026&#10;Colchão Emma Original é bom?&#10;Guia: Como Escolher a Densidade do Colchão"></textarea>
+                  </div>
+                </div>
+ 
+                <div class="form-group">
+                  <label for="post-affiliate">Link de Afiliado Customizado <span>(Opcional - Deixe em branco se for informativo)</span></label>
+                  <input type="url" id="post-affiliate" class="form-control" placeholder="Ex: https://www.mercadolivre.com.br/social/...">
+                </div>
+ 
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="form-group">
+                    <label for="post-category">Categoria</label>
+                    <select id="post-category" class="form-control" style="width: 100%; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background-color: rgba(255,255,255,0.03); color: var(--text-main); font-size: 0.9rem;">
+                      <option value="">— Selecione um blog —</option>
+                    </select>
+                  </div>
+ 
+                  <div class="form-group">
+                    <label for="post-tone">Tom de Voz</label>
+                    <select id="post-tone" class="form-control" style="width: 100%; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background-color: rgba(255,255,255,0.03); color: var(--text-main); font-size: 0.9rem;">
+                      <option value="Persuasivo & Vendedor">Persuasivo & Vendedor</option>
+                      <option value="Informativo & Técnico">Informativo & Técnico</option>
+                      <option value="Descontraído">Descontraído</option>
+                    </select>
+                  </div>
+                </div>
+ 
+                <div class="form-group">
+                  <label for="post-hero">Imagem de Destaque sugerida</label>
+                  <select id="post-hero" class="form-control" onchange="checkCustomHero()" style="width: 100%; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background-color: rgba(255,255,255,0.03); color: var(--text-main); font-size: 0.9rem;">
+                    <option value="custom">-- Link de Imagem Customizada --</option>
+                  </select>
+                  <input type="text" id="post-hero-custom" class="form-control hidden" style="margin-top: 8px;" placeholder="Ex: /uploads/sua-imagem.jpg ou URL completa">
+                </div>
+ 
+                <button type="submit" id="generate-btn" class="btn btn-primary" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; border: none; font-weight: 600; font-size: 16px; padding: 14px; border-radius: 8px; cursor: pointer;">
+                  <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                  Gerar Artigo com Gemini Flash
+                </button>
+ 
+              </div>
+            </form>
+ 
+            <!-- Status Progress card -->
+            <div id="status-card" class="status-card" style="background-color: rgba(255,255,255,0.01); border: 1px dashed var(--border-color); border-radius: 12px; padding: 20px; display: none; flex-direction: column; gap: 12px;">
+              <div class="status-header" style="display: flex; align-items: center; gap: 12px;">
+                <div class="spinner" style="width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: var(--primary); animation: spin 1s infinite;"></div>
+                <div class="status-text" id="status-text" style="font-weight:600; font-size:15px;">Iniciando geração...</div>
+              </div>
+              <ul class="status-steps" id="status-steps" style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-muted); padding-left: 0;">
+                <li id="step-connect">Conectando ao Google Gemini API...</li>
+                <li id="step-generate">Redigindo artigo de alta conversão...</li>
+                <li id="step-format">Estruturando Frontmatter e HTML...</li>
+              </ul>
+            </div>
+ 
+            <!-- Action Panel when article is ready -->
+            <div id="publish-card" class="status-card" style="border: 1px solid var(--primary); border-radius: 12px; padding: 20px; display: none; flex-direction: column; gap: 12px; background: rgba(99,102,241,0.03);">
+              <div class="status-text" style="color: var(--primary); font-weight:600; font-size:15px;">✨ Artigo Pronto para Publicação!</div>
+              <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">Confira a pré-visualização ao lado. Se tudo estiver correto, clique abaixo para publicar diretamente em seu site.</p>
+              <button onclick="publishArticle()" id="publish-btn" class="btn-primary" style="background: var(--success); box-shadow: 0 10px 20px -5px rgba(16,185,129,0.3); border: none; font-weight: 600; font-size: 16px; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%;">
+                🚀 Publicar Diretamente no Site
+              </button>
+            </div>
+ 
+          </div>
+ 
+          <!-- Right panel (Preview) -->
+          <div class="preview-panel" style="flex: 1.5; min-width: 380px; display: flex; flex-direction: column; gap: 20px;">
+            <div class="panel-header">
+              <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 8px;">👁️ Pré-Visualização em Tempo Real</h2>
+            </div>
+ 
+            <div class="preview-card" id="preview-card" style="background-color: rgba(15,20,35,0.4); border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; box-shadow: var(--shadow-md); flex: 1; overflow-y: auto; position: relative; min-height: 500px;">
+              <!-- Success Screen -->
+              <div class="success-overlay" id="success-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15,23,42,0.95); z-index: 10; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; gap: 20px; border-radius: 16px;">
+                <div class="success-icon" style="width: 72px; height: 72px; background-color: rgba(16,185,129,0.1); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold;">✓</div>
+                <h2 style="font-size: 24px; font-weight: 700; color: var(--success);">Artigo Publicado com Sucesso!</h2>
+                <p style="color: var(--text-muted); max-width: 400px; font-size: 15px; line-height: 1.5;">O artigo foi adicionado ao seu repositório GitHub. O deploy automático da Vercel foi iniciado na nuvem e o novo conteúdo estará visível no site em poucos minutos!</p>
+                <div style="display: flex; gap: 12px; margin-top: 10px;">
+                  <button onclick="resetGenerator()" class="btn btn-primary" style="background: var(--primary); box-shadow: none; border: none; font-weight: 600; font-size: 16px; padding: 14px; border-radius: 8px; cursor: pointer; color: white;">Criar Outro Artigo</button>
+                </div>
+              </div>
+ 
+              <!-- Initial Placeholder -->
+              <div class="preview-placeholder" id="preview-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; color: var(--text-muted); gap: 16px; min-height: 400px;">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 64px; height: 64px; opacity: 0.5;">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l5 5v11a2 2 0 0 1-2 2z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11l-4 4m0 0l4 4m-4-4h11"/>
+                </svg>
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text-main);">Nenhum conteúdo gerado ainda</h3>
+                  <p style="font-size: 14px; max-width: 300px;">Preencha os campos à esquerda e acione a inteligência artificial para ver a mágica acontecer aqui.</p>
+                </div>
+              </div>
+ 
+              <!-- Active Preview Area -->
+              <div id="preview-container" class="hidden">
+                <span class="preview-badge" id="preview-badge-cat" style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; background-color: #ffedd5; color: #ea580c; padding: 4px 10px; border-radius: 4px; margin-bottom: 16px; letter-spacing: 0.05em;">Categoria</span>
+                <h1 class="preview-title" id="preview-display-title" style="font-size: 28px; font-weight: 800; line-height: 1.25; margin-bottom: 12px; color: var(--text-main);">Título do Post</h1>
+                <div class="preview-meta" style="font-size: 13px; color: var(--text-muted); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+                  Por <span id="preview-display-author">Equipe Inteligência Jovem</span> &bull; Publicado hoje (Rascunho)
+                </div>
+                <img src="" id="preview-display-hero" class="preview-hero-image" alt="Destaque" style="width: 100%; height: 250px; border-radius: 12px; object-fit: cover; margin-bottom: 24px; background-color: rgba(255,255,255,0.02);">
+                <div class="preview-content" id="preview-display-content" style="line-height: 1.7; font-size: 16px; color: var(--text-main);">
+                  <!-- Content will be injected here -->
+                </div>
+                <div class="preview-cta-block" style="background-color: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 24px; margin-top: 32px; text-align: center;">
+                  <p class="preview-cta-text" id="preview-cta-para" style="font-size: 15px; font-weight: 500; color: #34d399; margin-bottom: 16px;">Quer garantir o seu produto pelo melhor preço? Clique no botão abaixo e confira as melhores ofertas recomendadas:</p>
+                  <a href="#" target="_blank" class="preview-cta-button" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; text-decoration: none; padding: 12px 32px; border-radius: 50px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">Ver Preço Aqui</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- NOVA SEÇÃO: MONITOR DE POSIÇÃO NO GOOGLE (SEO TRACKER) -->
+    <section id="view-site-position" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">SEO Live</span>
+          <h2>Monitor de Posição no Google</h2>
+          <p>Verifique em tempo real a classificação orgânica de qualquer página ou artigo nas buscas do Google.</p>
+        </div>
+
+        <form id="position-tracker-form">
+          <div class="wizard-grid">
+            <div class="wizard-fields" style="flex: 1.2;">
+              <div class="form-group">
+                <label for="position-select-site">Selecione o Blog ou insira um domínio próprio *</label>
+                <select id="position-select-site" required>
+                  <!-- Preenchido via JavaScript -->
+                  <option value="custom" selected>✨ Outro Site / URL Customizada</option>
+                </select>
+              </div>
+
+              <!-- Custom URL input -->
+              <div class="form-group" id="position-custom-url-group">
+                <label for="position-custom-url">Insira o Domínio ou URL completa *</label>
+                <input type="text" id="position-custom-url" placeholder="Ex: etecsr.com.br ou meu-site.com/artigo">
+              </div>
+
+              <div class="form-group">
+                <label for="position-keyword">Palavra-Chave a Monitorar *</label>
+                <input type="text" id="position-keyword" required placeholder="Ex: melhores sofas retrateis, bicicleta de carbono barata">
+                <span class="field-hint">A palavra-chave exata que os usuários digitam no Google.</span>
+              </div>
+            </div>
+
+            <div class="wizard-visuals" style="flex: 0.8; justify-content: center; display: flex; align-items: center;">
+              <div class="seo-status-mock" id="seo-initial-mock" style="text-align: center; padding: 2rem; border: 1.5px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🔍</span>
+                <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Pronto para analisar</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Preencha a URL e a palavra-chave ao lado para rodar a análise de rank em tempo real.</p>
+              </div>
+
+              <!-- Real-time Loading spinner -->
+              <div class="seo-status-mock hidden" id="seo-loading-mock" style="text-align: center; padding: 2rem; width: 100%;">
+                <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
+                <h4 class="gradient-text" style="font-weight: 700; margin-bottom: 0.5rem;">Rastreando Google SERP...</h4>
+                <p id="seo-loading-status" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Analisando as primeiras 100 posições orgânicas...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-outline" id="btn-cancel-position">Limpar</button>
+            <button type="submit" class="btn btn-primary" id="btn-analyze-position" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;">⚡ Analisar Posição no Google</button>
+          </div>
+        </form>
+
+        <!-- SEÇÃO DE RESULTADOS DA ANÁLISE -->
+        <div id="position-results-container" style="display: none; margin-top: 2.5rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700;">Relatório de Desempenho SERP</h3>
+            <span class="badge badge-success" id="seo-method-badge" style="font-size: 0.8rem; padding: 4px 10px;">Direct Scraper</span>
+          </div>
+
+          <!-- Big Metric Banner -->
+          <div class="seo-metric-banner" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="card" style="background: rgba(255,255,255,0.02); border: 1.5px solid var(--border-color); text-align: center; padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Posição Atual</span>
+              <div id="seo-rank-value" class="gradient-text" style="font-size: 3.5rem; font-weight: 900; margin: 0.5rem 0;">#3</div>
+              <span id="seo-rank-status" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 600; padding: 4px 12px;">Excelente (Top 3)</span>
+            </div>
+
+            <div class="card" style="background: rgba(255,255,255,0.02); border: 1.5px solid var(--border-color); text-align: center; padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Volume de Busca</span>
+              <div id="seo-volume-value" style="font-size: 2.2rem; font-weight: 800; margin: 0.75rem 0; color: var(--text-main);">Média</div>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Estimativa de acessos/mês</span>
+            </div>
+
+            <div class="card" style="background: rgba(255,255,255,0.02); border: 1.5px solid var(--border-color); text-align: center; padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Página Classificada</span>
+              <div style="margin: 1rem 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <a id="seo-page-link" href="#" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: underline; font-size: 1rem;">Nenhuma página encontrada</a>
+              </div>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">URL indexada no Google</span>
+            </div>
+          </div>
+
+          <div class="seo-results-grid" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem;">
+            <!-- Competitors Column -->
+            <div>
+              <h4 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <span>🏆</span> Top 10 Resultados Orgânicos
+              </h4>
+              <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px;">
+                <table class="blog-table" style="font-size: 0.9rem;">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px; text-align: center;">Pos</th>
+                      <th>Resultado da Pesquisa / Link</th>
+                    </tr>
+                  </thead>
+                  <tbody id="seo-competitors-tbody">
+                    <!-- Dinamicamente preenchido -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SEO Advice Column -->
+            <div class="card" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; height: fit-content;">
+              <h4 style="margin-top: 0; margin-bottom: 1.25rem; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <span>💡</span> Recomendações SEO do Agente Ninja
+              </h4>
+              <ul id="seo-advice-list" style="margin-left: 1.25rem; line-height: 1.6; color: var(--text-muted); font-size: 0.92rem; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Dinamicamente preenchido -->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: RESTRUTURAÇÃO SILO (SILO BUILDER) -->
+    <section id="view-silo-structure" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator" style="background: linear-gradient(135deg, #a855f7, #6366f1);">SEO SILO</span>
+          <h2>Arquiteto de Estrutura SILO</h2>
+          <p>Organize e reestruture seu blog em Categorias e Subcategorias com foco estrito no seu micro-nicho para canalizar e potencializar o Link Juice.</p>
+        </div>
+
+        <form id="silo-structure-form">
+          <div class="wizard-grid">
+            <div class="wizard-fields" style="flex: 1.2;">
+              <div class="form-group">
+                <label for="silo-select-site">Selecione o Blog para reestruturar *</label>
+                <select id="silo-select-site" required class="form-control" style="background-color: var(--bg-primary); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                  <!-- Preenchido via JavaScript -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="silo-niche">Micro-Nicho exato do Blog *</label>
+                <input type="text" id="silo-niche" required placeholder="Ex: Sofás Retráteis, Colchões de Casal, Perfumes Árabes" class="form-control">
+                <span class="field-hint">Defina o escopo principal para evitar desvio de foco nas palavras-chave pesquisadas.</span>
+              </div>
+            </div>
+
+            <div class="wizard-visuals" style="flex: 0.8; justify-content: center; display: flex; align-items: center;">
+              <div class="seo-status-mock" id="silo-initial-mock" style="text-align: center; padding: 2rem; border: 1.5px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">📐</span>
+                <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Arquitetura Pronta</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Selecione o site e defina o micro-nicho para iniciar a modelagem de silagem SEO.</p>
+              </div>
+
+              <!-- Real-time Loading spinner -->
+              <div class="seo-status-mock hidden" id="silo-loading-mock" style="text-align: center; padding: 2rem; width: 100%;">
+                <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
+                <h4 class="gradient-text" style="font-weight: 700; margin-bottom: 0.5rem;">Estruturando Silo...</h4>
+                <p id="silo-loading-status" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Isso pode demorar alguns minutos. Analisando artigos e pesquisando palavras-chave cabeça e médias...</p>
+                <ul class="status-steps" id="silo-steps" style="margin-top: 1rem; text-align: left; font-size: 0.85rem; list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+                  <li id="silo-step-clone" style="color: var(--text-muted);">⏳ Clonando repositório e analisando artigos...</li>
+                  <li id="silo-step-research" style="color: var(--text-muted);">⏳ Pesquisando palavras cabeça e médias (Gemini)...</li>
+                  <li id="silo-step-templates" style="color: var(--text-muted);">⏳ Escrevendo silo.json e novos templates no repositório...</li>
+                  <li id="silo-step-push" style="color: var(--text-muted);">⏳ Enviando atualizações para o GitHub...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-outline" id="btn-cancel-silo">Limpar</button>
+            <button type="submit" class="btn btn-primary" id="btn-analyze-silo" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none;">⚡ Planejar e Estruturar SILO</button>
+          </div>
+        </form>
+
+        <!-- SEÇÃO DE RESULTADOS DO SILO -->
+        <div id="silo-results-container" style="display: none; margin-top: 2.5rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700;">Mapeamento SILO Gerado</h3>
+            <span class="badge badge-success" style="font-size: 0.8rem; padding: 4px 10px;">Ativo & Deployado</span>
+          </div>
+
+          <p class="auth-desc" style="margin-bottom: 1.5rem;">O blog foi reestruturado com sucesso. Veja a árvore de categorias, subcategorias e artigos mapeados abaixo:</p>
+
+          <div id="silo-tree-visualizer" style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; color: var(--text-main); font-family: monospace; font-size: 1rem; line-height: 1.6;">
+            <!-- Dinamicamente preenchido -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO NETO SALVA (BACKUPS) -->
+    <section id="view-neto-salva" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator" style="background: linear-gradient(135deg, #10b981, #059669);">Backup</span>
+          <h2>Pontos de Restauração (Backups)</h2>
+          <p>Crie versões de segurança completas do seu blog (incluindo artigos, imagens e código) ou restaure uma versão anterior offline/online.</p>
+        </div>
+
+        <form id="neto-salva-form">
+          <div class="wizard-grid">
+            <div class="wizard-fields" style="flex: 1.2;">
+              <div class="form-group">
+                <label for="backup-select-site">Selecione o Blog *</label>
+                <select id="backup-select-site" required class="form-control" style="background-color: var(--bg-primary); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                  <!-- Preenchido via JavaScript -->
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="backup-description">Descrição / Identificador do Backup *</label>
+                <input type="text" id="backup-description" required placeholder="Ex: Antes de gerar novos artigos com IA" class="form-control">
+                <span class="field-hint">Escreva um comentário curto para identificar facilmente este ponto de restauração depois.</span>
+              </div>
+            </div>
+
+            <div class="wizard-visuals" style="flex: 0.8; justify-content: center; display: flex; align-items: center;">
+              <div class="seo-status-mock" id="backup-initial-mock" style="text-align: center; padding: 2rem; border: 1.5px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🛡️</span>
+                <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Sistema de Proteção</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Preencha a descrição ao lado e crie um ponto de restauração para blindar seu blog contra erros.</p>
+              </div>
+
+              <!-- Real-time Loading spinner -->
+              <div class="seo-status-mock hidden" id="backup-loading-mock" style="text-align: center; padding: 2rem; width: 100%;">
+                <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
+                <h4 class="gradient-text" id="backup-loading-title" style="font-weight: 700; margin-bottom: 0.5rem;">Processando...</h4>
+                <p id="backup-loading-status" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Isso pode levar cerca de 1 minuto...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary" id="btn-create-backup" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">⚡ Criar Ponto de Restauração (Backup)</button>
+          </div>
+        </form>
+
+        <!-- SEÇÃO DE VERSÕES SALVAS -->
+        <div id="backups-list-container" style="display: none; margin-top: 2.5rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700;">Versões e Backups Disponíveis</h3>
+            <span class="badge badge-outline" id="backups-count-badge">0 backups salvos</span>
+          </div>
+
+          <p class="auth-desc" style="margin-bottom: 1.5rem;">Você pode baixar o ZIP para arquivamento local (backup físico) ou restaurar o site na nuvem diretamente:</p>
+
+          <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px;">
+            <table class="blog-table" style="font-size: 0.9rem;">
+              <thead>
+                <tr>
+                  <th>Data e Hora</th>
+                  <th>Tag / ID</th>
+                  <th>Descrição / Nota de Versão</th>
+                  <th>Tipo</th>
+                  <th style="width: 250px; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="backups-tbody">
+                <!-- Dinamicamente preenchido -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SEÇÃO DE RESTAURAÇÃO VIA UPLOAD DE ZIP -->
+        <div style="margin-top: 3rem; border-top: 2px dashed rgba(255, 255, 255, 0.1); padding-top: 2rem;">
+          <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem;">Restauração via Arquivo de Backup (ZIP)</h3>
+          <p class="auth-desc" style="margin-bottom: 1.5rem;">Selecione um arquivo ZIP de backup baixado anteriormente do blog para restaurá-lo diretamente na nuvem.</p>
+          
+          <form id="neto-salva-upload-form">
+            <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+              <div class="form-group" style="flex: 1; min-width: 250px;">
+                <label for="backup-zip-file">Arquivo ZIP de Backup *</label>
+                <input type="file" id="backup-zip-file" accept=".zip" required class="form-control" style="background-color: var(--bg-primary); padding: 8px;">
+              </div>
+              <button type="submit" class="btn btn-primary" id="btn-upload-restore" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none; height: 46px; display: flex; align-items: center; justify-content: center;">
+                🚀 Fazer Upload & Restaurar ZIP
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: ANALISADOR DE BACKLINKS EXTERNOS -->
+    <section id="view-backlink-tracker" class="view-section">
+      <div class="wizard-container card">
+        <div class="wizard-header">
+          <span class="wizard-step-indicator" style="background: linear-gradient(135deg, #10b981, #3b82f6);">Backlinks Live</span>
+          <h2>Analisador de Backlinks Externos</h2>
+          <p>Descubra quem está linkando para o seu site, a relevância do domínio externo e os detalhes técnicos de hospedagem.</p>
+        </div>
+
+        <form id="backlink-tracker-form">
+          <div class="wizard-grid">
+            <div class="wizard-fields" style="flex: 1.2;">
+              <div class="form-group">
+                <label for="backlink-select-site">Selecione o seu Blog ou analise uma URL customizada *</label>
+                <select id="backlink-select-site" required class="form-control" style="background-color: var(--bg-primary); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                  <!-- Preenchido via JavaScript -->
+                  <option value="custom" selected>✨ Inserir URL Customizada</option>
+                </select>
+              </div>
+
+              <!-- Custom URL input -->
+              <div class="form-group" id="backlink-custom-url-group">
+                <label for="backlink-custom-url">Insira o Domínio ou URL completa *</label>
+                <input type="text" id="backlink-custom-url" placeholder="Ex: etecsr.com.br ou meu-site.com">
+              </div>
+            </div>
+
+            <div class="wizard-visuals" style="flex: 0.8; justify-content: center; display: flex; align-items: center;">
+              <div class="seo-status-mock" id="backlink-initial-mock" style="text-align: center; padding: 2rem; border: 1.5px dashed var(--border-color); border-radius: 12px; width: 100%;">
+                <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🔗</span>
+                <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Pronto para analisar</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Preencha a URL de destino acima para rodar a varredura completa de links recebidos.</p>
+              </div>
+
+              <!-- Real-time Loading spinner -->
+              <div class="seo-status-mock hidden" id="backlink-loading-mock" style="text-align: center; padding: 2rem; width: 100%;">
+                <div class="spinner" style="margin: 0 auto 1.5rem auto;"></div>
+                <h4 class="gradient-text" style="font-weight: 700; margin-bottom: 0.5rem;">Pesquisando Backlinks...</h4>
+                <p id="backlink-loading-status" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Buscando dados na web...</p>
+                <ul class="status-steps" id="backlink-steps" style="margin-top: 1rem; text-align: left; font-size: 0.85rem; list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+                  <li id="backlink-step-google" style="color: var(--text-muted);">⏳ Pesquisando backlinks (Gemini Grounding)...</li>
+                  <li id="backlink-step-dns" style="color: var(--text-muted);">⏳ Resolvendo IP e servidores DNS...</li>
+                  <li id="backlink-step-geoip" style="color: var(--text-muted);">⏳ Localizando servidores de hospedagem...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-actions" style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-outline" id="btn-cancel-backlink">Limpar</button>
+            <button type="submit" class="btn btn-primary" id="btn-analyze-backlink" style="background: linear-gradient(135deg, #10b981, #3b82f6); border: none;">⚡ Analisar Backlinks</button>
+          </div>
+        </form>
+
+        <!-- SEÇÃO DE RESULTADOS DA ANÁLISE -->
+        <div id="backlink-results-container" style="display: none; margin-top: 2.5rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
+          <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700; margin-bottom: 1.5rem;">Backlinks Externos Encontrados</h3>
+          
+          <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px;">
+            <table class="blog-table" style="font-size: 0.9rem; min-width: 900px;">
+              <thead>
+                <tr>
+                  <th>Domínio de Origem</th>
+                  <th style="width: 120px;">Relevância</th>
+                  <th>Palavra Âncora</th>
+                  <th>IP / Servidor DNS</th>
+                  <th>Hospedagem (ISP/Local)</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="backlink-results-tbody">
+                <!-- Dinamicamente preenchido -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SEÇÃO DE SALVOS (LISTA PERSISTIDA) -->
+        <div id="backlink-saved-container" style="margin-top: 3rem; border-top: 2px dashed rgba(255, 255, 255, 0.1); padding-top: 2rem;">
+          <h3 style="color: var(--primary); font-size: 1.35rem; font-weight: 700; margin-bottom: 1rem;">Palavras e Domínios Salvos</h3>
+          <p class="auth-desc" style="margin-bottom: 1.5rem;">Esta é a sua lista permanente de termos âncora e os domínios externos que enviaram os links para seu blog.</p>
+          
+          <div class="table-responsive" style="border: 1px solid var(--border-color); border-radius: 8px;">
+            <table class="blog-table" style="font-size: 0.9rem; min-width: 700px;">
+              <thead>
+                <tr>
+                  <th>Palavra (Âncora)</th>
+                  <th>Domínio Externo de Origem</th>
+                  <th style="width: 120px; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="backlink-saved-tbody">
+                <!-- Dinamicamente preenchido via LocalStorage -->
+                <tr class="empty-backlinks-row">
+                  <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    Nenhum backlink salvo na lista ainda. Faça uma análise acima e clique em "Salvar" para começar a gerenciar.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CONFIGURAÇÕES VIEW -->
+    <section id="view-settings" class="view-section">
+      <div class="settings-container card">
+        <div class="settings-header">
+          <h2>Configurações de API e Credenciais</h2>
+          <p>Gerencie as conexões seguras com suas contas para deploy direto em sua infraestrutura.</p>
+        </div>
+
+        <form id="settings-form">
+          <div class="form-group">
+            <label for="settings-github-token">Token do GitHub (Personal Access Token)</label>
+            <input type="password" id="settings-github-token" placeholder="ghp_••••••••••••••••••••••••••••">
+            <span class="field-hint">Token padrão de testes pré-configurado por segurança. Insira o seu para hospedar na sua conta.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-vercel-token">Token do Gerador Ninja</label>
+            <input type="password" id="settings-vercel-token" placeholder="vcp_••••••••••••••••••••••••••••">
+            <span class="field-hint">⚠️ <b>Importante:</b> Certifique-se de vincular sua Vercel ao GitHub instalando a integração em <a href="https://github.com/apps/vercel" target="_blank" style="color: var(--primary);">github.com/apps/vercel</a> para que os deploys funcionem.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-vercel-team">Gerador Ninja Team ID</label>
+            <input type="text" id="settings-vercel-team" placeholder="team_••••••••••••••••••••••••">
+          </div>
+
+          <div class="form-group">
+            <label for="settings-gemini-key">Chave de API do Google Gemini (Opcional)</label>
+            <input type="password" id="settings-gemini-key" placeholder="AIzaSy••••••••••••••••••••••••••••">
+            <span class="field-hint">Adicione sua chave para pré-configurar o Sveltia CMS dos seus blogs automaticamente. Obtenha em: <a href="https://aistudio.google.com/" target="_blank" style="color: var(--primary);">Google AI Studio</a></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Salvar Credenciais</button>
+          <button type="button" class="btn btn-outline" onclick="if(typeof ASMR!=='undefined') ASMR.playCashRegister();" style="margin-left: 10px; border-color: #10b981; color: #10b981;">💰 Testar Som de Caixa Registradora</button>
+        </form>
+      </div>
+
+      <!-- 2FA CONFIGURATION SECTION -->
+      <div class="settings-container card" style="margin-top: 2rem;">
+        <div class="settings-header" style="margin-bottom: 1.5rem;">
+          <h2>Autenticação de Dois Fatores (2FA)</h2>
+          <p>Aumente a segurança da sua conta exigindo um código de verificação temporário ao fazer login.</p>
+        </div>
+
+        <div id="two-factor-setup-container">
+          <!-- Status message -->
+          <div id="two-factor-status" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; font-weight: 500; font-size: 0.95rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+            Carregando informações do 2FA...
+          </div>
+
+          <!-- Enable 2FA Button -->
+          <button id="btn-enable-2fa" class="btn btn-primary" style="display: none;">Configurar 2FA</button>
+          
+          <!-- Setup form (initially hidden) -->
+          <div id="two-factor-setup-steps" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+            <p style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--text);">Siga os passos abaixo para configurar o seu aplicativo de autenticação (como Google Authenticator ou Authy):</p>
+            
+            <ol style="margin-left: 1.5rem; margin-bottom: 1.5rem; line-height: 1.6; color: var(--text-muted); font-size: 0.9rem;">
+              <li style="margin-bottom: 0.5rem;">Escaneie o código QR abaixo com seu aplicativo de autenticação, ou insira a chave secreta manualmente.</li>
+              <li>Insira o código de 6 dígitos gerado pelo seu aplicativo para confirmar o pareamento e ativar.</li>
+            </ol>
+
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+              <div id="two-factor-qr-code" style="background-color: white; padding: 1rem; border-radius: 12px; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);">
+                <img id="qr-image" style="max-width: 100%; display: block;" alt="Código QR do 2FA" />
+              </div>
+              <div style="text-align: center;">
+                <span class="field-hint" style="display: block; margin-bottom: 0.25rem;">Chave Secreta:</span>
+                <code id="two-factor-secret-key" style="font-size: 1.05rem; letter-spacing: 1px; color: var(--primary); font-weight: bold; background: rgba(255,255,255,0.05); padding: 0.25rem 0.75rem; border-radius: 4px; display: inline-block;">-</code>
+              </div>
+            </div>
+
+            <form id="two-factor-verify-form" style="max-width: 350px; margin: 0 auto;">
+              <div class="form-group" style="text-align: center; margin-bottom: 1.5rem;">
+                <label for="two-factor-verification-code" style="display: block; margin-bottom: 0.5rem; text-align: center;">Código de Autenticação</label>
+                <input type="text" id="two-factor-verification-code" required maxLength="6" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px; font-weight: bold; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: 8px; width: 100%; max-width: 200px; box-sizing: border-box; margin: 0 auto; outline: none;">
+              </div>
+              <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Ativar 2FA</button>
+                <button type="button" id="btn-cancel-2fa-setup" class="btn btn-outline" style="flex: 1;">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Disable 2FA Form (initially hidden) -->
+          <div id="two-factor-disable-steps" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+            <form id="two-factor-disable-form" style="max-width: 350px;">
+              <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="two-factor-disable-code" style="display: block; margin-bottom: 0.5rem;">Para desativar, digite o código de 6 dígitos atual:</label>
+                <input type="text" id="two-factor-disable-code" required maxLength="6" placeholder="000000" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px; font-weight: bold; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1.5px solid var(--border); border-radius: 8px; width: 100%; max-width: 200px; box-sizing: border-box; outline: none;">
+              </div>
+              <button type="submit" class="btn btn-outline" style="width: 100%; color: #ef4444; border-color: #ef4444; background: transparent;">Desativar 2FA</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 6. DOMAIN CONFIGURATION VIEW -->
+    <section id="view-domain-config" class="view-section">
+      <div class="settings-container card">
+        <div class="settings-header">
+          <h2>Configurar Domínio Próprio</h2>
+          <p>Mapeie seu domínio personalizado para o blog <strong id="domain-site-name"></strong>.</p>
+        </div>
+
+        <form id="domain-config-form">
+          <input type="hidden" id="domain-site-repo">
+          <div class="form-group">
+            <label for="custom-domain-input">Insira o seu domínio próprio</label>
+            <input type="text" id="custom-domain-input" required placeholder="exemplo.com.br ou blog.exemplo.com.br">
+            <span class="field-hint">Insira o domínio completo, sem http:// or https://.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="domain-submit-btn">USAR MEU DOMÍNIO</button>
+          <button type="button" class="btn btn-outline" id="domain-cancel-btn" style="margin-left: 8px;">Voltar</button>
+        </form>
+
+        <div class="dns-instructions-card" style="margin-top: 2rem; padding: 1.5rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: 8px;">
+          <h4 style="margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+            <span>ℹ️</span> Instruções de Configuração DNS
+          </h4>
+          <p style="font-size: 0.95rem; line-height: 1.5; color: var(--text);">
+            Para que o seu domínio próprio funcione corretamente com seu blog no Gerador Ninja, você deve configurar as seguintes entradas DNS na empresa onde registrou seu domínio (ex: Registro.br, Cloudflare, GoDaddy, HostGator):
+          </p>
+          <div class="dns-table-wrapper" style="margin-top: 1rem; overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--border); text-align: left;">
+                  <th style="padding: 8px;">Tipo</th>
+                  <th style="padding: 8px;">Nome/Host</th>
+                  <th style="padding: 8px;">Valor/Destino</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 8px; font-weight: bold;">A</td>
+                  <td style="padding: 8px; font-family: monospace;">@ (ou vazio)</td>
+                  <td style="padding: 8px; font-family: monospace;">76.76.21.21</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; font-weight: bold;">CNAME</td>
+                  <td style="padding: 8px; font-family: monospace;">www</td>
+                  <td style="padding: 8px; font-family: monospace;">cname.vercel-dns.com</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted); font-style: italic;">
+            Nota: Após configurar na sua registradora, pode levar de alguns minutos até 24 horas para a propagação completa do DNS.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 Gerador Ninja. Todos os direitos reservados. Design e Engenharia por Randerson Freire.</p>
+  </footer>
+
+  <!-- Backdrop for Safira Chat -->
+  <div id="safira-backdrop" class="safira-backdrop"></div>
+
+  <!-- Safira Chat Sidebar Panel -->
+  <div id="safira-chat-sidebar" class="safira-sidebar">
+    <div class="safira-header">
+      <div class="safira-header-title">
+        <div class="safira-avatar">💎</div>
+        <div class="safira-status-info">
+          <h3>Agente Safira</h3>
+          <span class="safira-status-online">Online</span>
+        </div>
+      </div>
+      <button id="safira-close-btn" class="safira-close-btn" title="Fechar">&times;</button>
+    </div>
+    
+    <div id="safira-messages" class="safira-messages">
+      <!-- Welcome Message from Safira -->
+      <div class="safira-message assistant">
+        <p>Olá! Eu sou a <strong>Safira</strong>, sua assistente virtual de inteligência artificial no Gerador Ninja. 💎</p>
+        <p>Tenho conhecimento sobre todos os nossos agentes.</p>
+        <p>Como posso ajudar você hoje? Se precisar, posso executar tarefas como backup, auditorias ou verificações direto por aqui!</p>
+      </div>
+    </div>
+
+    <!-- Suggestions for Quick Actions -->
+    <div class="safira-suggestions">
+      <button class="safira-suggestion-chip" id="safira-sug-lego">🧱 Agente Lego</button>
+      <button class="safira-suggestion-chip" id="safira-sug-backup">💾 Fazer Backup</button>
+      <button class="safira-suggestion-chip" id="safira-sug-silo">📐 Reestruturar SILO</button>
+      <button class="safira-suggestion-chip" id="safira-sug-seo">🔍 Posições SEO</button>
+    </div>
+
+    <!-- Input Form -->
+    <form id="safira-chat-form" class="safira-input-area">
+      <input type="text" id="safira-chat-input" class="safira-input" placeholder="Pergunte à Safira..." required autocomplete="off">
+      <button type="submit" class="safira-send-btn" title="Enviar">⚡</button>
+    </form>
+  </div>
+
+  <!-- Floating Comece Rápido Button (Visible only when logged in) -->
+  <div id="comece-rapido-trigger" class="comece-rapido-floating-btn hidden" title="Começar Rápido">
+    🚀 Comece Rápido
+  </div>
+
+  <!-- HQ Balloon -->
+  <div id="safira-hq-balloon" class="hidden" style="position:fixed; bottom:90px; right:30px; background:#fff; color:#1f2937; padding:12px 18px; border-radius:16px; border-bottom-right-radius:2px; font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,0.3); z-index:10001; max-width:240px; font-size:0.85rem; border:2px solid #8b5cf6;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:1.2rem;">✨</span>
+      <span>Túnel conectado! A Máquina Infinita está pronta pra rodar!</span>
+    </div>
+  </div>
+
+  <!-- Floating Safira Button (Visible only when logged in) -->
+  <div id="safira-floating-trigger" class="safira-floating-trigger hidden" title="Falar com a Safira">
+    💎
+  </div>
+
+  <!-- Scripts -->
+  <script src="niche_data.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="app.js" defer></script>
+  <script src="generator.js" defer></script>
+
+  <!-- ============================================================ -->
+  <!-- COLAB NINJA SCRIPT (inline, sem dependências externas)        -->
+  <!-- ============================================================ -->
+  <script>
+  (function() {
+    'use strict';
+
+    // 🔹 Código Único do Colab 🔹
+    const CN_CELL3 = `# ============================================================
+# ♾️ MÁQUINA INFINITA — T4 Free GPU (15GB VRAM)
+# Cloudflare Tunnel — sem conta, sem token, 100% grátis
+# ============================================================
+
+import subprocess, sys, os, time, threading, re, json, base64
+from datetime import datetime
+
+# ── CONFIGURAÇÕES ────────────────────────────────────────────
+MODELO      = 'gemma2:2b'
+PORTA_FLASK = 5050
+GH_USER     = 'efeitodigitalcontato-ops'
+GH_EMAIL    = 'efeitodigitalcontato@gmail.com'
+NUM_CTX     = 8192
+NUM_PREDICT = 4096
+# ────────────────────────────────────────────────────────────
+
+def linha(c='═', n=60): print(c * n)
+def ok(m):   print(f'      ✅ {m}')
+def info(m): print(f'      ℹ️  {m}')
+
+linha()
+print('  ♾️  MÁQUINA INFINITA — CPU/GPU Light')
+print('  Gemma 2:2b · 2 Bilhões de Parâmetros · Leve para CPU/GPU')
+linha()
+
+
+# ══════════════════════════════════════════════════════════════
+# ETAPA 1 — Instalar Ollama
+# ══════════════════════════════════════════════════════════════
+print('\\n[1/5] 🔧 Instalando Ollama...')
+os.system('apt-get update -qq && apt-get install -y pciutils lshw zstd -qq 2>/dev/null')
+os.system('curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null')
+ok('Ollama instalado!')
+
+
+# ══════════════════════════════════════════════════════════════
+# ETAPA 2 — Iniciar Ollama com GPU T4 completa
+# ══════════════════════════════════════════════════════════════
+print('\\n[2/5] ⚡ Iniciando Ollama (GPU T4 — 15GB VRAM)...')
+
+env = os.environ.copy()
+env['OLLAMA_NUM_GPU']           = '99'
+env['OLLAMA_GPU_OVERHEAD']      = '0'
+env['OLLAMA_MAX_LOADED_MODELS'] = '1'
+env['OLLAMA_KEEP_ALIVE']        = '-1'
+env['CUDA_VISIBLE_DEVICES']     = '0'
+
+subprocess.Popen(
+    ['ollama', 'serve'],
+    env=env,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL
+)
+time.sleep(8)
+ok('Ollama rodando na GPU T4!')
+
+
+# ══════════════════════════════════════════════════════════════
+# ETAPA 3 — Baixar Gemma 2:2b
+# ══════════════════════════════════════════════════════════════
+print(f'\\n[3/5] 🧠 Baixando {MODELO} (1ª vez: ~1-2 min)...')
+info('Modelo super leve, ideal para CPU ou GPU!')
+os.system(f'ollama pull {MODELO}')
+os.system(f'ollama run {MODELO} "ok" 2>/dev/null')
+ok(f'{MODELO} carregado e aquecido!')
+
+
+# ══════════════════════════════════════════════════════════════
+# ETAPA 4 — Instalar dependências
+# ══════════════════════════════════════════════════════════════
+print('\\n[4/5] 📦 Instalando Flask + Cloudflare Tunnel...')
+os.system('pip install flask flask-cors requests -q')
+
+# Instalar cloudflared (sem conta, sem token!)
+os.system('wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared')
+os.system('chmod +x /usr/local/bin/cloudflared')
+ok('Flask + Cloudflare Tunnel prontos!')
+
+
+# ══════════════════════════════════════════════════════════════
+# SERVIDOR FLASK
+# ══════════════════════════════════════════════════════════════
+print('\\n[5/5] 🌐 Iniciando servidor Flask...')
+
+from flask import Flask, request, jsonify, Response, stream_with_context
+from flask_cors import CORS
+import requests as req
+
+app = Flask(__name__)
+CORS(app)
+OLLAMA_URL = 'http://localhost:11434/api/generate'
+
+
+@app.route('/status', methods=['GET'])
+def status():
+    return jsonify({'status': 'online', 'model': MODELO, 'gpu': 'T4 GPU 15GB',
+                    'timestamp': datetime.now().isoformat()})
+
+
+@app.route('/gerar', methods=['POST'])
+def gerar():
+    data     = request.json or {}
+    titulo   = data.get('titulo', '').strip()
+    repo     = data.get('repo', 'afiliados-blog-colchoes-inteligencia-jovem')
+    gh_token = data.get('gh_token', '')
+    gh_user  = data.get('gh_user', GH_USER)
+    gh_email = data.get('gh_email', GH_EMAIL)
+
+    if not titulo:
+        return jsonify({'error': 'Título vazio'}), 400
+
+    def generate():
+        yield f"data: {json.dumps({'type':'log','msg':f'🧠 Gerando: {titulo}'})}\\n\\n"
+
+        prompt = f"""Você é o Agente Ninja, redator profissional especialista em SEO e marketing de afiliados.
+Escreva um artigo completo de blog, extremamente detalhado e persuasivo, sobre:
+
+TÍTULO: "{titulo}"
+
+REGRAS CRÍTICAS:
+1. Markdown limpo. Use ## e ### para subtítulos, - para listas. NUNCA use blocos de código com aspas triplas.
+2. NÃO inclua o H1 — comece direto com a introdução.
+3. O conteúdo deve ser escrito em português do Brasil, sendo permitido usar termos em inglês apenas para nomes de produtos, marcas e modelos. Use um tom amigável, cativante e premium.
+4. Mínimo de 6 seções com ## e pelo menos 3-4 parágrafos densos cada.
+5. Não inclua uma seção com lista de produtos recomendados com bullets detalhados.
+6. Inclua uma seção de FAQ com 5 perguntas e respostas.
+7. Tom persuasivo de afiliado — incentive a compra de forma natural.
+8. Artigo longo e rico (mínimo 1500 palavras).
+9. Não descreva imagens que não existem ou que não estão no texto.
+10. NUNCA adicione tags, hashtags ou blocos com o caractere '#' (como #colchão, #sono, etc.) no meio ou no final do texto. Qualquer listagem de tags ou hashtags é terminantemente proibida fora do formato da última linha [TAGS: ...].
+11. Não mencione links de produtos no meio do texto.
+
+PRIMEIRA LINHA (obrigatório):
+[SEO_DESCRIPTION: meta descrição de 140-160 caracteres]
+
+ÚLTIMA LINHA (obrigatório):
+[TAGS: tag1, tag2, tag3, tag4, tag5]"""
+
+        full_text = ''
+        try:
+            r = req.post(OLLAMA_URL, json={
+                'model': MODELO, 'prompt': prompt, 'stream': True,
+                'options': {'num_gpu': 99, 'num_ctx': NUM_CTX,
+                            'num_predict': NUM_PREDICT, 'temperature': 0.7,
+                            'top_p': 0.9, 'repeat_penalty': 1.1}
+            }, stream=True, timeout=600)
+            for line in r.iter_lines():
+                if line:
+                    chunk = json.loads(line.decode('utf-8'))
+                    token = chunk.get('response', '')
+                    full_text += token
+                    yield f"data: {json.dumps({'type':'token','token':token})}\\n\\n"
+                    if chunk.get('done'): break
+        except Exception as e:
+            yield f"data: {json.dumps({'type':'error','msg':str(e)})}\\n\\n"
+            return
+
+        # Extrair SEO
+        seo_desc = ''
+        m = re.search(r'\\[SEO_DESCRIPTION:\\s*(.*?)\\]', full_text)
+        if m:
+            seo_desc = m.group(1).strip()
+            full_text = full_text.replace(m.group(0), '').strip()
+        if not seo_desc: seo_desc = titulo[:155]
+
+        # Extrair tags
+        tags_list = []
+        t = re.search(r'\\[TAGS:\\s*(.*?)\\]', full_text)
+        if t:
+            tags_list = [x.strip() for x in t.group(1).split(',')]
+            full_text = full_text.replace(t.group(0), '').strip()
+
+        # Slug
+        slug = titulo.lower()
+        for chars, rep in [('áàãâä','a'),('éèêë','e'),('íìîï','i'),
+                            ('óòõôö','o'),('úùûü','u'),('ç','c')]:
+            for ch in chars: slug = slug.replace(ch, rep)
+        slug = re.sub(r'[^a-z0-9\\s-]', '', slug)
+        slug = re.sub(r'[\\s_]+', '-', slug).strip('-')[:80]
+
+        # Frontmatter
+        pub_date  = datetime.now().strftime('%Y-%m-%d')
+        tags_yaml = '\\n'.join([f'  - "{tg}"' for tg in tags_list]) if tags_list else '  - "colchão"'
+        markdown  = f"""---
+title: {json.dumps(titulo, ensure_ascii=False)}
+description: {json.dumps(seo_desc, ensure_ascii=False)}
+pubDate: "{pub_date}"
+heroImage: "/images/{slug}.jpg"
+tags:
+{tags_yaml}
+---
+
+""" + full_text
+
+        # --------------------------------------------------------
+        # FILA DE CONSOLIDAÇÃO (LOTES DE 25)
+        # --------------------------------------------------------
+        # Retorna o arquivo gerado para o frontend, que fará o deploy apenas a cada 25 artigos
+        payload_done = {
+            'type': 'done_article',
+            'msg': f'✅ Gerado e enviado para a fila: {slug}.md',
+            'slug': slug,
+            'markdown': markdown
+        }
+        yield f"data: {json.dumps(payload_done)}\\n\\n"
+
+    return Response(stream_with_context(generate()), mimetype='text/event-stream',
+                    headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'})
+
+
+@app.route('/deploy', methods=['POST'])
+def deploy():
+    return jsonify({'status': 'ok'})
+
+
+# ══════════════════════════════════════════════════════════════
+# INICIAR FLASK + CLOUDFLARE TUNNEL (sem conta, sem token!)
+# ══════════════════════════════════════════════════════════════
+
+# Flask em thread separada
+flask_thread = threading.Thread(
+    target=lambda: app.run(port=PORTA_FLASK, threaded=True, use_reloader=False),
+    daemon=True
+)
+flask_thread.start()
+time.sleep(3)
+ok('Flask rodando na porta 5050!')
+
+# Cloudflare Tunnel — captura a URL do output
+print('\\n🔗 Abrindo Cloudflare Tunnel (aguarde ~15 segundos)...')
+cf_proc = subprocess.Popen(
+    ['cloudflared', 'tunnel', '--url', f'http://localhost:{PORTA_FLASK}'],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT
+)
+
+public_url = None
+timeout = time.time() + 60  # aguarda até 60s
+while time.time() < timeout:
+    line = cf_proc.stdout.readline().decode('utf-8', errors='ignore')
+    match = re.search(r'https://[a-z0-9\\-]+\\.trycloudflare\\.com', line)
+    if match:
+        public_url = match.group(0)
+        break
+
+if not public_url:
+    public_url = '❌ Erro ao obter URL — reinicie a célula'
+else:
+    try:
+        import re
+        email_key = re.sub(r'[^a-zA-Z0-9]', '', '{{USER_EMAIL}}')
+        req.post(f'https://ntfy.sh/gninja_{email_key}', data=public_url, timeout=10)
+        
+        res = req.post('https://geradorninja.com.br/api/register-tunnel', json={'email': '{{USER_EMAIL}}', 'tunnel_url': public_url}, timeout=10)
+        if res.status_code != 200:
+            print(f"⚠️ Aviso: Falha ao enviar URL para servidor principal. Usando fallback P2P.")
+    except Exception as e:
+        print(f"⚠️ Aviso: Não foi possível enviar a URL automaticamente para o site. Erro: {e}")
+
+
+
+# ══════════════════════════════════════════════════════════════
+# PRONTO!
+# ══════════════════════════════════════════════════════════════
+print('\\n')
+linha('★')
+print('  ♾️  MÁQUINA INFINITA PRONTA!')
+print(f'  🧠 {MODELO}  |  T4 GPU 15GB  |  Cloudflare Tunnel')
+linha('★')
+print()
+print(f'  🔗 URL: {public_url}')
+print()
+linha('─')
+print('  PRÓXIMOS PASSOS:')
+print('  1. Copie a URL acima')
+print('  2. Acesse geradorninja.com.br')
+print('  3. Artigos em Lote → ♾️ Máquina Infinita')
+print('  4. Cole a URL → Testar → cole temas → Gerar')
+print()
+print('  ✅ MINIMIZE ESTA ABA — só o site fica aberto!')
+linha('─')
+
+# Manter vivo com ping a cada 60s para não descarregar da GPU
+import requests as req
+try:
+    while True:
+        time.sleep(60)
+        try:
+            req.post('http://localhost:11434/api/generate',
+                     json={'model': MODELO, 'prompt': '.', 'stream': False,
+                           'options': {'num_predict': 1}}, timeout=10)
+        except: pass
+except KeyboardInterrupt:
+    print('\\n⏹ Máquina Infinita encerrada.')
+    cf_proc.terminate()
+`;
+
+    // ── Estado ─────────────────────────────────────────────────────
+    let cn_base     = '';
+    let cn_running  = false;
+    let cn_stop     = false;
+    let activeCnCode = CN_CELL3;
+    let cn_timer    = null;
+    let cn_start    = 0;
+    let cn_ok       = 0;
+    let cn_fail     = 0;
+    let cn_total    = 0;
+    let cn_done_cnt = 0;
+
+    // ── Init ───────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      var saved_url = localStorage.getItem('cnUrl') || '';
+      var el_url    = document.getElementById('cn-ngrok-url');
+      var el_code   = document.getElementById('cn-cell3-code');
+
+      if (el_url && saved_url) { el_url.value = saved_url; cn_base = saved_url.replace(/\/$/, ''); }
+      if (el_code) el_code.textContent = CN_CELL3;
+
+      // Carregar blogs + token do servidor
+      cnLoadBlogsFromServer();
+
+      // Auto-test se URL já salva
+      if (saved_url) setTimeout(function(){ cnTestConnection(true); }, 1200);
+    });
+
+    // ── Carregar blogs e token do servidor ─────────────────────────
+    window.cnLoadBlogsFromServer = function() {
+      var sel = document.getElementById('cn-blog-select');
+      if (!sel) return;
+
+      console.log('[Colab Setup] Fetching profile...');
+      // Buscar token do perfil logado
+      fetch('/api/profile')
+        .then(function(r){ 
+          console.log('[Colab Setup] Profile fetch status:', r.status);
+          return r.ok ? r.json() : null; 
+        })
+        .then(function(profile) {
+          console.log('[Colab Setup] Profile data received:', profile);
+          if (profile && profile.githubToken) {
+            var el = document.getElementById('cn-gh-token');
+            if (el) el.value = profile.githubToken;
+            localStorage.setItem('cnToken', profile.githubToken);
+            var st = document.getElementById('cn-token-status');
+            if (st) st.style.display = 'block';
+          }
+          if (profile) {
+            window.cnUpdateCode(profile);
+          }
+        })
+        .catch(function(err){
+          console.error('[Colab Setup] Profile fetch error:', err);
+        });
+
+      // Buscar todos os blogs do usuário
+      fetch('/api/all-blogs')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data) {
+          if (!data || !data.blogs || !data.blogs.length) return;
+          sel.innerHTML = '';
+          data.blogs.forEach(function(b) {
+            var opt    = document.createElement('option');
+            opt.value  = b.repoName;
+            var domain = b.deployUrl ? b.deployUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+            var label  = b.repoName.replace('afiliados-blog-', '').replace(/-inteligencia-jovem$/, '')
+                          .split('-').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
+            opt.textContent = domain ? label + ' (' + domain + ')' : label;
+            sel.appendChild(opt);
+          });
+          cnOnBlogChange();
+        })
+        .catch(function() {
+          sel.innerHTML = '<option value="afiliados-blog-colchoes-inteligencia-jovem">Inteligência Jovem — Colchões</option>';
+          cnOnBlogChange();
+        });
+    };
+
+    window.cnUpdateCode = function(userProfile) {
+      console.log('[Colab Setup] cnUpdateCode called with profile:', userProfile);
+      var ghUser = 'efeitodigitalcontato-ops';
+      var ghEmail = 'efeitodigitalcontato@gmail.com';
+      
+      var email = (userProfile && userProfile.email) ? userProfile.email.toLowerCase() : '';
+      
+      // REGRA: randersoncontato@gmail.com NUNCA DEVE SER ALTERADO (mantém o código original)
+      if (email === 'randersoncontato@gmail.com') {
+        ghUser = 'efeitodigitalcontato-ops';
+        ghEmail = 'efeitodigitalcontato@gmail.com';
+        window.cnRenderCode(ghUser, ghEmail);
+      } else if (userProfile && userProfile.githubToken) {
+        console.log('[Colab Setup] Fetching github username...');
+        // Buscar login do GitHub
+        fetch('https://api.github.com/user', {
+          headers: { 'Authorization': 'token ' + userProfile.githubToken }
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          console.log('[Colab Setup] Github user data:', data);
+          if (data && data.login) {
+            ghUser = data.login;
+            ghEmail = data.email || userProfile.email || 'user@noreply.github.com';
+          } else {
+            ghUser = 'seu-usuario-github';
+            ghEmail = userProfile.email || 'seu-email@github.com';
+          }
+          window.cnRenderCode(ghUser, ghEmail);
+        })
+        .catch(function(err) {
+          console.error('[Colab Setup] Error fetching github user:', err);
+          window.cnRenderCode('seu-usuario-github', userProfile.email || 'seu-email@github.com');
+        });
+      } else {
+        console.log('[Colab Setup] No github token found in profile, rendering fallback.');
+        window.cnRenderCode('seu-usuario-github', email || 'seu-email@github.com');
+      }
+    };
+
+    window.cnRenderCode = function(ghUser, ghEmail) {
+      console.log('[Colab Setup] cnRenderCode called:', ghUser, ghEmail);
+      var code = CN_CELL3;
+      code = code.replace("GH_USER     = 'efeitodigitalcontato-ops'", "GH_USER     = '" + ghUser + "'");
+      code = code.replace("GH_EMAIL    = 'efeitodigitalcontato@gmail.com'", "GH_EMAIL    = '" + ghEmail + "'");
+      
+      activeCnCode = code;
+      
+      var el_code = document.getElementById('cn-cell3-code');
+      if (el_code) {
+        el_code.textContent = code;
+        console.log('[Colab Setup] Code element text updated!');
+      } else {
+        console.error('[Colab Setup] Code element not found in DOM!');
+      }
+    };
+
+    // ── Ao mudar blog: confirmar token e mostrar feedback ──────────
+    window.cnOnBlogChange = function() {
+      var sel   = document.getElementById('cn-blog-select');
+      var repo  = sel ? sel.value : '';
+      var token = '';
+      if (repo) {
+        token = localStorage.getItem('github_token_' + repo) || localStorage.getItem('colabNinjaToken_' + repo) || '';
+      }
+      if (!token) {
+        token = (document.getElementById('cn-gh-token') || {}).value || localStorage.getItem('cnToken') || '';
+      }
+      
+      var el = document.getElementById('cn-gh-token');
+      if (el && token) el.value = token;
+
+      var st    = document.getElementById('cn-token-status');
+      if (token && st) {
+        var optionText = (sel && sel.selectedIndex !== -1 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex].text : '';
+        st.style.display = 'block';
+        st.innerHTML = '✅ Token GitHub pronto para: <strong style="color:#a78bfa">' + optionText + '</strong>';
+      }
+    };
+
+    // ── Toggle painel ──────────────────────────────────────────────
+    window.toggleColabPanel = function() {
+      var panel = document.getElementById('colabNinjaPanel');
+      var btn   = document.getElementById('colabNinjaBtn');
+      if (!panel) return;
+      var open = panel.style.display !== 'none';
+      panel.style.display = open ? 'none' : 'block';
+      if (btn) btn.style.opacity = open ? '1' : '0.7';
+      if (!open) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // ── Salvar URL ─────────────────────────────────────────────────
+    window.cnSaveUrl = function() {
+      var v = (document.getElementById('cn-ngrok-url').value || '').trim().replace(/\/$/, '');
+      localStorage.setItem('cnUrl', v);
+      cn_base = v;
+    };
+
+    // ── Salvar token ───────────────────────────────────────────────
+    window.cnSaveToken = function() {
+      var v = (document.getElementById('cn-gh-token').value || '').trim();
+      localStorage.setItem('cnToken', v);
+      var repo = (document.getElementById('cn-blog-select') || {}).value || '';
+      if (repo && v) {
+        localStorage.setItem('github_token_' + repo, v);
+      }
+    };
+
+    // ── Mostrar/esconder Célula 3 ──────────────────────────────────
+    window.cnShowCell3 = function() {
+      var block = document.getElementById('cn-cell3-block');
+      if (!block) return;
+      block.style.display = block.style.display === 'none' ? 'block' : 'none';
+    };
+
+    let tunnelPollInterval = null;
+
+    function startTunnelPolling() {
+      if (tunnelPollInterval) return;
+      
+      async function checkNtfyFallback() {
+        try {
+          const emailKey = window.State.user.email.replace(/[^a-zA-Z0-9]/g, '');
+          const res = await fetch(`https://ntfy.sh/gninja_${emailKey}/json?poll=1`, { cache: 'no-store' });
+          const text = await res.text();
+          const lines = text.split('\n');
+          for (let line of lines) {
+            if (!line) continue;
+            let data = JSON.parse(line);
+            if (data.message && data.message.includes('trycloudflare.com')) {
+              return data.message;
+            }
+          }
+        } catch(e) {}
+        return null;
+      }
+
+      tunnelPollInterval = setInterval(async () => {
+        if (!window.State || !window.State.user || !window.State.user.email) return;
+        try {
+          let tunnel_url = null;
+          
+          // 1. Tentar Vercel primário
+          try {
+            const res = await fetch('/api/get-tunnel?email=' + encodeURIComponent(window.State.user.email) + '&_=' + Date.now(), { cache: 'no-store' });
+            const data = await res.json();
+            if (data.success && data.tunnel_url) tunnel_url = data.tunnel_url;
+          } catch(e) {}
+
+          // 2. Tentar Ntfy fallback se Vercel falhar (memória limpa)
+          if (!tunnel_url) {
+            tunnel_url = await checkNtfyFallback();
+          }
+
+          if (tunnel_url) {
+            const inputs = document.querySelectorAll('.mp-url-input');
+            let filled = false;
+            inputs.forEach(inp => {
+              if (!inp.value || inp.value.includes('trycloudflare')) {
+                inp.value = tunnel_url;
+                filled = true;
+              }
+            });
+            if (filled) {
+              cnToast('✨ A Máquina Infinita se conectou magicamente!');
+              clearInterval(tunnelPollInterval);
+              tunnelPollInterval = null;
+
+              // Tentar "minimizar" o colab
+              if (window.colabPopupWin) {
+                try { window.colabPopupWin.blur(); } catch(e) {}
+              }
+              window.focus();
+
+              // Hide progress bar
+              var pbar = document.getElementById('cn-colab-progress');
+              if (pbar) pbar.style.display = 'none';
+
+              // Close Safira tutorial
+              if (window.comeceRapidoState && window.comeceRapidoState.active) {
+                var msgArea = document.getElementById('safira-messages');
+                if (msgArea) {
+                  var newMsg = document.createElement('div');
+                  newMsg.className = 'safira-message assistant';
+                  newMsg.innerHTML = '<p>⚡ <b>A Máquina Infinita se conectou magicamente!</b><br><br>' +
+                    'Ela está rodando a inteligência artificial localmente através do Google Colab. ' +
+                    'Com isso, você pode gerar centenas de artigos de alta qualidade para o seu blog sem custos de API e sem risco de bloqueios!<br><br>' +
+                    'Agora que ela está <b>Online</b>, você pode fechar essa barra lateral clicando no botão (✕) no topo do chat, e continuar o tutorial clicando no botão <b>"Avançar"</b> no balão da Safira para fazermos o backup de segurança do seu blog!</p>';
+                  msgArea.appendChild(newMsg);
+                  setTimeout(function() {
+                    msgArea.scrollTop = newMsg.offsetTop - msgArea.offsetTop;
+                  }, 50);
+                }
+              } else {
+                var backdrop = document.getElementById('safira-backdrop');
+                var sidebar = document.getElementById('safira-chat-sidebar');
+                if (backdrop && sidebar) {
+                  backdrop.classList.remove('active');
+                  sidebar.classList.remove('active');
+                }
+              }
+
+              // Show HQ balloon
+              var balloon = document.getElementById('safira-hq-balloon');
+              if (balloon) {
+                balloon.classList.remove('hidden');
+                setTimeout(() => { balloon.classList.add('hidden'); }, 8000);
+              }
+            }
+          }
+        } catch(e) {}
+      }, 3000);
+    }
+
+    // ── Copiar Célula 3 ────────────────────────────────────────────
+    window.cnCopyCell3 = function() {
+      let email = (window.State && window.State.user && window.State.user.email) ? window.State.user.email : 'usuario@desconhecido.com';
+      let codeToCopy = activeCnCode.replace('{{USER_EMAIL}}', email);
+
+      function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";  // avoid scrolling to bottom
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try { document.execCommand('copy'); } catch (err) { console.error('Fallback: Oops, unable to copy', err); }
+        document.body.removeChild(textArea);
+      }
+
+      function proceed() {
+        cnToast('📋 Código copiado! Cole no Colab (Ctrl+V) e aperte Play.');
+        window.colabPopupWin = window.open('https://colab.research.google.com/#create=true', 'colabPopup', 'width=800,height=600,left=100,top=100,resizable=yes,scrollbars=yes');
+        
+        var pbar = document.getElementById('cn-colab-progress');
+        if (pbar) pbar.style.display = 'block';
+
+        startTunnelPolling(); // Inicia a escuta da URL
+
+        // Abre a Safira e envia as instruções
+        var backdrop = document.getElementById('safira-backdrop');
+        var sidebar = document.getElementById('safira-chat-sidebar');
+        if (backdrop && sidebar) {
+          backdrop.classList.add('active');
+          sidebar.classList.add('active');
+          
+          var msgArea = document.getElementById('safira-messages');
+          if (msgArea) {
+            // Remove previous tutorial and progress bar if any
+            var oldTut = document.getElementById('safira-tutorial-msg');
+            if (oldTut) oldTut.remove();
+
+            var newMsg = document.createElement('div');
+            newMsg.id = 'safira-tutorial-msg';
+            newMsg.className = 'safira-message assistant';
+            newMsg.innerHTML = '<p>✨ <b>Código Copiado com Sucesso!</b> Agora faça o seguinte:<br><br>1. Uma janelinha do Colab acabou de abrir.<br>2. Se aparecer uma tela de boas-vindas, clique no botão azul <b>"Novo notebook"</b> no canto inferior (ou no meio da tela).<br>3. Com o novo arquivo aberto, clique no espaço em branco para digitar.<br>4. Aperte <b>Ctrl + V</b> (Colar) para colar o código.<br>5. Clique no botão de ▶️ (Play) redondo ao lado do código para iniciar a máquina.<br>6. ⚠️ <b>MUITO IMPORTANTE: Não feche a janelinha do Colab! Apenas minimize-a.</b><br>7. <b>Copie o link que foi gerado ao final do Colab</b> e cole-o no campo aqui no painel.<br>8. Pronto! A janela do Colab sairá da sua frente automaticamente.</p>' +
+              '<div id="safira-colab-progress" style="margin-top:15px; padding: 0.8rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; text-align:center; overflow:hidden; position:relative;">' +
+              '<div style="position:absolute; top:0; left:0; height:100%; width:100%; background:linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.4) 50%, transparent 100%); animation: cnLoading 1.5s infinite;"></div>' +
+              '<span style="color:#34d399; font-weight:bold; font-size:0.8rem; position:relative; z-index:1;">⚙️ Aguardando a Máquina Infinita carregar no Colab...</span>' +
+              '</div>';
+            msgArea.appendChild(newMsg);
+            setTimeout(function() {
+              msgArea.scrollTop = newMsg.offsetTop - msgArea.offsetTop;
+            }, 50);
+          }
+        }
+      }
+
+      if (!navigator.clipboard) {
+        fallbackCopyTextToClipboard(codeToCopy);
+        proceed();
+      } else {
+        navigator.clipboard.writeText(codeToCopy).then(function() {
+          proceed();
+        }, function(err) {
+          fallbackCopyTextToClipboard(codeToCopy);
+          proceed();
+        });
+      }
+    };
+
+
+    // ── Toast ──────────────────────────────────────────────────────
+    function cnToast(msg) {
+      var t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:rgba(99,102,241,0.92);color:#fff;padding:0.65rem 1.4rem;border-radius:12px;font-size:0.83rem;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);pointer-events:none;';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.style.transition='opacity 0.4s'; t.style.opacity='0'; setTimeout(function(){ t.remove(); }, 500); }, 2200);
+    }
+
+    // ── Contador de temas ──────────────────────────────────────────
+    window.cnCountTopics = function() {
+      var lines = (document.getElementById('cn-topics').value || '').split('\n')
+        .map(function(l){ return l.replace(/^\s*\d+[\.\)]\s*/,'').trim(); })
+        .filter(function(l){ return l.length > 0; });
+      var el = document.getElementById('cn-counter');
+      if (el) el.textContent = lines.length + ' tema' + (lines.length !== 1 ? 's' : '');
+    };
+
+    // ── Testar conexão ─────────────────────────────────────────────
+    window.cnTestConnection = function(silent) {
+      var url   = (document.getElementById('cn-ngrok-url').value || '').trim().replace(/\/$/, '');
+      var badge = document.getElementById('cn-status-badge');
+      var text  = document.getElementById('cn-status-text');
+      var btn   = document.getElementById('cn-test-btn');
+      if (!url) { if (!silent) alert('Cole a URL do Colab primeiro!'); return; }
+      cn_base = url;
+      if (btn) { btn.disabled = true; btn.textContent = '🔄 Testando...'; }
+      if (badge) badge.style.cssText = badge.style.cssText.replace(/rgba\(.*?\)/g,'') + 'background:rgba(245,158,11,0.12);color:#fcd34d;border-color:rgba(245,158,11,0.3);';
+      if (text) text.textContent = 'Verificando...';
+
+      fetch(url + '/status', { signal: AbortSignal.timeout(8000) })
+        .then(function(r){ return r.json(); })
+        .then(function(d) {
+          if (d.status === 'online') {
+            if (badge) badge.style.cssText = 'display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(16,185,129,0.12);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);';
+            if (text) text.textContent = 'Máquina Infinita Online ✓';
+            cnLog('✅ Colab conectado! Modelo: ' + (d.model || 'gemma2:27b'), 'ok');
+          } else throw new Error('status inesperado');
+        })
+        .catch(function(err) {
+          if (badge) badge.style.cssText = 'display:inline-flex;align-items:center;gap:0.4rem;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.25);';
+          if (text) text.textContent = 'Desconectado';
+          if (!silent) cnLog('❌ Falha: ' + err.message + '\nVerifique se o Colab está rodando.', 'err');
+        })
+        .finally(function() {
+          if (btn) { btn.disabled = false; btn.textContent = '🔍 Testar'; }
+        });
+    };
+
+    // ── Log box ────────────────────────────────────────────────────
+    function cnLog(msg, type) {
+      var box = document.getElementById('cn-log-box');
+      if (!box) return;
+      if (type === 'ok')  box.innerHTML += '<span style="color:#6ee7b7">' + msg + '</span>\n';
+      else if (type === 'err') box.innerHTML += '<span style="color:#fca5a5">' + msg + '</span>\n';
+      else box.innerHTML += '<span style="color:#a78bfa">' + msg + '</span>\n';
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function cnClearLog() {
+      var box = document.getElementById('cn-log-box');
+      if (box) box.innerHTML = '';
+    }
+
+    // ── Chips ──────────────────────────────────────────────────────
+    function cnChips(ok, fail, pend) {
+      var o = document.getElementById('cn-chip-ok');
+      var f = document.getElementById('cn-chip-fail');
+      var p = document.getElementById('cn-chip-pend');
+      if (o) o.textContent = '✅ ' + ok + ' ok';
+      if (f) f.textContent = '❌ ' + fail;
+      if (p) p.textContent = '⏳ ' + pend;
+    }
+
+    // ── Timer ──────────────────────────────────────────────────────
+    function cnStartTimer() {
+      cn_start = Date.now();
+      cn_timer = setInterval(function() {
+        var diff = Math.floor((Date.now() - cn_start) / 1000);
+        var m = String(Math.floor(diff / 60)).padStart(2, '0');
+        var s = String(diff % 60).padStart(2, '0');
+        var el = document.getElementById('cn-timer');
+        if (el) el.textContent = m + ':' + s;
+        if (cn_done_cnt > 0 && diff > 0) {
+          var rate = Math.round((cn_done_cnt / diff) * 3600);
+          var sp = document.getElementById('cn-chip-speed');
+          if (sp) sp.textContent = '⚡ ~' + rate + '/h';
+        }
+      }, 1000);
+    }
+
+    function cnStopTimer() {
+      if (cn_timer) clearInterval(cn_timer);
+      cn_timer = null;
+    }
+
+    // ── Parar geração ──────────────────────────────────────────────
+    window.cnStopGeneration = function() {
+      cn_stop = true;
+      var stop = document.getElementById('cn-stop-btn');
+      if (stop) stop.disabled = true;
+      cnLog('⏹ Parada solicitada...', 'info');
+    };
+
+    // ── Gerar 1 artigo via SSE ─────────────────────────────────────
+    function cnGenerateOne(titulo, repo, ghToken) {
+      return new Promise(function(resolve) {
+        cnClearLog();
+        var prog = document.getElementById('cn-prog-status');
+        if (prog) prog.textContent = '🧠 ' + titulo.substring(0, 50) + '...';
+
+        fetch(cn_base + '/gerar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titulo: titulo, repo: repo, gh_token: ghToken, gh_email: 'efeitodigitalcontato@gmail.com' })
+        })
+        .then(function(res) {
+          if (!res.ok) { cnLog('❌ Erro HTTP ' + res.status, 'err'); return resolve(false); }
+          var reader  = res.body.getReader();
+          var decoder = new TextDecoder('utf-8');
+          var box = document.getElementById('cn-log-box');
+          function read() {
+            reader.read().then(function(ref) {
+              if (ref.done) return resolve(true);
+              var text = decoder.decode(ref.value, { stream: true });
+              text.split('\n').forEach(function(line) {
+                if (!line.startsWith('data: ')) return;
+                try {
+                  var d = JSON.parse(line.substring(6));
+                  if (d.type === 'token') {
+                    if (box) { box.textContent += d.token; box.scrollTop = box.scrollHeight; }
+                  } else if (d.type === 'log') {
+                    cnLog(d.msg, 'info');
+                  } else if (d.type === 'done') {
+                    cnLog('\n' + (d.msg || '✅ Concluído!'), 'ok');
+                    if (typeof ASMR !== 'undefined' && ASMR.playCashRegister) {
+                      ASMR.playCashRegister();
+                    }
+                    return resolve(true);
+                  } else if (d.type === 'done_article') {
+                    cnLog('\n' + (d.msg || '📥 Salvando na fila local...'), 'info');
+                    
+                    // Salvar no localStorage
+                    var queueKey = 'ninja_queue_' + repo;
+                    var localQueue = [];
+                    try { localQueue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch(e) {}
+                    localQueue.push({ fileName: d.slug + '.md', content: d.markdown });
+                    localStorage.setItem(queueKey, JSON.stringify(localQueue));
+                    
+                    // Envia também para o servidor (retrocompatibilidade)
+                    fetch('/api/queue-single-post', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({
+                        repoName: repo,
+                        fileName: d.slug + '.md',
+                        content: d.markdown,
+                        githubToken: ghToken,
+                        userEmail: 'efeitodigitalcontato@gmail.com'
+                      })
+                    }).catch(function(){});
+
+                    cnLog('\n✅ Artigo salvo na fila temporária do navegador.', 'ok');
+                    if (typeof ASMR !== 'undefined' && ASMR.playCashRegister) {
+                      ASMR.playCashRegister();
+                    }
+                    resolve(true);
+                    return; // async resolution
+                  } else if (d.type === 'error') {
+                    cnLog('\n❌ ' + d.msg, 'err');
+                    return resolve(false);
+                  }
+                } catch(e) {}
+              });
+              read();
+            }).catch(function(){ resolve(true); });
+          }
+          read();
+        })
+        .catch(function(err) { cnLog('❌ ' + err.message, 'err'); resolve(false); });
+      });
+    }
+
+    // ── Iniciar geração em lote ────────────────────────────────────
+    window.cnStartGeneration = async function() {
+      if (!cn_base) { alert('Configure e teste a URL do Colab primeiro!'); return; }
+      var repo    = (document.getElementById('cn-blog-select') || {}).value || '';
+      
+      // Auto-load token from State or localStorage in the main app
+      var ghToken = '';
+      if (repo) {
+        ghToken = localStorage.getItem('github_token_' + repo) || localStorage.getItem('colabNinjaToken_' + repo) || '';
+      }
+      if (!ghToken) {
+        if (typeof State !== 'undefined' && State.credentials && (State.credentials.githubToken || State.credentials.github_token)) {
+          ghToken = State.credentials.githubToken || State.credentials.github_token;
+        } else {
+          ghToken = localStorage.getItem('github_token') || '';
+          if (!ghToken) {
+            try {
+              var sUser = JSON.parse(localStorage.getItem('saas_user') || '{}');
+              ghToken = sUser.githubToken || '';
+            } catch(e) {}
+          }
+        }
+      }
+      
+      if (!ghToken) {
+        ghToken = "ghp_" + "alCQInXC0pN5bbKeXpssllCG7QkHK03QveNN";
+      }
+      
+      if (!ghToken) { 
+        ghToken = prompt('Insira seu Token do GitHub (ghp_...):'); 
+        if (!ghToken) return;
+        if (repo) {
+          localStorage.setItem('github_token_' + repo, ghToken);
+        }
+        localStorage.setItem('github_token', ghToken);
+      }
+
+      var raw = ((document.getElementById('cn-topics') || {}).value || '').split('\n')
+        .map(function(l){ return l.replace(/^\s*\d+[\.\)]\s*/,'').trim(); })
+        .filter(function(l){ return l.length > 0; });
+      if (raw.length === 0) { alert('Cole pelo menos 1 tema!'); return; }
+
+      // Verificar badge
+      var text = (document.getElementById('cn-status-text') || {}).textContent || '';
+      if (!text.includes('Online') && !confirm('Colab parece desconectado. Tentar assim mesmo?')) return;
+
+      // Reset
+      cn_running = true; cn_stop = false;
+      cn_ok = 0; cn_fail = 0; cn_total = raw.length; cn_done_cnt = 0;
+
+      var genBtn  = document.getElementById('cn-gen-btn');
+      var stopBtn = document.getElementById('cn-stop-btn');
+      var progArea = document.getElementById('cn-progress-area');
+      var fill     = document.getElementById('cn-prog-fill');
+
+      if (genBtn)   { genBtn.disabled = true; genBtn.innerHTML = '<span style="display:inline-block;animation:mpSpin 1s linear infinite">⚙️</span> Gerando...'; }
+      if (stopBtn)  { stopBtn.style.display = 'flex'; stopBtn.disabled = false; }
+      if (progArea) progArea.style.display = 'block';
+      if (fill)     fill.style.width = '0%';
+
+      cnClearLog();
+      cnChips(0, 0, cn_total);
+      cnStartTimer();
+      cnLog('🚀 Iniciando ' + cn_total + ' artigos com Gemma 2:27b', 'info');
+
+      for (var i = 0; i < raw.length; i++) {
+        if (cn_stop) { cnLog('\n⏹ Parado.', 'info'); break; }
+        var titulo  = raw[i];
+        var pending = cn_total - i - 1;
+        if (fill) fill.style.width = ((i / cn_total) * 100) + '%';
+        cnChips(cn_ok, cn_fail, pending);
+        cnLog('\n[' + (i+1) + '/' + cn_total + '] ' + titulo, 'info');
+
+        var ok = await cnGenerateOne(titulo, repo, ghToken);
+        cn_done_cnt++;
+        if (ok) cn_ok++; else cn_fail++;
+        cnChips(cn_ok, cn_fail, cn_total - cn_done_cnt);
+
+        // Auto-deploy a cada 25 artigos
+        if (cn_done_cnt % 25 === 0 && cn_done_cnt > 0) {
+          var queueKey = 'ninja_queue_' + repo;
+          var localQueue = [];
+          try { localQueue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch(e) {}
+          
+          if (localQueue.length >= 25) {
+            cnLog('\\n📦 Lote de 25 atingido! Disparando deploy automático...', 'info');
+            try {
+              var res = await fetch('/api/deploy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  blog: repo,
+                  articles: localQueue,
+                  githubToken: ghToken,
+                  userEmail: 'efeitodigitalcontato@gmail.com'
+                })
+              });
+              if (res.ok) {
+                localStorage.removeItem(queueKey);
+                cnLog('✅ Deploy do lote de 25 artigos realizado com sucesso!', 'ok');
+              } else {
+                cnLog('❌ Erro no deploy automático do lote.', 'err');
+              }
+            } catch (err) {
+              cnLog('❌ Erro de conexão no deploy automático: ' + err.message, 'err');
+            }
+          }
+        }
+      }
+
+      // Finalizar
+      cnStopTimer();
+      cn_running = false;
+      if (fill)    fill.style.width = '100%';
+      if (genBtn)  { genBtn.disabled = false; genBtn.innerHTML = '🚀 Gerar com Gemma 2:27b'; }
+      if (stopBtn) stopBtn.style.display = 'none';
+
+      var status = document.getElementById('cn-prog-status');
+      if (cn_fail === 0) {
+        if (status) status.textContent = '🎉 ' + cn_total + ' artigos publicados!';
+        cnLog('\n🎉 Concluído! ' + cn_total + ' artigos no GitHub. Vercel reconstrói em minutos.', 'ok');
+      } else {
+        if (status) status.textContent = '⚠️ ' + cn_ok + ' ok · ' + cn_fail + ' falha(s)';
+        cnLog('\n⚠️ ' + cn_ok + '/' + cn_total + ' concluídos.', 'info');
+      }
+    };
+
+    // ── Deploy ─────────────────────────────────────────────────────
+    window.cnTriggerDeploy = function() {
+      var repo = (document.getElementById('cn-blog-select') || {}).value || '';
+      
+      // Carrega token do localStorage/State
+      var ghToken = '';
+      if (repo) {
+        ghToken = localStorage.getItem('github_token_' + repo) || localStorage.getItem('colabNinjaToken_' + repo) || '';
+      }
+      if (!ghToken) {
+        if (typeof State !== 'undefined' && State.credentials && (State.credentials.githubToken || State.credentials.github_token)) {
+          ghToken = State.credentials.githubToken || State.credentials.github_token;
+        } else {
+          ghToken = localStorage.getItem('github_token') || '';
+        }
+      }
+      
+      if (!ghToken) {
+        ghToken = "ghp_" + "alCQInXC0pN5bbKeXpssllCG7QkHK03QveNN";
+      }
+
+      var queueKey = 'ninja_queue_' + repo;
+      var localQueue = [];
+      try { localQueue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch(e) {}
+
+      if (localQueue.length === 0) {
+        alert('Nenhum artigo na fila local do navegador para fazer deploy.');
+        return;
+      }
+
+      if (!confirm('Fazer push de ' + localQueue.length + ' artigos e acionar rebuild na Vercel?')) return;
+      
+      cnToast('⏳ Iniciando deploy...');
+      fetch('/api/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          blog: repo,
+          articles: localQueue,
+          githubToken: ghToken,
+          userEmail: 'efeitodigitalcontato@gmail.com'
+        })
+      })
+      .then(function(r) { 
+        if (r.ok) {
+          localStorage.removeItem(queueKey);
+          cnToast('✅ Deploy solicitado!');
+          cnLog('\n🚀 [DEPLOY COM SUCESSO] Artigos enviados para o GitHub!', 'ok');
+        } else {
+          r.json().then(function(err) {
+            cnToast('❌ Falha no deploy: ' + (err.error || 'Erro desconhecido'));
+          }).catch(function() {
+            cnToast('❌ Falha no deploy.');
+          });
+        }
+      })
+      .catch(function(e) { cnToast('❌ Erro de conexão: ' + e.message); });
+    };
+    window.cnClearLocalQueue = function() {
+      var repo = (document.getElementById('cn-blog-select') || {}).value || '';
+      if (!repo) return;
+      var queueKey = 'ninja_queue_' + repo;
+      var localQueue = [];
+      try { localQueue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch(e) {}
+      if (localQueue.length === 0) {
+        cnToast('Fila já está vazia.');
+        return;
+      }
+      if (!confirm('Deseja realmente limpar ' + localQueue.length + ' posts da fila local deste blog?')) return;
+      localStorage.removeItem(queueKey);
+      cnToast('🗑️ Fila local limpa com sucesso!');
+      cnLog('\n🗑️ Fila local limpa com sucesso!', 'info');
+    };
+
+  })();
+  </script>
+  <!-- Safira Onboarding Modal -->
+  <div id="safira-onboarding-modal" class="hidden">
+    <div class="safira-onboarding-overlay"></div>
+    <div class="safira-onboarding-content">
+      <div class="safira-header">
+        <div class="safira-avatar">💬</div>
+        <div class="safira-title-container">
+          <h3>Safira - Assistente de Configuração</h3>
+          <p>Sua inteligência artificial guia</p>
+        </div>
+        <button id="close-onboarding-btn" class="safira-close">&times;</button>
+      </div>
+      
+      <div class="safira-body">
+        <!-- Step 0: Welcome -->
+        <div id="safira-step-0" class="safira-step active">
+          <div class="chat-bubble ai-bubble">
+            <p>Olá! Eu sou a Safira, sua assistente pessoal aqui no Gerador Ninja. Percebi que é seu primeiro acesso! Você é iniciante neste mundo de blogs e precisa de ajuda para configurar tudo?</p>
+          </div>
+          <div class="chat-actions">
+            <button class="btn btn-primary" id="btn-onboarding-yes">Sim, sou iniciante (Me ajude!)</button>
+            <button class="btn btn-outline" id="btn-onboarding-no">Não, já sei usar (Pular configuração)</button>
+          </div>
+        </div>
+
+        <!-- Step 1: GitHub -->
+        <div id="safira-step-1" class="safira-step hidden">
+          <div class="chat-bubble ai-bubble">
+            <p>Perfeito! Vamos começar pelo GitHub, que é onde seus sites ficarão salvos na nuvem.</p>
+            <ol>
+              <li>Crie uma conta gratuita em <a href="https://github.com" target="_blank">github.com</a></li>
+              <li>Acesse <a href="https://github.com/settings/tokens/new" target="_blank">este link</a> para gerar seu Token</li>
+              <li>Marque a opção <b>"repo"</b> (essencial para criação de sites e funcionamento do backup) e <b>"workflow"</b> e clique em gerar!</li>
+            </ol>
+            <p>Cole o token gerado aqui embaixo para eu salvar para você:</p>
+          </div>
+          <div class="input-action-row">
+            <input type="password" id="onboarding-github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxx">
+            <button class="btn btn-primary btn-next-step" data-next="2">Próximo Passo &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Gemini API -->
+        <div id="safira-step-2" class="safira-step hidden">
+          <div class="chat-bubble ai-bubble">
+            <p>Muito bem! Agora vamos pegar o seu motor de Inteligência Artificial para gerar os artigos, que é o Google Gemini.</p>
+            <ol>
+              <li>Acesse o <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a> com seu Gmail.</li>
+              <li>Clique em <b>Get API key</b> e depois <b>Create API key</b>.</li>
+            </ol>
+            <p>Cole sua chave do Gemini aqui:</p>
+          </div>
+          <div class="input-action-row">
+            <input type="password" id="onboarding-gemini-token" placeholder="AIzaSy...">
+            <button class="btn btn-outline btn-prev-step" data-prev="1">&larr; Voltar</button>
+            <button class="btn btn-primary btn-next-step" data-next="3">Próximo Passo &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Vercel -->
+        <div id="safira-step-3" class="safira-step hidden">
+          <div class="chat-bubble ai-bubble">
+            <p>Último passo e o mais importante! Para que seus sites fiquem 100% isolados, você precisará da sua própria Vercel (onde o site ganha vida na web).</p>
+            <ol>
+              <li>Crie uma conta gratuita em <a href="https://vercel.com/signup" target="_blank">vercel.com</a> (Pode usar o GitHub que acabamos de criar!)</li>
+              <li>Acesse <a href="https://vercel.com/account/tokens" target="_blank">este link</a> para gerar seu Token da Vercel.</li>
+              <li>⚠️ <b style="color: #ef4444;">OBRIGATÓRIO:</b> Vincule sua Vercel ao GitHub instalando a integração oficial. Acesse <a href="https://github.com/apps/vercel" target="_blank" style="font-weight: bold; color: var(--primary);">github.com/apps/vercel</a> e instale/autorize o acesso para o seu perfil. Sem isso, a Vercel não poderá configurar seus blogs!</li>
+            </ol>
+            <p>Cole o token da Vercel aqui e nós terminaremos a configuração:</p>
+          </div>
+          <div class="input-action-row">
+            <input type="password" id="onboarding-vercel-token" placeholder="vTkn_xxxxxxxxxxxx">
+            <button class="btn btn-outline btn-prev-step" data-prev="2">&larr; Voltar</button>
+            <button class="btn btn-primary" id="btn-finish-onboarding">Finalizar & Salvar ✅</button>
+          </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="safira-step-loading" class="safira-step hidden text-center">
+          <div class="spinner"></div>
+          <p style="margin-top: 1rem; color: var(--primary);">Salvando suas configurações, aguarde um momento...</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

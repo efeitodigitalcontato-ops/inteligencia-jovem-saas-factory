@@ -1,0 +1,195 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Sidebar from '../components/Sidebar.astro';
+import siteConfig from '../siteConfig.json';
+
+interface Props {
+	title: string;
+	description?: string;
+	preloadImage?: string;
+	showSidebar?: boolean;
+}
+
+const { title, description = siteConfig.description, preloadImage, showSidebar = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{preloadImage && (
+			<link rel="preload" as="image" href={preloadImage} />
+		)}
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<Header />
+		
+		{showSidebar ? (
+			<div class="site-container">
+				<main class="main-content">
+					<slot />
+				</main>
+				
+				<aside class="sidebar-wrapper">
+					<Sidebar />
+				</aside>
+			</div>
+		) : (
+			<div class="site-container-full">
+				<slot />
+			</div>
+		)}
+
+		<Footer />
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--primary-color: #e11d48; /* Red 600 - Matches the premium AnalisaMelhor layout */
+		--primary-hover: #be123c; /* Red 700 */
+		--bg-color: #f8fafc; /* Slate 50 */
+		--card-bg: #ffffff;
+		--text-main: #0f172a; /* Slate 900 */
+		--text-muted: #64748b; /* Slate 500 */
+		--border-color: #e2e8f0; /* Slate 200 */
+		--shadow-subtle: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+		--shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+		--font-family: 'Plus Jakarta Sans', sans-serif;
+	}
+
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+
+	body {
+		font-family: var(--font-family);
+		background-color: var(--bg-color);
+		color: var(--text-main);
+		line-height: 1.6;
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	/* Layout responsivo de 2 colunas */
+	.site-container {
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 2rem 1.5rem;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2.5rem;
+		flex: 1;
+	}
+
+	@media (min-width: 992px) {
+		.site-container {
+			grid-template-columns: 8fr 4fr;
+			padding: 3rem 1.5rem;
+		}
+	}
+
+	.site-container-full {
+		width: 100%;
+		margin: 0 auto;
+		flex: 1;
+	}
+
+	/* Estilos de links padrão */
+	a {
+		color: var(--primary-color);
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	a:hover {
+		color: var(--primary-hover);
+		text-decoration: underline;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		color: #0f172a;
+		font-weight: 700;
+		line-height: 1.3;
+	}
+
+	/* Botão padrão */
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.75rem 1.5rem;
+		background-color: var(--primary-color);
+		color: #ffffff !important;
+		font-weight: 600;
+		border-radius: 0.5rem;
+		border: none;
+		cursor: pointer;
+		text-decoration: none !important;
+		box-shadow: var(--shadow-subtle);
+		transition: all 0.2s ease;
+	}
+
+	.btn:hover {
+		background-color: var(--primary-hover);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	.btn:active {
+		transform: translateY(0);
+	}
+
+	/* Estilos comuns para posts de blog */
+	.blog-post-content {
+		font-size: 1.1rem;
+		color: #334155;
+	}
+
+	.blog-post-content p {
+		margin-bottom: 1.5rem;
+	}
+
+	.blog-post-content h2 {
+		font-size: 1.8rem;
+		margin-top: 2.5rem;
+		margin-bottom: 1.25rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 2px solid var(--border-color);
+	}
+
+	.blog-post-content h3 {
+		font-size: 1.4rem;
+		margin-top: 2rem;
+		margin-bottom: 1rem;
+	}
+
+	.blog-post-content ul, .blog-post-content ol {
+		margin-bottom: 1.5rem;
+		padding-left: 1.5rem;
+	}
+
+	.blog-post-content li {
+		margin-bottom: 0.5rem;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+		border-radius: 0.5rem;
+		display: block;
+	}
+</style>

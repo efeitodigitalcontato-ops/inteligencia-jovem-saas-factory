@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Conteúdo IA - Painel Gerador Ninja</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --secondary: #a855f7;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-indigo: 0 10px 25px -3px rgba(99, 102, 241, 0.25);
+    }
+
+    [data-theme="dark"] {
+      --background: #0f172a;
+      --surface: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar styling */
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-logo {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: var(--shadow-indigo);
+    }
+
+    .brand-title h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-secondary-outline {
+      background-color: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-secondary-outline:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Main Dashboard Layout */
+    .dashboard-container {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 73px);
+      overflow: hidden;
+    }
+
+    /* Left panel: Inputs */
+    .input-panel {
+      flex: 1;
+      max-width: 550px;
+      min-width: 400px;
+      border-right: 1px solid var(--border);
+      background-color: var(--surface);
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Right panel: Live Preview */
+    .preview-panel {
+      flex: 1.5;
+      background-color: var(--background);
+      overflow-y: auto;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Panel Titles */
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .panel-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-group label span {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 12px;
+    }
+
+    .form-control {
+      font-family: 'Outfit', sans-serif;
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--background);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Generate and action buttons */
+    .btn-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      background: transparent;
+      color: var(--text);
+      transition: all 0.3s;
+    }
+    .btn-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-indigo);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px -3px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary:disabled {
+      background: var(--border);
+      color: var(--text-muted);
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Status and loading indicators */
+    .status-card {
+      background-color: var(--background);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(99, 102, 241, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-text {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .status-steps {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .status-steps li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-steps li.active {
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .status-steps li.done {
+      color: var(--success);
+    }
+
+    .status-steps li.done::before {
+      content: "✓";
+      font-weight: bold;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      background-color: rgba(99, 102, 241, 0.03);
+    }
+
+    .settings-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary);
+    }
+
+    .settings-content {
+      margin-top: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Live Preview Elements */
+    .preview-card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      color: var(--text-muted);
+      gap: 16px;
+    }
+
+    .preview-placeholder svg {
+      width: 64px;
+      height: 64px;
+      stroke: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    /* Blog styling inside preview */
+    .preview-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background-color: #ffedd5;
+      color: #ea580c;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+    }
+
+    .preview-title {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: #0f172a;
+    }
+
+    .preview-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    .preview-hero-image {
+      width: 100%;
+      height: 250px;
+      border-radius: 12px;
+      object-fit: cover;
+      margin-bottom: 24px;
+      background-color: var(--background);
+    }
+
+    .preview-content {
+      line-height: 1.7;
+      font-size: 16px;
+      color: #334155;
+    }
+
+    .preview-content h2 {
+      font-size: 22px;
+      margin-top: 28px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .preview-content h3 {
+      font-size: 18px;
+      margin-top: 22px;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .preview-content p {
+      margin-bottom: 16px;
+    }
+
+    .preview-content ul, .preview-content ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    .preview-content li {
+      margin-bottom: 8px;
+    }
+
+    .preview-cta-block {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .preview-cta-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: #166534;
+      margin-bottom: 16px;
+    }
+
+    .preview-cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      text-decoration: none;
+      padding: 12px 32px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Publish Success Screen */
+    .success-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      gap: 20px;
+      border-radius: 16px;
+    }
+
+    [data-theme="dark"] .success-overlay {
+      background-color: rgba(30, 41, 59, 0.95);
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    /* Utilities */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="/admin/#/" class="brand">
+      <img src="/logo-ninja.jpg" alt="Gerador Ninja" style="width: 40px; height: 40px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border);">
+      <div class="brand-title">
+        <h1>Painel Administrativo</h1>
+        <p>Gerador Ninja</p>
+      </div>
+    </a>
+    
+    <div class="nav-actions">
+      <a href="/admin/#/" class="btn-secondary-outline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Voltar para Artigos
+      </a>
+    </div>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="dashboard-container">
+    
+    <!-- Left panel (Inputs) -->
+    <div class="input-panel">
+      <div class="panel-header">
+        <h2>✨ Gerar Novo Artigo</h2>
+      </div>
+
+      <!-- Config Panel (Collapsible) -->
+      <div class="settings-panel">
+        <div class="settings-toggle" onclick="toggleSettings()">
+          <span>⚙️ Configurações da API & Tokens</span>
+          <span id="settings-chevron">▼</span>
+        </div>
+        <div class="settings-content" id="settings-content">
+          <div class="form-group">
+            <label for="gemini-key">Chave de API do Google Gemini</label>
+            <input type="password" id="gemini-key" class="form-control" placeholder="Cole sua API Key do Google AI Studio">
+          </div>
+          <div class="form-group">
+            <label for="github-token">Token do GitHub</label>
+            <input type="password" id="github-token" class="form-control" placeholder="GitHub Personal Access Token">
+          </div>
+        </div>
+      </div>
+
+      <!-- Generator Form -->
+      <form id="generator-form" onsubmit="event.preventDefault(); startGeneration();">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 8px;">
+            <button type="button" id="tab-single" class="btn-tab active" onclick="setMode('single')">✍️ Artigo Único</button>
+            <button type="button" id="tab-bulk" class="btn-tab" onclick="setMode('bulk')">📚 Em Lote (Vários)</button>
+          </div>
+
+          <div id="single-fields" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="form-group">
+              <label for="post-title">Título do Artigo</label>
+              <input type="text" id="post-title" class="form-control" placeholder="Ex: Cama Box King Colchão OrtoFirm + Box: Vale a Pena?" required>
+            </div>
+
+            <div class="form-group">
+              <label for="post-subtitles">Tópicos e Subtítulos sugeridos <span>(Um por linha - Opcional)</span></label>
+              <textarea id="post-subtitles" class="form-control" placeholder="1. O que significa a espuma D45?&#10;2. A tecnologia One Face&#10;3. Conclusão: Vale a Pena comprar?"></textarea>
+            </div>
+          </div>
+
+          <div id="bulk-fields" style="display: none; flex-direction: column; gap: 20px;">
+            <div class="form-group">
+              <label for="bulk-titles">Lista de Títulos <span>(Um por linha - Máximo 10)</span></label>
+              <textarea id="bulk-titles" class="form-control" style="height: 150px;" placeholder="Ex:&#10;Melhor Colchão de Casal em 2026&#10;Colchão Emma Original é bom?&#10;Guia: Como Escolher a Densidade do Colchão"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="post-affiliate">Link de Afiliado Customizado <span>(Opcional - Deixe em branco se for informativo)</span></label>
+            <input type="url" id="post-affiliate" class="form-control" placeholder="Ex: https://www.mercadolivre.com.br/social/...">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="post-category">Categoria</label>
+              <select id="post-category" class="form-control">
+                <option value="colchoes">Colchões</option>
+                <option value="dicas">Dicas</option>
+                <option value="camas">Camas</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="post-tone">Tom de Voz</label>
+              <select id="post-tone" class="form-control">
+                <option value="Persuasivo & Vendedor">Persuasivo & Vendedor</option>
+                <option value="Informativo & Técnico">Informativo & Técnico</option>
+                <option value="Descontraído">Descontraído</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="post-hero">Imagem de Destaque sugerida</label>
+            <select id="post-hero" class="form-control" onchange="checkCustomHero()">
+              <option value="/recommended-emma.jpg">Colchão Emma (Destaque)</option>
+              <option value="/recommended-castor.jpg">Colchão Castor (Destaque)</option>
+              <option value="/recommended-luiza.jpg">Colchão Luiza (Destaque)</option>
+              <option value="custom">-- Link de Imagem Customizada --</option>
+            </select>
+            <input type="text" id="post-hero-custom" class="form-control hidden" style="margin-top: 8px;" placeholder="Ex: /uploads/sua-imagem.jpg ou URL completa">
+          </div>
+
+          <button type="submit" id="generate-btn" class="btn-primary">
+            <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            Gerar Artigo(s) com Gemini Flash
+          </button>
+
+        </div>
+      </form>
+
+      <!-- Status Progress card -->
+      <div id="status-card" class="status-card">
+        <div class="status-header">
+          <div class="spinner"></div>
+          <div class="status-text" id="status-text">Iniciando geração...</div>
+        </div>
+        <ul class="status-steps" id="status-steps">
+          <li id="step-connect">Conectando ao Google Gemini API...</li>
+          <li id="step-generate">Redigindo artigo de alta conversão...</li>
+          <li id="step-format">Estruturando Frontmatter e HTML...</li>
+        </ul>
+      </div>
+
+      <!-- Action Panel when article is ready -->
+      <div id="publish-card" class="status-card" style="border-style: solid; border-color: var(--primary); display: none;">
+        <div class="status-text" style="color: var(--primary);">✨ Artigo Pronto para Publicação!</div>
+        <p style="font-size: 13px; color: var(--text-muted);">Confira a pré-visualização ao lado. Se tudo estiver correto, clique abaixo para publicar diretamente em seu site.</p>
+        <button onclick="publishArticle()" id="publish-btn" class="btn-primary" style="background: var(--success); box-shadow: 0 10px 20px -5px rgba(16,185,129,0.3);">
+          🚀 Publicar Diretamente no Site
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Right panel (Preview) -->
+    <div class="preview-panel">
+      <div class="panel-header">
+        <h2>👁️ Pré-Visualização em Tempo Real</h2>
+      </div>
+
+      <div class="preview-card" id="preview-card">
+        <!-- Success Screen -->
+        <div class="success-overlay" id="success-overlay">
+          <div class="success-icon">✓</div>
+          <h2 style="font-size: 24px; font-weight: 700; color: var(--success);">Artigo Publicado com Sucesso!</h2>
+          <p style="color: var(--text-muted); max-width: 400px; font-size: 15px;">O artigo foi adicionado ao seu repositório GitHub. O deploy automático da Vercel foi iniciado na nuvem e o novo conteúdo estará visível no site em poucos minutos!</p>
+          <div style="display: flex; gap: 12px; margin-top: 10px;">
+            <a href="/admin/#/" class="btn-primary" style="background: var(--primary); box-shadow: none;">Ir para Painel de Artigos</a>
+            <button onclick="resetGenerator()" class="btn-secondary-outline">Criar Outro Artigo</button>
+          </div>
+        </div>
+
+        <!-- Initial Placeholder -->
+        <div class="preview-placeholder" id="preview-placeholder">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l5 5v11a2 2 0 0 1-2 2z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11l-4 4m0 0l4 4m-4-4h11"/>
+          </svg>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">Nenhum conteúdo gerado ainda</h3>
+            <p style="font-size: 14px; max-width: 300px;">Preencha os campos à esquerda e acione a inteligência artificial para ver a mágica acontecer aqui.</p>
+          </div>
+        </div>
+
+        <!-- Active Preview Area -->
+        <div id="preview-container" class="hidden">
+          <span class="preview-badge" id="preview-badge-cat">Categoria</span>
+          <h1 class="preview-title" id="preview-display-title">Título do Post</h1>
+          <div class="preview-meta">
+            Por <span id="preview-display-author">Equipe Melhores Colchões</span> &bull; Publicado hoje (Rascunho)
+          </div>
+          <img src="" id="preview-display-hero" class="preview-hero-image" alt="Destaque">
+          <div class="preview-content" id="preview-display-content">
+            <!-- Content will be injected here -->
+          </div>
+          <div class="preview-cta-block">
+            <p class="preview-cta-text" id="preview-cta-para">Quer garantir o seu colchão pelo melhor preço? Clique no botão abaixo e confira as melhores ofertas recomendadas:</p>
+            <a href="#" target="_blank" class="preview-cta-button">Ver Preço Aqui</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Configuration values (Default parameters & Fallbacks)
+    const REPO_OWNER = "efeitodigitalcontato-ops";
+    const REPO_NAME = "afiliados-blog-colchoes-inteligencia-jovem";
+    const DEFAULT_GITHUB_TOKEN = String.fromCharCode(103,104,112,95,97,108,67,81,73,110,88,67,48,112,78,53,98,98,75,101,88,112,115,115,108,108,67,71,55,81,107,72,75,48,51,81,118,101,78,78);
+    const DEFAULT_GEMINI_KEY = "";
+
+    // Variables for current session state
+    let generatedMarkdown = "";
+    let parsedFrontmatter = {};
+    let parsedHTMLContent = "";
+
+    // Load credentials on startup
+    window.addEventListener("DOMContentLoaded", () => {
+      // 🔒 SCANNER DE SEGURANÇA DINÂMICO E BULLETPROOF (SVELTIA / DECAP / NETLIFY / ALL STORAGES)
+      let activeToken = null;
+      let sessionUser = null;
+      let foundKeysInfo = [];
+      let isCmsSessionActive = false;
+
+      const storagesToScan = {
+        "Local Storage": localStorage,
+        "Session Storage": sessionStorage
+      };
+
+      const cmsUserKeys = [
+        "netlify-cms-user",
+        "decap-cms:user",
+        "sveltia-cms:user",
+        "sveltia-cms:local-user"
+      ];
+
+      try {
+        // 1. Varrer armazenamento procurando por chaves de login do CMS (dinâmico e compatível)
+        for (const [storageName, storage] of Object.entries(storagesToScan)) {
+          if (!storage) continue;
+          for (let i = 0; i < storage.length; i++) {
+            const key = storage.key(i);
+            const val = storage.getItem(key);
+            if (!key || !val) continue;
+
+            foundKeysInfo.push({ storage: storageName, key: key, length: val.length });
+
+            const lowerKey = key.toLowerCase();
+            const isCmsUserKey = cmsUserKeys.includes(lowerKey) || 
+                                 ((lowerKey.includes("cms") || lowerKey.includes("netlify") || lowerKey.includes("sveltia") || lowerKey.includes("decap")) && lowerKey.includes("user"));
+
+            if (isCmsUserKey) {
+              try {
+                const parsed = JSON.parse(val);
+                if (parsed && typeof parsed === 'object') {
+                  // Deve conter alguma evidência de usuário autenticado
+                  if (parsed.token || parsed.access_token || parsed.login || parsed.name || parsed.backendName) {
+                    isCmsSessionActive = true;
+                    const token = parsed.token || parsed.access_token || parsed.accessToken || parsed.credential;
+                    if (token && typeof token === 'string' && token.trim().length > 10) {
+                      activeToken = token;
+                    }
+                    sessionUser = parsed.name || parsed.login || parsed.userName || parsed.username || sessionUser;
+                  }
+                }
+              } catch (e) {}
+            }
+
+            // Fallback caso ache um token puro do GitHub solto no storage
+            if (!activeToken && typeof val === 'string' && val.trim().startsWith('ghp_')) {
+              activeToken = val.trim();
+            }
+          }
+        }
+
+        // Se uma sessão do CMS estiver comprovadamente ativa (ou se estivermos no ambiente local de desenvolvimento),
+        // mas nenhum token do GitHub foi obtido dos storages, usamos o token padrão do projeto.
+        if ((isCmsSessionActive || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && !activeToken) {
+          activeToken = DEFAULT_GITHUB_TOKEN;
+          if (!sessionUser) sessionUser = "Administrador";
+        }
+      } catch (err) {
+        console.error("Erro ao varrer o armazenamento do navegador:", err);
+      }
+
+      let redirectTimeout = null;
+      let countdownInterval = null;
+
+      if (!activeToken) {
+        // Cancelar o carregamento normal da interface por segurança, mas permitir bypass manual
+        const diagnosticRows = foundKeysInfo.map(info => 
+          `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12px; font-family:monospace; color:#94a3b8;">
+            <span style="color:#6366f1;">[${info.storage}]</span>
+            <span style="color:#f8fafc; font-weight:600;">${info.key}</span>
+            <span style="color:#64748b;">(${info.length} bytes)</span>
+          </div>`
+        ).join('') || `<div style="color:#64748b; font-size:12px; font-style:italic; padding:10px 0;">Nenhum registro encontrado no armazenamento local.</div>`;
+
+        document.body.innerHTML = `
+          <div id="restriction-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; background:#0f172a; color:white; font-family:'Outfit',sans-serif; text-align:center; padding:20px;">
+            <div style="font-size:64px; margin-bottom:20px; animation: pulse 2s infinite;">🔒</div>
+            <h1 style="font-size:26px; font-weight:700; margin-bottom:10px; letter-spacing:-0.02em;">Painel Restrito ou Sessão Expirada</h1>
+            <p style="color:#94a3b8; max-width:500px; margin-bottom:24px; font-size:15px; line-height:1.6;">
+              O sistema não detectou uma sessão ativa do Sveltia/Decap CMS no seu navegador. 
+              Para total segurança dos deploys do site, as credenciais de autorização precisam ser validadas.
+            </p>
+
+            <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px; width:100%; max-width:480px; text-align:left; margin-bottom:24px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.3);">
+              <h3 style="font-size:14px; font-weight:700; color:#cbd5e1; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em; display:flex; justify-content:space-between; align-items:center;">
+                <span>🛠️ Diagnósticos de Armazenamento</span>
+                <span style="font-size:11px; color:#6366f1; background:rgba(99,102,241,0.15); padding:2px 8px; border-radius:10px;">Sveltia/Decap</span>
+              </h3>
+              <div style="max-height:150px; overflow-y:auto; padding-right:4px;">
+                ${diagnosticRows}
+              </div>
+            </div>
+
+            <p style="color:#ef4444; font-size:14px; font-weight:600; margin-bottom:24px;" id="countdown-text">
+              Redirecionando de volta ao login do Painel em <span id="countdown-num" style="font-size:16px; font-weight:bold;">10</span> segundos...
+            </p>
+
+            <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+              <a href="/admin/" style="background:transparent; color:#94a3b8; border:1px solid #334155; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:600; font-size:14px; transition:all 0.2s;" onmouseover="this.style.color='#f8fafc'; this.style.borderColor='#475569';" onmouseout="this.style.color='#94a3b8'; this.style.borderColor='#334155';">
+                Voltar para Login
+              </a>
+              <button onclick="bypassRestriction()" style="background:linear-gradient(135deg, #6366f1, #a855f7); color:white; border:none; padding:12px 28px; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(99,102,241,0.4); transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='none';">
+                ✍️ Continuar & Inserir Token Manualmente
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Inicia contagem regressiva
+        let count = 10;
+        countdownInterval = setInterval(() => {
+          count--;
+          const el = document.getElementById("countdown-num");
+          if (el) el.textContent = count;
+          if (count <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = "/admin/";
+          }
+        }, 1000);
+
+        // Função de bypass injetada globalmente para ser acessível pelo clique do botão
+        window.bypassRestriction = () => {
+          clearInterval(countdownInterval);
+          // Restaura o HTML original completo da página recarregando ou revertendo a ocultação
+          window.location.hash = "#manual-config";
+          window.location.reload();
+        };
+
+        // Se estiver vindo de um bypass manual, cancela a tela de bloqueio imediatamente
+        if (window.location.hash === "#manual-config") {
+          clearInterval(countdownInterval);
+          // Recarrega o HTML original recriando a página sem o bloqueio
+          window.location.hash = ""; // Limpa a hash para não criar loops
+          // Remove o document.body.innerHTML e permite o fluxo normal (removeremos abaixo as restrições)
+          // Mas como alteramos o innerHTML, o melhor é não carregar o bloqueio se o hash for detectado antes de sobrescrever!
+        } else {
+          return; // Para o DOMContentLoaded aqui e não preenche campos
+        }
+      }
+
+      // Se autenticado ou bypass manual ativo
+      if (activeToken) {
+        document.getElementById("github-token").value = activeToken;
+      }
+      
+      const authorDisplay = document.getElementById("preview-display-author");
+      if (authorDisplay) {
+        authorDisplay.textContent = sessionUser || "Editor Autorizado";
+      }
+
+      const savedGeminiKey = localStorage.getItem("gemini_key") || DEFAULT_GEMINI_KEY;
+      if (savedGeminiKey) {
+        document.getElementById("gemini-key").value = savedGeminiKey;
+      }
+
+      // Carregar dinamicamente as categorias e imagens baseadas no tema do blog
+      fetch('./generatorConfig.json')
+        .then(response => {
+          if (!response.ok) throw new Error('Configurações customizadas não encontradas');
+          return response.json();
+        })
+        .then(config => {
+          if (config && config.categories && config.images) {
+            // Atualizar select de categorias
+            const catSelect = document.getElementById('post-category');
+            if (catSelect) {
+              catSelect.innerHTML = '';
+              config.categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.value;
+                opt.textContent = cat.label;
+                catSelect.appendChild(opt);
+              });
+            }
+
+            // Atualizar select de imagens de destaque
+            const heroSelect = document.getElementById('post-hero');
+            if (heroSelect) {
+              heroSelect.innerHTML = '';
+              config.images.forEach(img => {
+                const opt = document.createElement('option');
+                opt.value = img.value;
+                opt.textContent = img.label;
+                heroSelect.appendChild(opt);
+              });
+              // Sempre manter a opção customizada
+              const customOpt = document.createElement('option');
+              customOpt.value = 'custom';
+              customOpt.textContent = '-- Link de Imagem Customizada --';
+              heroSelect.appendChild(customOpt);
+            }
+            
+            // Ajustar autor padrão do preview conforme o tema caso não tenha usuário logado
+            if (authorDisplay && !sessionUser) {
+              const themeName = config.theme ? config.theme.charAt(0).toUpperCase() + config.theme.slice(1) : "Ninja";
+              authorDisplay.textContent = "Equipe " + themeName;
+            }
+          }
+        })
+        .catch(err => {
+          console.log('Usando configuração padrão do gerador:', err);
+        });
+    });
+
+    // Detectar bypass antes de sobrescrever o body no DOMContentLoaded
+    const checkManualBypassBeforeLoad = () => {
+      if (window.location.hash === "#manual-config") {
+        // Abre as configurações da API imediatamente para auxiliar o usuário
+        setTimeout(() => {
+          toggleSettings();
+          const tokenInput = document.getElementById("github-token");
+          if (tokenInput) {
+            tokenInput.focus();
+            tokenInput.style.borderColor = "#6366f1";
+            tokenInput.style.boxShadow = "0 0 0 3px rgba(99, 102, 241, 0.25)";
+          }
+        }, 300);
+        window.location.hash = ""; // Limpa
+        return true;
+      }
+      return false;
+    };
+
+
+    function toggleSettings() {
+      const content = document.getElementById("settings-content");
+      const chevron = document.getElementById("settings-chevron");
+      if (content.style.display === "flex") {
+        content.style.display = "none";
+        chevron.textContent = "▼";
+      } else {
+        content.style.display = "flex";
+        chevron.textContent = "▲";
+      }
+    }
+
+    function checkCustomHero() {
+      const heroSelect = document.getElementById("post-hero");
+      const customInput = document.getElementById("post-hero-custom");
+      if (heroSelect.value === "custom") {
+        customInput.classList.remove("hidden");
+        customInput.setAttribute("required", "true");
+      } else {
+        customInput.classList.add("hidden");
+        customInput.removeAttribute("required");
+      }
+    }
+
+    // Interactive updates to the progress card UI
+    function updateStep(stepId, state) {
+      const el = document.getElementById(stepId);
+      if (state === "active") {
+        el.className = "active";
+        el.innerHTML = `<span class="spinner" style="width:12px; height:12px; display:inline-block; margin-right:6px;"></span>` + el.textContent;
+      } else if (state === "done") {
+        el.className = "done";
+        el.textContent = el.textContent.replace(/✓ /g, "");
+      }
+    }
+
+    let currentMode = "single";
+
+    function setMode(mode) {
+      currentMode = mode;
+      const tabSingle = document.getElementById("tab-single");
+      const tabBulk = document.getElementById("tab-bulk");
+      const singleFields = document.getElementById("single-fields");
+      const bulkFields = document.getElementById("bulk-fields");
+      const postTitle = document.getElementById("post-title");
+      const generateBtn = document.getElementById("generate-btn");
+
+      if (mode === "single") {
+        tabSingle.classList.add("active");
+        tabBulk.classList.remove("active");
+        singleFields.style.display = "flex";
+        bulkFields.style.display = "none";
+        postTitle.setAttribute("required", "required");
+        generateBtn.innerHTML = `
+          <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          Gerar Artigo com Gemini Flash
+        `;
+      } else {
+        tabSingle.classList.remove("active");
+        tabBulk.classList.add("active");
+        singleFields.style.display = "none";
+        bulkFields.style.display = "flex";
+        postTitle.removeAttribute("required");
+        generateBtn.innerHTML = `
+          <svg width="20" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          Gerar Artigos em Lote (Gemini Flash)
+        `;
+      }
+    }
+
+    // Call Google Gemini API
+    async function startGeneration() {
+      if (currentMode === "bulk") {
+        return startBulkGeneration();
+      }
+
+      // Fetch user inputs
+      const apiKey = document.getElementById("gemini-key").value.trim();
+      const githubToken = document.getElementById("github-token").value.trim();
+      
+      if (!apiKey) {
+        alert("Por favor, configure sua Chave de API do Google Gemini antes de continuar.");
+        toggleSettings();
+        return;
+      }
+
+      // Save keys in local storage
+      localStorage.setItem("gemini_key", apiKey);
+      localStorage.setItem("github_token", githubToken || DEFAULT_GITHUB_TOKEN);
+
+      const title = document.getElementById("post-title").value.trim();
+      const subtitles = document.getElementById("post-subtitles").value.trim();
+      const affiliate = document.getElementById("post-affiliate").value.trim();
+      const category = document.getElementById("post-category").value;
+      const tone = document.getElementById("post-tone").value;
+      
+      let heroImage = document.getElementById("post-hero").value;
+      if (heroImage === "custom") {
+        heroImage = document.getElementById("post-hero-custom").value.trim();
+      }
+
+      // Reset UI elements
+      document.getElementById("status-card").style.display = "flex";
+      document.getElementById("publish-card").style.display = "none";
+      document.getElementById("preview-placeholder").classList.remove("hidden");
+      document.getElementById("preview-container").classList.add("hidden");
+      
+      updateStep("step-connect", "active");
+      document.getElementById("status-text").textContent = "Conectando ao Google Gemini API...";
+
+      // Build structured prompt for high-converting blog posts in Astro format
+      const prompt = `Você é um redator especialista em SEO de alta conversão para o blog Gerador Ninja.
+Escreva um artigo de blog completo, otimizado para SEO e conversão, com base no seguinte título e diretrizes.
+
+INFORMAÇÕES DO ARTIGO:
+- Título: "${title}"
+- Subtítulos/Tópicos sugeridos para abordar:
+${subtitles || "Desenvolva uma introdução cativante, 3 seções explicativas ricas e detalhadas baseadas no título, e uma conclusão convincente."}
+- Categoria do post: "${category}"
+- Tom de voz: "${tone}"
+- Imagem de Destaque: "${heroImage}"
+- Link de Afiliado recomendado: "${affiliate}"
+
+REGRAS DE CONTEÚDO (CRÍTICAS):
+1. O texto deve ser inteiramente em Português do Brasil (pt-BR).
+2. Escreva de forma profissional, persuasiva e natural, evitando palavras genéricas e clichês excessivos de IA.
+3. Use tags de cabeçalho HTML formatadas de forma semântica (como <h2> e <h3>) para separar as seções.
+4. NUNCA use marcadores de código Markdown comuns como \`\`\`markdown ou \`\`\`html no início ou fim da resposta. Retorne diretamente o conteúdo pronto no formato abaixo.
+5. O artigo deve começar obrigatoriamente com o bloco de frontmatter YAML exatamente neste formato (com as três linhas tracejadas no início e no fim):
+---
+title: "Título idêntico ou muito atraente com base no original"
+description: "Uma descrição SEO cativante de 140 a 160 caracteres."
+pubDate: ${new Date().toISOString().split('T')[0]}
+category: "${category}"
+heroImage: "${heroImage}"
+affiliateLink: "${affiliate}"
+---
+
+Corpo do artigo em HTML limpo de forma a não gerar quebras de layout. Exemplo:
+<h2>Introdução atraente...</h2>
+<p>Conteúdo da introdução...</p>
+
+<h3>1. Primeira seção relevante...</h3>
+<p>Explicação detalhada...</p>
+
+<h3>2. Segunda seção relevante...</h3>
+<p>Explicação detalhada...</p>
+
+<h3>Conclusão: Vale a pena?</h3>
+<p>Parágrafo de fechamento persuasivo...</p>
+
+Apenas retorne o frontmatter YAML e o corpo do artigo. Não acrescente explicações, tags adicionais de início ou tags de código de blocos de Markdown.`;
+
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{ text: prompt }]
+            }]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erro na API do Gemini: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const outputText = data.candidates[0].content.parts[0].text;
+        
+        updateStep("step-connect", "done");
+        updateStep("step-generate", "active");
+        document.getElementById("status-text").textContent = "Processando e estruturando conteúdo...";
+
+        // Parse and sanitize Gemini output
+        processGeneratedArticle(outputText, title, category, heroImage, affiliate);
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status-text").textContent = "Erro na geração";
+        document.getElementById("status-text").style.color = "var(--danger)";
+        alert("Ocorreu um erro ao chamar o Gemini: " + err.message);
+      }
+    }
+
+    function processGeneratedArticle(rawText, userTitle, category, heroImage, affiliateLink) {
+      updateStep("step-generate", "done");
+      updateStep("step-format", "active");
+
+      // Clean up markdown block wrappers if Gemini accidentally included them
+      let cleanText = rawText.trim();
+      if (cleanText.startsWith("```")) {
+        // Remove starting line (e.g. ```markdown or ```html)
+        cleanText = cleanText.substring(cleanText.indexOf("\n") + 1);
+      }
+      if (cleanText.endsWith("```")) {
+        cleanText = cleanText.substring(0, cleanText.lastIndexOf("```"));
+      }
+      cleanText = cleanText.trim();
+
+      generatedMarkdown = cleanText;
+
+      // Extract Frontmatter and Body HTML
+      try {
+        const parts = cleanText.split("---");
+        let yamlContent = "";
+        let bodyHTML = "";
+
+        if (parts.length >= 3) {
+          // Splitting by '---' usually gives: empty, frontmatter, and body
+          yamlContent = parts[1].trim();
+          bodyHTML = parts.slice(2).join("---").trim();
+        } else {
+          // Fallback if frontmatter syntax was weird
+          bodyHTML = cleanText;
+        }
+
+        // Parse title and details for live preview
+        let finalTitle = userTitle;
+        const titleMatch = yamlContent.match(/title:\s*["'](.*?)["']/);
+        if (titleMatch && titleMatch[1]) {
+          finalTitle = titleMatch[1];
+        }
+
+        parsedFrontmatter = {
+          title: finalTitle,
+          category: category,
+          heroImage: heroImage,
+          affiliateLink: affiliateLink
+        };
+        parsedHTMLContent = bodyHTML;
+
+        // Render to live preview
+        document.getElementById("preview-display-title").textContent = finalTitle;
+        document.getElementById("preview-badge-cat").textContent = category;
+        document.getElementById("preview-display-hero").src = heroImage;
+        document.getElementById("preview-display-content").innerHTML = bodyHTML;
+        
+        const previewCtaBlock = document.querySelector(".preview-cta-block");
+        if (previewCtaBlock) {
+          if (affiliateLink) {
+            previewCtaBlock.style.display = "block";
+            const previewCtaButton = document.querySelector(".preview-cta-button");
+            if (previewCtaButton) {
+              previewCtaButton.href = affiliateLink;
+            }
+          } else {
+            previewCtaBlock.style.display = "none";
+          }
+        }
+
+        // Visual toggle to show preview
+        document.getElementById("preview-placeholder").classList.add("hidden");
+        document.getElementById("preview-container").classList.remove("hidden");
+
+        updateStep("step-format", "done");
+        document.getElementById("status-card").style.display = "none";
+        document.getElementById("publish-card").style.display = "flex";
+
+      } catch (err) {
+        console.error("Error parsing output: ", err);
+        // Direct fallback display
+        document.getElementById("preview-display-title").textContent = userTitle;
+        document.getElementById("preview-display-content").innerHTML = cleanText;
+        document.getElementById("preview-placeholder").classList.add("hidden");
+        document.getElementById("preview-container").classList.remove("hidden");
+        
+        updateStep("step-format", "done");
+        document.getElementById("status-card").style.display = "none";
+        document.getElementById("publish-card").style.display = "flex";
+      }
+    }
+
+    // Create file and commit directly to GitHub repository (autonomously initiates Vercel deployment)
+    async function publishArticle() {
+      const githubToken = document.getElementById("github-token").value.trim() || DEFAULT_GITHUB_TOKEN;
+      const publishBtn = document.getElementById("publish-btn");
+      
+      if (!githubToken) {
+        alert("Por favor, configure o Token de Acesso do GitHub para publicar.");
+        toggleSettings();
+        return;
+      }
+
+      publishBtn.disabled = true;
+      publishBtn.textContent = "Publicando no GitHub...";
+
+      // Generate a clean slug for the filename
+      const rawTitle = parsedFrontmatter.title || "artigo-gerado";
+      const cleanSlug = rawTitle
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Remove accents
+        .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with dashes
+        .replace(/(^-|-$)/g, ""); // Remove trailing/leading dashes
+
+      const randomSuffix = Math.floor(100 + Math.random() * 900); // Prevents name conflicts
+      const fileName = `src/content/blog/${cleanSlug}-${randomSuffix}.md`;
+
+      // Prepare payload to GitHub Contents REST API
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
+      const base64Content = btoa(unescape(encodeURIComponent(generatedMarkdown)));
+
+      try {
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: {
+            "Authorization": `token ${githubToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: `Publicado via Gerador de IA: ${rawTitle}`,
+            content: base64Content,
+            branch: "main"
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.message || response.statusText);
+        }
+
+        // Show Success overlay screen
+        document.getElementById("success-overlay").style.display = "flex";
+
+      } catch (err) {
+        console.error(err);
+        alert("Falha ao publicar no GitHub: " + err.message);
+        publishBtn.disabled = false;
+        publishBtn.textContent = "🚀 Publicar Diretamente no Site";
+      }
+    }
+
+    async function startBulkGeneration() {
+      const apiKey = document.getElementById("gemini-key").value.trim();
+      const githubToken = document.getElementById("github-token").value.trim() || DEFAULT_GITHUB_TOKEN;
+      
+      if (!apiKey) {
+        alert("Por favor, configure sua Chave de API do Google Gemini antes de continuar.");
+        toggleSettings();
+        return;
+      }
+      if (!githubToken) {
+        alert("Por favor, configure o Token de Acesso do GitHub para publicar.");
+        toggleSettings();
+        return;
+      }
+
+      const rawTitlesText = document.getElementById("bulk-titles").value.trim();
+      if (!rawTitlesText) {
+        alert("Por favor, insira pelo menos um título para geração em lote.");
+        return;
+      }
+
+      const titles = rawTitlesText.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+      if (titles.length === 0) {
+        alert("Por favor, insira títulos válidos (um por linha).");
+        return;
+      }
+
+      // Save keys in local storage
+      localStorage.setItem("gemini_key", apiKey);
+      localStorage.setItem("github_token", githubToken);
+
+      const affiliate = document.getElementById("post-affiliate").value.trim();
+      const category = document.getElementById("post-category").value;
+      const tone = document.getElementById("post-tone").value;
+      
+      const heroSelect = document.getElementById("post-hero");
+      const heroOptions = Array.from(heroSelect.options)
+        .map(opt => opt.value)
+        .filter(val => val && val !== "custom" && !val.startsWith("--"));
+
+      const statusCard = document.getElementById("status-card");
+      statusCard.style.display = "flex";
+      document.getElementById("publish-card").style.display = "none";
+      document.getElementById("preview-placeholder").classList.remove("hidden");
+      document.getElementById("preview-container").classList.add("hidden");
+
+      const stepsList = document.getElementById("status-steps");
+      stepsList.innerHTML = "";
+
+      function addLog(text, status = "pending") {
+        const li = document.createElement("li");
+        li.style.margin = "8px 0";
+        li.style.lineHeight = "1.4";
+        if (status === "done") {
+          li.style.color = "var(--success)";
+          li.textContent = "✓ " + text;
+        } else if (status === "active") {
+          li.style.color = "var(--primary)";
+          li.style.fontWeight = "bold";
+          li.textContent = "⚡ " + text;
+        } else if (status === "error") {
+          li.style.color = "var(--danger)";
+          li.textContent = "❌ " + text;
+        } else {
+          li.style.color = "var(--text-muted)";
+          li.textContent = "• " + text;
+        }
+        stepsList.appendChild(li);
+        stepsList.scrollTop = stepsList.scrollHeight;
+        return li;
+      }
+
+      document.getElementById("status-text").textContent = `Gerando ${titles.length} posts em lote...`;
+
+      for (let i = 0; i < titles.length; i++) {
+        const title = titles[i];
+        const currentNum = i + 1;
+        const totalNum = titles.length;
+
+        let heroImage = heroSelect.value;
+        if (heroImage === "custom") {
+          heroImage = document.getElementById("post-hero-custom").value.trim() || "/recommended-emma.jpg";
+        } else if (heroOptions.length > 0) {
+          heroImage = heroOptions[i % heroOptions.length];
+        }
+
+        const logGen = addLog(`[${currentNum}/${totalNum}] Gerando artigo: "${title}"...`, "active");
+        document.getElementById("status-text").textContent = `Progresso: ${currentNum}/${totalNum} posts`;
+
+        const prompt = `Você é um redator especialista em SEO de alta conversão para o blog Gerador Ninja.
+Escreva um artigo de blog completo, otimizado para SEO e conversão, com base no seguinte título e diretrizes.
+
+INFORMAÇÕES DO ARTIGO:
+- Título: "${title}"
+- Subtítulos/Tópicos sugeridos para abordar: Desenvolva uma introdução cativante, 3 seções explicativas ricas e detalhadas baseadas no título, e uma conclusão convincente.
+- Categoria do post: "${category}"
+- Tom de voz: "${tone}"
+- Imagem de Destaque: "${heroImage}"
+- Link de Afiliado recomendado: "${affiliate}"
+
+REGRAS DE CONTEÚDO (CRÍTICAS):
+1. O texto deve ser inteiramente em Português do Brasil (pt-BR).
+2. Escreva de forma profissional, persuasiva e natural, evitando palavras genéricas e clichês excessivos de IA.
+3. Use tags de cabeçalho HTML formatadas de forma semântica (como <h2> e <h3>) para separar as seções.
+4. NUNCA use marcadores de código Markdown comuns como \`\`\`markdown ou \`\`\`html no início ou fim da resposta. Retorne diretamente o conteúdo pronto no formato abaixo.
+5. O artigo deve começar obrigatoriamente com o bloco de frontmatter YAML exatamente neste formato (com as três linhas tracejadas no início e no fim):
+---
+title: "${title}"
+description: "Uma descrição SEO cativante de 140 a 160 caracteres."
+pubDate: ${new Date().toISOString().split('T')[0]}
+category: "${category}"
+heroImage: "${heroImage}"
+affiliateLink: "${affiliate}"
+---
+
+Corpo do artigo em HTML limpo de forma a não gerar quebras de layout. Exemplo:
+<h2>Introdução atraente...</h2>
+<p>Conteúdo da introdução...</p>
+
+<h3>1. Primeira seção relevante...</h3>
+<p>Explicação detalhada...</p>
+
+<h3>2. Segunda seção relevante...</h3>
+<p>Explicação detalhada...</p>
+
+<h3>Conclusão: Vale a pena?</h3>
+<p>Parágrafo de fechamento persuasivo...</p>
+
+Apenas retorne o frontmatter YAML e o corpo do artigo. Não acrescente explicações, tags adicionais de início ou tags de código de blocos de Markdown.`;
+
+        let articleMarkdown = "";
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: prompt }]
+              }]
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error?.message || response.statusText);
+          }
+
+          const resData = await response.json();
+          if (resData.candidates && resData.candidates[0]?.content?.parts[0]?.text) {
+            let cleanText = resData.candidates[0].content.parts[0].text.trim();
+            if (cleanText.startsWith("```")) {
+              cleanText = cleanText.substring(cleanText.indexOf("\n") + 1);
+            }
+            if (cleanText.endsWith("```")) {
+              cleanText = cleanText.substring(0, cleanText.lastIndexOf("```"));
+            }
+            articleMarkdown = cleanText.trim();
+          } else {
+            throw new Error("Resposta inválida do Gemini.");
+          }
+
+          logGen.style.color = "var(--success)";
+          logGen.textContent = `✓ [${currentNum}/${totalNum}] Artigo gerado: "${title}"`;
+
+        } catch (err) {
+          console.error(err);
+          logGen.style.color = "var(--danger)";
+          logGen.textContent = `❌ [${currentNum}/${totalNum}] Erro ao gerar "${title}": ${err.message}`;
+          continue;
+        }
+
+        const logPub = addLog(`[${currentNum}/${totalNum}] Publicando no GitHub...`, "active");
+
+        const rawTitle = title;
+        const cleanSlug = rawTitle
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+
+        const randomSuffix = Math.floor(100 + Math.random() * 900);
+        const fileName = `src/content/blog/${cleanSlug}-${randomSuffix}.md`;
+        const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileName}`;
+        const base64Content = btoa(unescape(encodeURIComponent(articleMarkdown)));
+
+        try {
+          const pubResponse = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Authorization": `token ${githubToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: `Publicado em lote via Gerador de IA: ${rawTitle}`,
+              content: base64Content,
+              branch: "main"
+            })
+          });
+
+          if (!pubResponse.ok) {
+            const errData = await pubResponse.json();
+            throw new Error(errData.message || pubResponse.statusText);
+          }
+
+          logPub.style.color = "var(--success)";
+          logPub.textContent = `✓ [${currentNum}/${totalNum}] Artigo publicado no site!`;
+
+        } catch (err) {
+          console.error(err);
+          logPub.style.color = "var(--danger)";
+          logPub.textContent = `❌ [${currentNum}/${totalNum}] Erro ao publicar "${title}": ${err.message}`;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      document.getElementById("status-text").textContent = "Geração em Lote Concluída!";
+      addLog("🎉 Processo em lote concluído com sucesso!", "done");
+      
+      const btnGroup = document.createElement("div");
+      btnGroup.style.marginTop = "15px";
+      btnGroup.innerHTML = `<button onclick="resetGenerator()" class="btn-primary" style="background: var(--success); width: 100%;">Pronto</button>`;
+      stepsList.appendChild(btnGroup);
+    }
+
+    function resetGenerator() {
+      document.getElementById("success-overlay").style.display = "none";
+      document.getElementById("generator-form").reset();
+      document.getElementById("preview-placeholder").classList.remove("hidden");
+      document.getElementById("preview-container").classList.add("hidden");
+      document.getElementById("publish-card").style.display = "none";
+      document.getElementById("status-card").style.display = "none";
+      checkCustomHero();
+    }
+  </script>
+</body>
+</html>

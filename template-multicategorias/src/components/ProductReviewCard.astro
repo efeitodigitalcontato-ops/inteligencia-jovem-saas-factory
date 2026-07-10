@@ -1,0 +1,372 @@
+---
+interface Props {
+  id?: string;
+  title: string;
+  image: string;
+  rating: number;
+  reviewsCount: string;
+  amazonLink: string;
+  priceEstimate: string;
+  specs: string[];
+  pros: string[];
+  cons: string[];
+  description: string;
+}
+
+const {
+  id,
+  title,
+  image,
+  rating,
+  reviewsCount,
+  amazonLink,
+  priceEstimate,
+  specs,
+  pros,
+  cons,
+  description
+} = Astro.props;
+---
+
+<div class="product-review-card" id={id}>
+  <div class="card-header-accent"></div>
+  <div class="card-grid">
+    <!-- Bloco Esquerdo: Imagem, Rating e Botão -->
+    <div class="media-column">
+      <div class="img-container">
+        <img src={image} alt={title} loading="lazy" width="200" height="200" decoding="async" />
+      </div>
+      
+      <div class="rating-box">
+        <div class="stars-row">
+          {"★".repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? "½" : "")}
+        </div>
+        <span class="rating-text"><strong>{rating} de 5</strong> ({reviewsCount} avaliações)</span>
+      </div>
+
+      <div class="price-indicator">
+        <span class="price-label">Faixa de preço:</span>
+        <span class="price-val">{priceEstimate}</span>
+      </div>
+
+      <a href={amazonLink} target="_blank" rel="noopener noreferrer nofollow" class="amazon-cta-btn">
+        <svg viewBox="0 0 24 24" class="cart-icon" fill="currentColor">
+          <path d="M17.21 9l-2.02-2.02c-.39-.39-1.02-.39-1.41 0L12 8.79 10.22 7c-.39-.39-1.02-.39-1.41 0L6.79 9H2v2h2l3.6 7.59c.31.67.98 1.11 1.72 1.11h8.36c.74 0 1.41-.44 1.72-1.11L20 11h2V9h-4.79zM12 9.01L14.99 6l1 1-3.99 4.01-1-1zm-6 2h12l-2.4 5H8.4L6 11.01zM12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+        </svg>
+        Ver Preço na Amazon
+      </a>
+    </div>
+
+    <!-- Bloco Direito: Detalhes, Especificações e Prós/Contras -->
+    <div class="info-column">
+      <h3 class="product-title">{title}</h3>
+      
+      <p class="product-desc">{description}</p>
+      
+      <div class="specs-box">
+        <h4 class="specs-title">Ficha Técnica & Destaques:</h4>
+        <ul class="specs-list">
+          {specs.map(spec => (
+            <li><strong>&bull;</strong> {spec}</li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Prós e Contras -->
+      <div class="pros-cons-grid">
+        <div class="pros-box">
+          <h5 class="pc-title pros-header">Prós</h5>
+          <ul class="pc-list">
+            {pros.map(pro => (
+              <li>
+                <span class="icon check">&check;</span>
+                <span class="pc-text">{pro}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div class="cons-box">
+          <h5 class="pc-title cons-header">Contras</h5>
+          <ul class="pc-list">
+            {cons.map(con => (
+              <li>
+                <span class="icon cross">&times;</span>
+                <span class="pc-text">{con}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-review-card {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-subtle);
+    margin: 2rem 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .product-review-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-header-accent {
+    height: 6px;
+    background-color: var(--primary-color);
+    width: 100%;
+  }
+
+  .card-grid {
+    padding: 1.75rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .card-grid {
+      grid-template-columns: 3.5fr 6.5fr;
+    }
+  }
+
+  /* Coluna da mídia (imagem e botões) */
+  .media-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .img-container {
+    width: 100%;
+    max-width: 220px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #f1f5f9;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background-color: #fff;
+  }
+
+  .img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .rating-box {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .stars-row {
+    color: #eab308;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .rating-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .price-indicator {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .price-label {
+    color: var(--text-muted);
+  }
+
+  .price-val {
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .amazon-cta-btn {
+    margin-top: 1.25rem;
+    width: 100%;
+    max-width: 240px;
+    background-color: #f97316;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+    transition: all 0.2s ease;
+  }
+
+  .amazon-cta-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3);
+  }
+
+  .cart-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Coluna de informações */
+  .info-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .product-title {
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .product-desc {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .specs-box {
+    background-color: #f8fafc;
+    border: 1px dashed var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .specs-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+
+  .specs-list {
+    list-style: none;
+    padding-left: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  @media (min-width: 576px) {
+    .specs-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .specs-list li {
+    font-size: 0.85rem;
+    color: #475569;
+  }
+
+  .specs-list li strong {
+    color: var(--primary-color);
+    margin-right: 0.25rem;
+  }
+
+  /* Prós e contras */
+  .pros-cons-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 576px) {
+    .pros-cons-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .pros-box, .cons-box {
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .pros-box {
+    background-color: #f0fdf4; /* Verde suave */
+    border: 1px solid #dcfce7;
+  }
+
+  .cons-box {
+    background-color: #fef2f2; /* Vermelho suave */
+    border: 1px solid #fee2e2;
+  }
+
+  .pc-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .pros-header {
+    color: #15803d;
+  }
+
+  .cons-header {
+    color: #b91c1c;
+  }
+
+  .pc-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pc-list li {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .icon {
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .icon.check {
+    color: #16a34a;
+  }
+
+  .icon.cross {
+    color: #dc2626;
+    font-size: 1.2rem;
+    margin-top: -0.1rem;
+  }
+
+  .pc-text {
+    color: #334155;
+  }
+</style>

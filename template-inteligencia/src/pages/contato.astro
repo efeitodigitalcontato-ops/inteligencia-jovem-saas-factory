@@ -1,0 +1,132 @@
+---
+import Layout from '../layouts/Layout.astro';
+import siteConfig from '../siteConfig.json';
+---
+
+<Layout title={`Contato | ${siteConfig.title}`} description={`Entre em contato com a equipe do ${siteConfig.title} para dúvidas, sugestões ou parcerias comerciais.`}>
+  <div class="contact-page">
+    <h1 class="page-title">Contato</h1>
+    
+    <p class="page-intro">Tem alguma dúvida, sugestão de análise ou proposta comercial? Preencha o formulário abaixo e nossa equipe responderá o mais rápido possível!</p>
+
+    <form class="contact-form" action="#" method="POST" onsubmit="event.preventDefault(); alert('Mensagem enviada com sucesso! Entraremos em contato em breve.'); this.reset();">
+      <div class="form-group">
+        <label for="name">O seu nome</label>
+        <input type="text" id="name" name="name" required placeholder="Digite seu nome completo" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">O seu e-mail</label>
+        <input type="email" id="email" name="email" required placeholder="seuemail@exemplo.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="subject">Assunto</label>
+        <input type="text" id="subject" name="subject" required placeholder="Ex: Dúvida sobre colchão, Parceria..." />
+      </div>
+
+      <div class="form-group">
+        <label for="message">A sua mensagem (opcional)</label>
+        <textarea id="message" name="message" rows="7" placeholder="Escreva sua mensagem aqui..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">Submeter</button>
+    </form>
+  </div>
+</Layout>
+
+<style>
+  .contact-page {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  @media (min-width: 768px) {
+    .contact-page {
+      padding: 3rem;
+    }
+  }
+
+  .page-title {
+    font-size: 2.25rem;
+    color: #0f172a;
+    margin-bottom: 1rem;
+    font-weight: 800;
+  }
+
+  .page-intro {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 650px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .form-group input, .form-group textarea {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    background-color: #f0f9ff;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .form-group input::placeholder, .form-group textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+  }
+
+  .submit-btn {
+    align-self: flex-start;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.75rem 2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-subtle);
+    transition: all 0.2s ease;
+  }
+
+  .submit-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+</style>

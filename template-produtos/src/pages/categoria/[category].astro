@@ -1,0 +1,56 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  try {
+    const siloPath = path.resolve('./src/data/silo.json');
+    if (fs.existsSync(siloPath)) {
+      const silo = JSON.parse(fs.readFileSync(siloPath, 'utf-8'));
+      return (silo.categories || []).map(cat => ({
+        params: { category: cat.slug },
+        props: { categoryData: cat }
+      }));
+    }
+  } catch (e) {
+    console.error("getStaticPaths error in categoria:", e);
+  }
+  return [];
+}
+
+const { categoryData } = Astro.props;
+---
+
+<Layout title={`${categoryData.name} | Hub Principal`} description={categoryData.description || `Guia completo sobre ${categoryData.name}`}>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
+    <nav style="margin-bottom: 1.5rem; font-size: 0.9rem; color: #64748b;">
+      <a href="/" style="color: #6366f1; text-decoration: none; font-weight: 500;">Home</a>
+      <span style="margin: 0 0.5rem; color: #94a3b8;">&gt;</span>
+      <span style="color: #94a3b8;">{categoryData.name}</span>
+    </nav>
+
+    <h1 style="font-size: 2.5rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem;">{categoryData.name}</h1>
+    <p style="font-size: 1.15rem; line-height: 1.6; color: #475569; margin-bottom: 2.5rem;">{categoryData.description}</p>
+
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+      {categoryData.subcategories.map(subcat => (
+        <section style="padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+          <h2 style="margin-top: 0; font-size: 1.5rem; color: #0f172a; margin-bottom: 0.75rem;">
+            <a href={`/subcategoria/${subcat.slug}`} style="color: #6366f1; text-decoration: none; hover: underline;">{subcat.name}</a>
+          </h2>
+          <p style="font-size: 1rem; color: #475569; line-height: 1.5; margin-bottom: 1.5rem;">{subcat.description}</p>
+          
+          <h3 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Artigos em Destaque:</h3>
+          <ul style="padding-left: 1.25rem; line-height: 1.8; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+            {subcat.articles.map(art => (
+              <li>
+                <a href={`/${art.slug}`} style="color: #1e293b; font-weight: 500; text-decoration: none; hover: underline; font-size: 1.05rem;">{art.title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  </main>
+</Layout>

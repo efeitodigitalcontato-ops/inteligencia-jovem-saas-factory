@@ -1,0 +1,15 @@
+node_modules
+.DS_Store
+.env
+.vercel
+temp_build
+*.log
+cache/
+queue/
+scratch/
+check_blocked_deploys.js
+check_tags.js
+find_vercel_pro.js
+get_team_settings.js
+
+

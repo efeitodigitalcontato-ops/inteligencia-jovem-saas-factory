@@ -1,0 +1,204 @@
+[
+  {
+    "name": "Randerson",
+    "email": "rannet10@gmail.com",
+    "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
+    "approved": false,
+    "createdAt": "2026-07-02T14:36:38.616Z",
+    "sites": [],
+    "geminiApiKey": ""
+  },
+  {
+    "name": "Randerson",
+    "email": "randersoncontato@gmail.com",
+    "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
+    "approved": true,
+    "createdAt": "2026-07-02T15:04:54.954Z",
+    "sites": [
+      {
+        "repoName": "afiliados-blog-melhores-tnis",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-tnis",
+        "deployUrl": "https://afiliados-blog-melhores-tnis.vercel.app",
+        "theme": "Melhores Tênis"
+      },
+      {
+        "repoName": "afiliados-blog-fogoes",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-fogoes",
+        "deployUrl": "https://icagro.com.br",
+        "theme": "icagro.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-perfumes",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-perfumes",
+        "deployUrl": "https://bibliolab.com.br",
+        "theme": "bibliolab.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-caixasdesom",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-caixasdesom",
+        "deployUrl": "https://acusticateoria.com.br",
+        "theme": "acusticateoria.com.br",
+        "lastSeoKeyword": "melhores caixas de som custo beneficio",
+        "lastSeoPosition": 0,
+        "lastSeoDate": "2026-07-03T22:57:59.600Z"
+      },
+      {
+        "repoName": "afiliados-blog-maquinadelavar",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-maquinadelavar",
+        "deployUrl": "https://ibpefex.com.br",
+        "theme": "ibpefex.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-sofas",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-sofas",
+        "deployUrl": "https://etecsr.com.br",
+        "theme": "etecsr.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-bicicletas",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-bicicletas",
+        "deployUrl": "https://estarsaudemental.com.br",
+        "theme": "estarsaudemental.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-panelas",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-panelas",
+        "deployUrl": "https://colinadepedra.com.br",
+        "theme": "colinadepedra.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-edicoesdejaneiro",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-edicoesdejaneiro",
+        "deployUrl": "https://edicoesdejaneiro.com.br",
+        "theme": "edicoesdejaneiro.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-dosertao",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-dosertao",
+        "deployUrl": "https://dosertao.com.br",
+        "theme": "dosertao.com.br"
+      },
+      {
+        "repoName": "afiliados-blog-colchoes-inteligencia-jovem",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-colchoes-inteligencia-jovem",
+        "deployUrl": "https://inteligenciajovem.com.br",
+        "theme": "inteligenciajovem.com.br",
+        "lastSeoKeyword": "melhores colchões queen",
+        "lastSeoPosition": 0,
+        "lastSeoDate": "2026-07-03T16:49:26.325Z"
+      },
+      {
+        "repoName": "test-blog-creation-1227",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/test-blog-creation-1227",
+        "deployUrl": "https://test-blog-creation-1227.vercel.app",
+        "theme": "Test Blog"
+      },
+      {
+        "repoName": "afiliados-blog-melhores-equipamentos-de-energia-solar-diy",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-equipamentos-de-energia-solar-diy",
+        "deployUrl": "https://afiliados-blog-melhores-equipamentos-de-energia-solar-diy.vercel.app",
+        "theme": "Melhores Equipamentos de Energia Solar DIY"
+      },
+      {
+        "repoName": "afiliados-blog-melhores-equipamentos-de-robs-aspiradores-limpeza",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-equipamentos-de-robs-aspiradores-limpeza",
+        "deployUrl": "https://afiliados-blog-melhores-equipamentos-de-robs-aspiradores-limpeza.vercel.app",
+        "theme": "Melhores Equipamentos de Robôs Aspiradores & Limpeza"
+      },
+      {
+        "repoName": "afiliados-blog-melhores-equipamentos-de-eletrodomsticos-de-cozinha",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-equipamentos-de-eletrodomsticos-de-cozinha",
+        "deployUrl": "https://afiliados-blog-melhores-equipamentos-de-eletrodomsticos-de-cozinha.vercel.app",
+        "theme": "Melhores Equipamentos de Eletrodomésticos de Cozinha"
+      },
+      {
+        "repoName": "afiliados-blog-melhores-equipamentos-de-casa-inteligente",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-equipamentos-de-casa-inteligente",
+        "deployUrl": "https://afiliados-blog-melhores-equipamentos-de-casa-inteligente.vercel.app",
+        "theme": "Melhores Equipamentos de Casa Inteligente"
+      },
+      {
+        "repoName": "afiliados-blog-melhores-equipamentos-de-varanda-lazer-externo",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-equipamentos-de-varanda-lazer-externo",
+        "deployUrl": "https://afiliados-blog-melhores-equipamentos-de-varanda-lazer-externo.vercel.app",
+        "theme": "Melhores Equipamentos de Varanda & Lazer Externo"
+      }
+    ],
+    "geminiApiKey": "enc:QVEuQWI4Uk42SVRMV1p6eEJXQUpZRnc0d25QeFQxTEJ2SXZlemhSckRWMFB0SkkxZ3RwYUE=",
+    "vercelToken": "enc:dmNwXzBDM0tmV3pQSGdBQWViQkw2eVZtREZmZkFnZ1RqSEFySDBLdnJ5UjQ5T0RXbFdLeDRUM1NoUXJl",
+    "vercelTeamId": "team_Wd4A9CtlI7gAntKGdcxvaG2N",
+    "twoFactorEnabled": true,
+    "githubToken": "",
+    "twoFactorSecret": "AU45O6TLGP643HEY"
+  },
+  {
+    "name": "01 01",
+    "email": "efeitodigitalcontato3@gmail.com",
+    "password": "797e3552604803aef21bb3e2ce7e66768be2513089280002f846f2fd7ab79baf",
+    "approved": true,
+    "createdAt": "2026-07-02T17:14:27.699Z",
+    "sites": [
+      {
+        "repoName": "afiliados-blog-melhores-tnis-para-corrida-custo-benefcio",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-tnis-para-corrida-custo-benefcio",
+        "deployUrl": "https://afiliados-blog-melhores-tnis-para-corrida-custo-benefcio.vercel.app",
+        "theme": "Melhores tênis para corrida custo-benefício "
+      },
+      {
+        "repoName": "afiliados-blog-melhores-tnis-para-corrida-custo-benefcio-4090",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-tnis-para-corrida-custo-benefcio-4090",
+        "deployUrl": "https://afiliados-blog-melhores-tnis-para-corrida-custo-benefcio-4090.vercel.app",
+        "theme": "Melhores tênis para corrida custo-benefício "
+      },
+      {
+        "repoName": "afiliados-blog-melhores-tnis-de-corrida",
+        "repoUrl": "https://github.com/efeitodigitalcontato-ops/afiliados-blog-melhores-tnis-de-corrida",
+        "deployUrl": "https://afiliados-blog-melhores-tnis-de-corrida.vercel.app",
+        "theme": "Melhores Tênis de Corrida"
+      }
+    ],
+    "geminiApiKey": "enc:QVEuQWI4Uk42SU80NnJVaWJtWllVR01JeGx2V2dFYUo4N2thdmp1NEdpdFBLTHRLbng2a2c=",
+    "vercelToken": "enc:dmNwXzBDM0tmV3pQSGdBQWViQkw2eVZtREZmZkFnZ1RqSEFySDBLdnJ5UjQ5T0RXbFdLeDRUM1NoUXJl",
+    "vercelTeamId": "team_Wd4A9CtlI7gAntKGdcxvaG2N"
+  },
+  {
+    "name": "Educação Online",
+    "email": "efeitodigitalcontato@gmail.com",
+    "password": "48f3ba0b1dc34810be0243135983265b2d52d348a3d846a313054ebf8c8e6020",
+    "approved": false,
+    "createdAt": "2026-07-08T18:13:14.397Z",
+    "sites": [],
+    "geminiApiKey": ""
+  },
+  {
+    "name": "Randerson Freire",
+    "email": "randersonfreire2023@gmail.com",
+    "password": "4a79c5c6dc23e23dcf97f31717b0f8272bfdd3aeec1e4adb62dbc76930634c29",
+    "approved": false,
+    "createdAt": "2026-07-08T18:13:37.071Z",
+    "sites": [],
+    "geminiApiKey": ""
+  },
+  {
+    "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
+    "name": "Efeito Digital 2",
+    "createdAt": "2026-07-08T00:00:00.000Z",
+    "approved": true,
+    "email": "efeitodigital2@gmail.com",
+    "sites": [],
+    "geminiApiKey": "",
+    "githubToken": "rev:V25YQjUwZFREY2tqVUNBUk1DU21wZURkRWVMYmhkbmlHR0l2X3BoZw==",
+    "vercelToken": "rev:ZXJRaFMzVDR4S1dsV0RPOTRSeXJ2SzBIckFIalRnZ0FmZkZEbVZ5NkxCYmVBQWdIUHpXZkszQzBfcGN2",
+    "vercelTeamId": "team_Wd4A9CtlI7gAntKGdcxvaG2N",
+    "onboardingComplete": true
+  },
+  {
+    "name": "Eilane Alves",
+    "email": "eilanealves@yahoo.com.br",
+    "password": "1d82c48bf08dee0e75c26daa7a39c7f0957dcc40cd1ca74f280d25b8875037e0",
+    "approved": true,
+    "createdAt": "2026-07-09T18:21:57.072Z",
+    "sites": [],
+    "geminiApiKey": ""
+  }
+]

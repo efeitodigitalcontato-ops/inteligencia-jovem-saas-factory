@@ -1,0 +1,59 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
+
+export async function getStaticPaths() {
+  try {
+    const siloPath = path.resolve('./src/data/silo.json');
+    if (fs.existsSync(siloPath)) {
+      const silo = JSON.parse(fs.readFileSync(siloPath, 'utf-8'));
+      const paths = [];
+      for (const cat of silo.categories || []) {
+        for (const subcat of cat.subcategories || []) {
+          paths.push({
+            params: { subcategory: subcat.slug },
+            props: { subcategoryData: subcat, parentCategory: { name: cat.name, slug: cat.slug } }
+          });
+        }
+      }
+      return paths;
+    }
+  } catch (e) {
+    console.error("getStaticPaths error in subcategoria:", e);
+  }
+  return [];
+}
+
+const { subcategoryData, parentCategory } = Astro.props;
+---
+
+<Layout title={`${subcategoryData.name} | Guia Completo`} description={subcategoryData.description || `Reviews e artigos sobre ${subcategoryData.name}`}>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
+    <nav style="margin-bottom: 1.5rem; font-size: 0.9rem; color: #64748b;">
+      <a href="/" style="color: #6366f1; text-decoration: none; font-weight: 500;">Home</a>
+      <span style="margin: 0 0.5rem; color: #94a3b8;">&gt;</span>
+      <a href={`/categoria/${parentCategory.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 500;">{parentCategory.name}</a>
+      <span style="margin: 0 0.5rem; color: #94a3b8;">&gt;</span>
+      <span style="color: #94a3b8;">{subcategoryData.name}</span>
+    </nav>
+
+    <h1 style="font-size: 2.2rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem;">{subcategoryData.name}</h1>
+    <p style="font-size: 1.15rem; line-height: 1.6; color: #475569; margin-bottom: 2.5rem;">{subcategoryData.description}</p>
+
+    <div style="padding: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <h2 style="margin-top: 0; font-size: 1.3rem; color: #0f172a; margin-bottom: 1.25rem;">Artigos e Reviews Disponíveis:</h2>
+      <ul style="padding-left: 1.5rem; line-height: 2; margin: 0; font-size: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+        {subcategoryData.articles.map(art => (
+          <li>
+            <a href={`/${art.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 500; hover: underline;">{art.title}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+    
+    <div style="margin-top: 2.5rem; text-align: center;">
+      <a href={`/categoria/${parentCategory.slug}`} style="color: #6366f1; text-decoration: none; font-weight: 600; hover: underline;">&larr; Voltar para a categoria principal {parentCategory.name}</a>
+    </div>
+  </main>
+</Layout>

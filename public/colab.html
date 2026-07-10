@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colab Ninja — Gerador com Gemma 2:9b</title>
+  <meta name="description" content="Controle sua máquina de conteúdo Google Colab diretamente pelo GeradorNinja. Gere artigos com Gemma 2:9b sem abrir o Colab.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+  <style>
+    /* ========== COLAB PAGE SPECIFIC STYLES ========== */
+    .colab-hero {
+      background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.08) 100%);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .colab-hero-icon {
+      font-size: 3.5rem;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 20px rgba(99,102,241,0.5));
+      animation: pulse-icon 3s ease-in-out infinite;
+    }
+    @keyframes pulse-icon {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .colab-hero-text h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+    }
+    .colab-hero-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Connection Panel */
+    .connection-panel {
+      background: rgba(17,24,39,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .connection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .connection-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .status-badge.offline {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .status-badge.online {
+      background: rgba(16,185,129,0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.3);
+      animation: pulse-online 2s ease-in-out infinite;
+    }
+    .status-badge.checking {
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245,158,11,0.3);
+    }
+    @keyframes pulse-online {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.2); }
+      50% { box-shadow: 0 0 0 4px rgba(16,185,129,0.0); }
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .status-badge.online .status-dot {
+      animation: blink-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .ngrok-input-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .ngrok-input-row input {
+      flex: 1;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: 'Outfit', monospace;
+      font-size: 0.88rem;
+      transition: all 0.3s ease;
+    }
+    .ngrok-input-row input:focus {
+      outline: none;
+      border-color: rgba(99,102,241,0.5);
+      background: rgba(99,102,241,0.05);
+    }
+    .ngrok-input-row input::placeholder {
+      color: rgba(156,163,175,0.5);
+    }
+    .btn-test {
+      padding: 0.75rem 1.2rem;
+      border-radius: 10px;
+      border: 1px solid rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.1);
+      color: #a78bfa;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .btn-test:hover {
+      background: rgba(99,102,241,0.2);
+      border-color: rgba(99,102,241,0.6);
+      transform: translateY(-1px);
+    }
+    .btn-test:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Step Guide */
+    .steps-guide {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 680px) {
+      .steps-guide { grid-template-columns: 1fr; }
+    }
+    .step-card {
+      background: rgba(17,24,39,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1.2rem;
+      position: relative;
+    }
+    .step-card.done {
+      border-color: rgba(16,185,129,0.3);
+      background: rgba(16,185,129,0.05);
+    }
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(99,102,241,0.2);
+      color: #a78bfa;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.7rem;
+    }
+    .step-card.done .step-number {
+      background: rgba(16,185,129,0.2);
+      color: #6ee7b7;
+    }
+    .step-card h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-main);
+    }
+    .step-card p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Main Form */
+    .main-form-card {
+      background: rgba(17,24,39,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 1.8rem;
+    }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 580px) {
+      .form-row-2 { grid-template-columns: 1fr; }
+    }
+    .field-label {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field-select, .field-input {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      appearance: none;
+    }
+    .field-select:focus, .field-input:focus {
+      outline: none;
+      border-color: rgba(99,102,241,0.5);
+      background: rgba(99,102,241,0.05);
+    }
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Topics Area */
+    .topics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .topics-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(99,102,241,0.12);
+      color: #a78bfa;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+    .topics-textarea {
+      width: 100%;
+      min-height: 220px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 1rem;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+    .topics-textarea:focus {
+      outline: none;
+      border-color: rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.03);
+    }
+    .topics-textarea::placeholder {
+      color: rgba(156,163,175,0.4);
+      font-size: 0.82rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .btn-generate {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-generate:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99,102,241,0.45);
+    }
+    .btn-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-deploy {
+      padding: 1rem 1.5rem;
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 12px;
+      background: rgba(16,185,129,0.1);
+      color: #6ee7b7;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-deploy:hover:not(:disabled) {
+      background: rgba(16,185,129,0.2);
+      transform: translateY(-2px);
+    }
+    .btn-deploy:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Progress Area */
+    .progress-area {
+      margin-top: 1.5rem;
+      display: none;
+    }
+    .progress-area.visible {
+      display: block;
+    }
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+    .progress-status {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #a78bfa;
+    }
+    .progress-timer {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .progress-bar-track {
+      height: 8px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      background-size: 200% 100%;
+      transition: width 0.5s ease;
+      animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .progress-chips {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .chip-ok { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .chip-fail { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .chip-pending { background: rgba(245,158,11,0.15); color: #fcd34d; }
+    .chip-speed { background: rgba(99,102,241,0.15); color: #a78bfa; }
+
+    .log-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      color: #9ca3af;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+    .log-box .log-ok { color: #6ee7b7; }
+    .log-box .log-err { color: #fca5a5; }
+    .log-box .log-info { color: #a78bfa; }
+
+    /* Spinning animation */
+    .spin {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Alert banners */
+    .alert-box {
+      padding: 0.9rem 1.2rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      line-height: 1.5;
+    }
+    .alert-info {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.25);
+      color: #93c5fd;
+    }
+    .alert-warn {
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      color: #fcd34d;
+    }
+    .alert-success {
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      color: #6ee7b7;
+    }
+
+    /* Current article preview */
+    .current-article {
+      background: rgba(99,102,241,0.05);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.82rem;
+      color: #c4b5fd;
+      display: none;
+    }
+    .current-article.visible {
+      display: block;
+    }
+    .current-article strong {
+      color: #a78bfa;
+    }
+  </style>
+</head>
+<body class="dark-theme">
+
+  <!-- Background Glow Orbs -->
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="app-container" style="max-width: 900px; margin: 0 auto; padding: 0 1.5rem 3rem;">
+
+    <!-- Header -->
+    <header class="app-header" style="padding: 1.5rem 0;">
+      <div class="logo-container">
+        <div class="logo-icon" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 14px; padding: 0.5rem; display:flex; align-items:center; justify-content:center; width:52px; height:52px; box-shadow: 0 4px 20px rgba(99,102,241,0.35);">
+          <span style="font-size: 1.6rem;">🧠</span>
+        </div>
+        <div class="logo-text">
+          <h1 style="font-size:1.4rem; font-weight:800;">Colab Ninja <span style="font-size:0.7rem; background: rgba(99,102,241,0.2); color:#a78bfa; padding:0.2rem 0.6rem; border-radius:8px; font-weight:600; vertical-align:middle;">GEMMA 2 · 9B</span></h1>
+          <p style="font-size:0.82rem; color:var(--text-muted);">Máquina de conteúdo infinita — controlada aqui</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="mp-btn mp-btn-secondary" style="font-size:0.82rem;">🔙 Painel Principal</a>
+      </div>
+    </header>
+
+    <!-- Hero Card -->
+    <div class="colab-hero">
+      <div class="colab-hero-icon">🤖</div>
+      <div class="colab-hero-text">
+        <h2>Gemma 2 · 9B Parâmetros</h2>
+        <p>Cole a URL do Colab abaixo e comande sua máquina de conteúdo diretamente daqui. O Colab fica rodando em segundo plano — você só precisa desta página aberta.</p>
+      </div>
+    </div>
+
+    <!-- Steps Guide -->
+    <div class="steps-guide">
+      <div class="step-card" id="step1Card">
+        <div class="step-number" id="step1Num">1</div>
+        <h4>🚀 Inicie o Colab</h4>
+        <p>Execute as células 1, 2 e 3 no Google Colab. A célula 3 exibirá a URL ngrok.</p>
+      </div>
+      <div class="step-card" id="step2Card">
+        <div class="step-number" id="step2Num">2</div>
+        <h4>🔗 Cole a URL</h4>
+        <p>Copie a URL gerada pelo ngrok e cole no campo abaixo. Clique em "Testar".</p>
+      </div>
+      <div class="step-card" id="step3Card">
+        <div class="step-number" id="step3Num">3</div>
+        <h4>🎯 Gere Conteúdo</h4>
+        <p>Escolha o blog, cole seus temas e clique em Gerar. Minimize o Colab!</p>
+      </div>
+    </div>
+
+    <!-- Alert: Colab Cell 3 Info -->
+    <div class="alert-info alert-box" id="colabCellAlert">
+      <span style="font-size:1.1rem; flex-shrink:0;">💡</span>
+      <span>Adicione a <strong>Célula 3</strong> no seu notebook Colab. Ela instala o servidor Flask + ngrok e exibe a URL para você colar aqui. <a href="#" id="showCell3Btn" style="color:#60a5fa; text-decoration:underline; cursor:pointer;">Ver código da Célula 3 →</a></span>
+    </div>
+
+    <!-- Cell 3 Code Block (hidden by default) -->
+    <div id="cell3CodeBlock" style="display:none; margin-bottom:1.5rem;">
+      <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; overflow: hidden;">
+        <div style="background: rgba(99,102,241,0.1); padding: 0.7rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.82rem; color:#a78bfa; font-weight:600;">📋 Célula 3 — Cole no Google Colab</span>
+          <button onclick="copyCell3()" style="background:rgba(99,102,241,0.2); border:1px solid rgba(99,102,241,0.3); color:#a78bfa; padding:0.3rem 0.8rem; border-radius:6px; font-size:0.75rem; cursor:pointer; font-family:'Outfit',sans-serif; font-weight:600;">📋 Copiar</button>
+        </div>
+        <pre id="cell3Code" style="padding:1.2rem; font-size:0.78rem; color:#9ca3af; overflow-x:auto; line-height:1.7; white-space:pre-wrap;"><!-- Colab Cell 3 code injected by JS --></pre>
+      </div>
+    </div>
+
+    <!-- Connection Panel -->
+    <div class="connection-panel">
+      <div class="connection-header">
+        <h3>🔌 Conexão com o Colab</h3>
+        <div class="status-badge offline" id="statusBadge">
+          <div class="status-dot"></div>
+          <span id="statusText">Desconectado</span>
+        </div>
+      </div>
+      <div class="ngrok-input-row">
+        <input
+          type="url"
+          id="ngrokUrl"
+          placeholder="https://abc123.ngrok-free.app"
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button class="btn-test" id="testBtn" onclick="testConnection()">
+          🔍 Testar
+        </button>
+        <button class="btn-test" id="saveBtn" onclick="saveUrl()" style="border-color:rgba(16,185,129,0.4); color:#6ee7b7;">
+          💾 Salvar
+        </button>
+      </div>
+      <div id="modelInfo" style="margin-top:0.75rem; font-size:0.78rem; color:var(--text-muted); display:none;"></div>
+    </div>
+
+    <!-- Main Generation Form -->
+    <div class="main-form-card">
+      <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:1.5rem;">📝 Configurar Geração em Lote</h2>
+
+      <div class="form-row-2">
+        <!-- Blog Selector -->
+        <div>
+          <label class="field-label">🌐 Blog de Destino</label>
+          <div class="select-wrapper">
+            <select class="field-select" id="blogSelect">
+              <option value="afiliados-blog-colchoes-inteligencia-jovem">Inteligência Jovem — Colchões</option>
+            </select>
+          </div>
+        </div>
+        <!-- E-mail do Usuário -->
+        <div>
+          <label class="field-label">📧 E-mail do Usuário</label>
+          <input
+            type="email"
+            class="field-input"
+            id="userEmail"
+            placeholder="seu-email@gmail.com"
+            disabled
+            style="opacity: 0.7; cursor: not-allowed;"
+          >
+        </div>
+      </div>
+
+      <div class="form-row-2" style="margin-top: 1rem;">
+        <!-- GitHub Token -->
+        <div>
+          <label class="field-label">🔑 Token GitHub</label>
+          <input
+            type="password"
+            class="field-input"
+            id="githubToken"
+            placeholder="ghp_... (salvo na conta)"
+          >
+        </div>
+        <!-- Token Vercel -->
+        <div>
+          <label class="field-label">⚡ Token Vercel</label>
+          <input
+            type="password"
+            class="field-input"
+            id="vercelToken"
+            placeholder="vcp_... (salvo na conta)"
+          >
+        </div>
+      </div>
+
+      <div style="margin-top: 0.75rem; margin-bottom: 1.5rem; text-align: right;">
+        <button class="btn-test" id="saveTokensBtn" onclick="saveTokensToServer()" style="border-color:rgba(16,185,129,0.4); color:#6ee7b7; padding: 0.4rem 1rem;">
+          💾 Salvar Tokens na Conta
+        </button>
+      </div>
+
+      <!-- Topics Textarea -->
+      <div style="margin-bottom:0;">
+        <div class="topics-header">
+          <label class="field-label" style="margin-bottom:0;">📋 Temas / Títulos dos Artigos</label>
+          <div class="topics-counter" id="topicsCounter">0 temas</div>
+        </div>
+        <p style="font-size:0.76rem; color:var(--text-muted); margin:0.3rem 0 0.6rem;">Cole seus temas, um por linha. Numerados ou não — funciona do mesmo jeito.</p>
+        <textarea
+          class="topics-textarea"
+          id="topicsTextarea"
+          placeholder="Descubra o Colchão Híbrido: A Fusão Perfeita de Conforto e Suporte
+Desvende os Segredos dos Colchões Híbridos
+O Colchão Híbrido é Bom Mesmo? Análise Profunda...
+(Cole até 1000 temas aqui — um por linha)"
+        ></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn-generate" id="generateBtn" onclick="startGeneration()">
+          🚀 Gerar Artigos com Gemma 2:9b
+        </button>
+        <button class="btn-deploy" id="deployBtn" onclick="triggerDeploy()">
+          ✈️ Deploy Vercel
+        </button>
+        <button class="btn-test" id="stopBtn" onclick="stopGeneration()" style="display:none; border-color:rgba(239,68,68,0.4); color:#fca5a5;">
+          ⏹ Parar
+        </button>
+      </div>
+
+      <!-- Progress Area -->
+      <div class="progress-area" id="progressArea">
+
+        <!-- Current article indicator -->
+        <div class="current-article" id="currentArticle">
+          <strong>⚡ Gerando agora:</strong> <span id="currentTitle"></span>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-top">
+          <span class="progress-status" id="progressStatus">⏳ Preparando...</span>
+          <span class="progress-timer" id="progressTimer">00:00</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+
+        <!-- Chips -->
+        <div class="progress-chips">
+          <span class="chip chip-ok" id="chipOk">✅ 0 concluídos</span>
+          <span class="chip chip-fail" id="chipFail">❌ 0 falhas</span>
+          <span class="chip chip-pending" id="chipPending">⏳ 0 restantes</span>
+          <span class="chip chip-speed" id="chipSpeed">⚡ ~0 art/h</span>
+        </div>
+
+        <!-- Log box -->
+        <div class="log-box" id="logBox">Aguardando início da geração...</div>
+      </div>
+    </div>
+
+    <!-- Footer info -->
+    <div style="text-align:center; margin-top:2rem; color:var(--text-muted); font-size:0.75rem; line-height:2;">
+      🧠 Gemma 2:2b (CPU Light) via Ollama no Google Colab &nbsp;·&nbsp; 🔒 Token GitHub salvo apenas no seu navegador &nbsp;·&nbsp; ⚡ ngrok + Flask API
+    </div>
+
+  </div>
+
+  <script src="colab.js?v=2"></script>
+</body>
+</html>

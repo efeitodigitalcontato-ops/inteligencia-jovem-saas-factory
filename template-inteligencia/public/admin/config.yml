@@ -1,0 +1,34 @@
+backend:
+  name: github
+  repo: efeitodigitalcontato-ops/afiliados-blog-colchoes-inteligencia-jovem
+  branch: main
+  site_domain: inteligenciajovem.com.br
+  # Usamos a API própria e segura que criamos para o seu domínio na Vercel
+  base_url: https://inteligenciajovem.com.br
+  auth_endpoint: api/auth
+
+# Permite rodar o CMS localmente com 'npx decap-cms-proxy-server'
+local_backend: true
+
+# Configurações de Mídia
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# Coleções de Conteúdo
+collections:
+  - name: "blog"
+    label: "Artigos"
+    label_singular: "Artigo"
+    folder: "src/content/blog"
+    create: true
+    slug: "{{slug}}"
+    format: "frontmatter"
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Descrição (SEO)", name: "description", widget: "text" }
+      - { label: "Data de Publicação", name: "pubDate", widget: "datetime", type: "date", format: "YYYY-MM-DD", default: "" }
+      - { label: "Imagem de Destaque", name: "heroImage", widget: "image", required: false }
+      - { label: "Link de Afiliado Customizado", name: "affiliateLink", widget: "string", required: false }
+      - { label: "Categoria", name: "category", widget: "select", options: ["colchoes", "dicas", "camas"], default: "colchoes", required: false }
+      - { label: "Autor", name: "author", widget: "string", default: "Equipe Melhores Colchões" }
+      - { label: "Corpo do Artigo", name: "body", widget: "markdown" }
