@@ -1607,7 +1607,7 @@ app.post('/api/generate-title-ideas', async (req, res) => {
     const prompt = `Você é um especialista em SEO avançado, tráfego orgânico de cauda longa, intenções de busca e micromomentos (Quero Saber, Quero Fazer, Quero Comprar, Quero Ir).
 Sua tarefa é usar a sua ferramenta de busca (Google Search) para pesquisar sobre a palavra-chave semente "${keyword}" e analisar os resultados reais, dúvidas frequentes do público, perguntas reais do "As Pessoas Também Perguntam" (People Also Ask) e discussões online reais.
 
-Com base nas pesquisas verdadeiras feitas na busca do Google e no tema do blog "${theme || 'Geral'}", gere uma lista de EXATAMENTE 10 ideias de títulos de postagem extremamente originais, criativas e otimizadas para taxa de clique (CTR) alta e SEO.
+Com base nas pesquisas verdadeiras feitas na busca do Google e no tema do blog "${theme || 'Geral'}", gere uma lista de EXATAMENTE 20 ideias de títulos de postagem extremamente originais, criativas e otimizadas para taxa de clique (CTR) alta e SEO.
 
 Aqui estão algumas sugestões iniciais de autocomplete do Google:
 ${suggestions.length > 0 ? suggestions.map(s => `- ${s}`).join('\n') : '(Nenhuma sugestão de autocomplete disponível, confie inteiramente na sua pesquisa ao vivo)'}

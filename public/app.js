@@ -1393,7 +1393,7 @@ if (btnGetIdeas) {
       const prompt = `Você é um especialista em SEO avançado, tráfego orgânico de cauda longa, intenções de busca e micromomentos (Quero Saber, Quero Fazer, Quero Comprar, Quero Ir).
 Sua tarefa é usar a sua ferramenta de busca (Google Search) para pesquisar sobre a palavra-chave semente "${keyword}" e analisar os resultados reais, dúvidas frequentes do público, perguntas reais do "As Pessoas Também Perguntam" (People Also Ask) e discussões online reais.
 
-Com base nas pesquisas verdadeiras feitas na busca do Google e no tema do blog "${theme}", gere uma lista de EXATAMENTE 100 ideias de títulos de postagem extremamente originais, criativas e otimizadas para taxa de clique (CTR) alta e SEO.
+Com base nas pesquisas verdadeiras feitas na busca do Google e no tema do blog "${theme}", gere uma lista de EXATAMENTE 20 ideias de títulos de postagem extremamente originais, criativas e otimizadas para taxa de clique (CTR) alta e SEO.
 
 REGRAS CRÍTICAS PARA EVITAR REPETIÇÃO E MONOTONIA:
 1. NUNCA comece dois títulos com o mesmo prefixo ou palavra! Varie totalmente a primeira palavra de cada título.
@@ -1430,7 +1430,7 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
         throw new Error(data.error?.message || 'Falha desconhecida na API do Gemini.');
       }
       
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
         let rawText = data.candidates[0].content.parts[0].text.trim();
         if (rawText.startsWith("```json")) {
           rawText = rawText.substring(7);
@@ -1442,7 +1442,7 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
         }
         rawText = rawText.trim();
         
-        const ideas = JSON.parse(rawText);
+        const ideas = JSON.parse(rawText).slice(0, 20);
         
         const listContainer = document.getElementById('titles-list');
         if (listContainer) {
@@ -1458,7 +1458,7 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
           });
           
           document.getElementById('container-ideas-list').style.display = 'block';
-          showToast('✓ 100 Ideias geradas com sucesso!', 'success');
+          showToast('✓ 20 Ideias geradas com sucesso!', 'success');
           
           if (window.comeceRapidoState && window.comeceRapidoState.active) {
             window.comeceRapidoState.generatedTitles = true;
@@ -1485,7 +1485,9 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
           }
         }
       } else {
-        throw new Error('Formato de resposta inesperado do Gemini.');
+        const candidate = data.candidates && data.candidates[0];
+        const finishReason = candidate ? candidate.finishReason : 'UNKNOWN';
+        throw new Error(`Resposta sem conteúdo do Gemini. Motivo de finalização: ${finishReason}`);
       }
     } catch (err) {
       console.error(err);
