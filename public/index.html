@@ -2269,10 +2269,22 @@ except KeyboardInterrupt:
             opt.textContent = domain ? label + ' (' + domain + ')' : label;
             sel.appendChild(opt);
           });
+          if (window.comeceRapidoState && window.comeceRapidoState.active && window.State && window.State.sites && window.State.sites.length > 0) {
+            var lastSite = window.State.sites[window.State.sites.length - 1];
+            if (lastSite && lastSite.repoName) {
+              sel.value = lastSite.repoName;
+            }
+          }
           cnOnBlogChange();
         })
         .catch(function() {
           sel.innerHTML = '<option value="afiliados-blog-colchoes-inteligencia-jovem">Inteligência Jovem — Colchões</option>';
+          if (window.comeceRapidoState && window.comeceRapidoState.active && window.State && window.State.sites && window.State.sites.length > 0) {
+            var lastSite = window.State.sites[window.State.sites.length - 1];
+            if (lastSite && lastSite.repoName) {
+              sel.value = lastSite.repoName;
+            }
+          }
           cnOnBlogChange();
         });
     };

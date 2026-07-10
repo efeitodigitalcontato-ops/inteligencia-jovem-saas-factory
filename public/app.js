@@ -527,6 +527,10 @@ function renderBlogList() {
       openDomainConfig(repoName);
     });
   });
+
+  if (typeof cnLoadBlogsFromServer === 'function') {
+    cnLoadBlogsFromServer();
+  }
 }
 
 // Dynamic input handler for Theme selector
