@@ -279,10 +279,20 @@ function showView(viewName) {
       newStep = 3;
       selector = '#btn-analyze-silo';
     } else if (viewName === 'multiGenerator') {
-      newStep = 4;
-      selector = '#btn-get-ideas';
+      if (window.comeceRapidoState.generatedTitles) {
+        if (window.comeceRapidoState.step === 5) {
+          newStep = 5;
+          selector = '#cn-login-colab-btn';
+        } else {
+          newStep = 4;
+          selector = '#colabNinjaBtn';
+        }
+      } else {
+        newStep = 4;
+        selector = '#btn-get-ideas';
+      }
     } else if (viewName === 'netoSalva') {
-      newStep = 5;
+      newStep = 6;
       selector = '#btn-create-backup';
     }
 
@@ -3067,6 +3077,10 @@ function showSafiraComicBubble(selector, stepIndex) {
       position = "bottom";
     }
   } else if (stepIndex === 5) {
+    title = "Logar na Colab";
+    text = "Para que a integração com o Google Colab funcione de forma 100% automatizada e sem bloqueios, clique no botão <strong>'🔓 Logar no Colab (Plug & Play)'</strong> e faça login com sua conta Google na Colab para continuar.";
+    position = "top";
+  } else if (stepIndex === 6) {
     title = "Neto Salva (Backup)";
     text = "<strong>O Neto Salva é essencial!</strong> Ele protege seu trabalho contra qualquer perda de dados, garantindo que seu progresso esteja seguro e editável na nuvem. Clique no botão indicado para fazer o backup de segurança!";
     position = "top";
@@ -3079,11 +3093,11 @@ function showSafiraComicBubble(selector, stepIndex) {
   bubble.innerHTML = `
     <div class="safira-hq-avatar">💎</div>
     <div class="safira-hq-bubble-title">Safira</div>
-    <div class="safira-hq-bubble-step">Etapa ${stepIndex} de 5 — ${title}</div>
+    <div class="safira-hq-bubble-step">Etapa ${stepIndex} de 6 — ${title}</div>
     <div class="safira-hq-bubble-text">${text}</div>
     <div class="safira-hq-buttons">
       ${stepIndex > 1 ? `<button class="safira-hq-btn safira-hq-btn-prev" onclick="advanceComeceRapidoComic(${stepIndex - 1})">◀ Voltar</button>` : '<div></div>'}
-      ${stepIndex < 5 
+      ${stepIndex < 6 
         ? `<button class="safira-hq-btn safira-hq-btn-next" onclick="advanceComeceRapidoComic(${stepIndex + 1})">Avançar ▶</button>`
         : `<button class="safira-hq-btn safira-hq-btn-next" onclick="finishComeceRapidoComic()">Finalizar 🎉</button>`
       }
@@ -3188,7 +3202,7 @@ function advanceComeceRapidoComic(step) {
       }
       return;
     }
-    if (currentStep === 5 && !window.comeceRapidoState.backedUp) {
+    if (currentStep === 6 && !window.comeceRapidoState.backedUp) {
       const textEl = document.querySelector('.safira-hq-bubble-text');
       if (textEl) {
         textEl.innerHTML = `<span style="color: #f59e0b; font-weight: bold;">⚠️ Atenção:</span> Você deve clicar no botão <strong>'Criar Ponto de Restauração'</strong> para realizar o backup antes de finalizar!`;
@@ -3274,6 +3288,16 @@ function advanceComeceRapidoComic(step) {
       }
     }, 300);
   } else if (step === 5) {
+    showView('multiGenerator');
+    setTimeout(() => {
+      // Abre o painel do Colab se estiver fechado
+      var panel = document.getElementById('colabNinjaPanel');
+      if (panel && panel.style.display === 'none') {
+        if (typeof toggleColabPanel === 'function') toggleColabPanel();
+      }
+      showSafiraComicBubble('#cn-login-colab-btn', 5);
+    }, 300);
+  } else if (step === 6) {
     showView('netoSalva');
     setTimeout(() => {
       populateBackupSites();
@@ -3286,7 +3310,7 @@ function advanceComeceRapidoComic(step) {
       if (bkpDesc && window.comeceRapidoState.selectedMicro) {
         bkpDesc.value = `Backup automático - ${window.comeceRapidoState.selectedMicro.name}`;
       }
-      showSafiraComicBubble('#btn-create-backup', 5);
+      showSafiraComicBubble('#btn-create-backup', 6);
     }, 300);
   }
 }
@@ -3330,7 +3354,7 @@ function launchConfetti() {
 
 function finishComeceRapidoComic() {
   const currentStep = window.comeceRapidoState.step;
-  if (currentStep === 5 && !window.comeceRapidoState.backedUp) {
+  if (currentStep === 6 && !window.comeceRapidoState.backedUp) {
     const textEl = document.querySelector('.safira-hq-bubble-text');
     if (textEl) {
       textEl.innerHTML = `<span style="color: #f59e0b; font-weight: bold;">⚠️ Atenção:</span> Você deve clicar no botão <strong>'Criar Ponto de Restauração'</strong> para realizar o backup antes de finalizar!`;
