@@ -4122,12 +4122,12 @@ function showSafiraComicBubble(selector, stepIndex) {
       position = "bottom";
     }
   } else if (stepIndex === 5) {
-    title = "Cura e Otimização de Imagens";
-    text = "Na aba de <strong>Imagens</strong>, você pode gerenciar capas e rodar a varredura automática. O blog recém-criado já vem pré-selecionado! Clique no botão <strong>'Corrigir Imagens Quebradas & Placeholders'</strong> para varrer o blog e preencher capas genéricas com imagens reais de alta qualidade e otimizadas via Pexels.";
-    position = "top";
-  } else if (stepIndex === 6) {
     title = "Logar na Colab";
     text = "Para que a integração com o Google Colab funcione de forma 100% automatizada e sem bloqueios, clique no botão <strong>'🔓 Logar no Colab (Plug & Play)'</strong> e faça login com sua conta Google na Colab para continuar.";
+    position = "top";
+  } else if (stepIndex === 6) {
+    title = "Cura e Otimização de Imagens";
+    text = "Na aba de <strong>Imagens</strong>, você pode gerenciar capas e rodar a varredura automática. O blog recém-criado já vem pré-selecionado! Clique no botão <strong>'Corrigir Imagens Quebradas & Placeholders'</strong> para varrer o blog e preencher capas genéricas com imagens reais de alta qualidade e otimizadas via Pexels.";
     position = "top";
   } else if (stepIndex === 7) {
     title = "Neto Salva (Backup)";
@@ -4337,6 +4337,16 @@ function advanceComeceRapidoComic(step) {
       }
     }, 300);
   } else if (step === 5) {
+    showView('multiGenerator');
+    setTimeout(() => {
+      // Abre o painel do Colab se estiver fechado
+      var panel = document.getElementById('colabNinjaPanel');
+      if (panel && panel.style.display === 'none') {
+        if (typeof toggleColabPanel === 'function') toggleColabPanel();
+      }
+      showSafiraComicBubble('#cn-login-colab-btn', 5);
+    }, 300);
+  } else if (step === 6) {
     showView('imagesPanel');
     setTimeout(() => {
       const select = document.getElementById('images-blog-select');
@@ -4345,16 +4355,7 @@ function advanceComeceRapidoComic(step) {
         select.value = lastSite.repoName;
         select.dispatchEvent(new Event('change'));
       }
-      showSafiraComicBubble('#btn-auto-heal-images', 5);
-    }, 300);
-  } else if (step === 6) {
-    showView('multiGenerator');
-    setTimeout(() => {
-      var panel = document.getElementById('colabNinjaPanel');
-      if (panel && panel.style.display === 'none') {
-        if (typeof toggleColabPanel === 'function') toggleColabPanel();
-      }
-      showSafiraComicBubble('#cn-login-colab-btn', 6);
+      showSafiraComicBubble('#btn-auto-heal-images', 6);
     }, 300);
   } else if (step === 7) {
     showView('netoSalva');
