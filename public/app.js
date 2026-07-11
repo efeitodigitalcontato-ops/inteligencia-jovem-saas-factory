@@ -1557,7 +1557,7 @@ const positionCustomUrl = document.getElementById('position-custom-url');
 if (positionSelectSite && positionCustomUrlGroup && positionCustomUrl) {
   positionSelectSite.addEventListener('change', () => {
     if (positionSelectSite.value === 'custom') {
-      positionCustomUrlGroup.style.display = 'block';
+      positionCustomUrlGroup.style.display = 'flex';
       positionCustomUrl.required = true;
     } else {
       positionCustomUrlGroup.style.display = 'none';
@@ -3387,7 +3387,7 @@ const customUrlGroup = document.getElementById('backlink-custom-url-group');
 if (selectBacklinkSite && customUrlGroup) {
   selectBacklinkSite.addEventListener('change', () => {
     if (selectBacklinkSite.value === 'custom') {
-      customUrlGroup.style.display = 'block';
+      customUrlGroup.style.display = 'flex';
     } else {
       customUrlGroup.style.display = 'none';
     }
@@ -3400,7 +3400,7 @@ if (btnCancelBacklink) {
   btnCancelBacklink.addEventListener('click', () => {
     const form = document.getElementById('backlink-tracker-form');
     if (form) form.reset();
-    if (customUrlGroup) customUrlGroup.style.display = 'block';
+    if (customUrlGroup) customUrlGroup.style.display = 'flex';
     
     document.getElementById('backlink-loading-mock').classList.add('hidden');
     document.getElementById('backlink-results-container').style.display = 'none';
