@@ -3343,7 +3343,7 @@ except KeyboardInterrupt:
         return;
       }
 
-      if (!confirm('Fazer push de ' + localQueue.length + ' artigos e acionar rebuild na Vercel?')) return;
+      if (!confirm('Fazer push de ' + localQueue.length + ' artigos e acionar rebuild no Servidor/Vercel?')) return;
       
       cnToast('⏳ Iniciando deploy...');
       fetch('/api/deploy', {
