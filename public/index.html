@@ -1749,13 +1749,28 @@
                   </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 15px;">
-                  <label for="pro-article-tone">Tom de Voz da IA</label>
-                  <select id="pro-article-tone" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-main);">
-                    <option value="professional">Profissional & Técnico</option>
-                    <option value="conversational" selected>Conversacional & Informativo</option>
-                    <option value="persuasive">Persuasivo & Vendas</option>
-                  </select>
+                <div class="form-row" style="display: flex; gap: 15px; margin-top: 15px;">
+                  <div class="form-group" style="flex: 1;">
+                    <label for="pro-article-source-theme">Nicho do seu Site (Origem do Link) *</label>
+                    <select id="pro-article-source-theme" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-main);">
+                      <option value="Dinheiro">Dinheiro & Finanças</option>
+                      <option value="Tecnologia">Tecnologia & Gadgets</option>
+                      <option value="Saúde">Saúde & Bem-estar</option>
+                      <option value="Moda">Moda & Beleza</option>
+                      <option value="Decoração">Decoração & Casa</option>
+                      <option value="Esportes">Esportes & Fitness</option>
+                      <option value="Alimentação">Alimentação & Receitas</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="flex: 1;">
+                    <label for="pro-article-tone">Tom de Voz da IA</label>
+                    <select id="pro-article-tone" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-main);">
+                      <option value="professional">Profissional & Técnico</option>
+                      <option value="conversational" selected>Conversacional & Informativo</option>
+                      <option value="persuasive">Persuasivo & Vendas</option>
+                    </select>
+                  </div>
                 </div>
                 
                 <div style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: flex-end;">

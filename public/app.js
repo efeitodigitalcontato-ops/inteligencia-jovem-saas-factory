@@ -2699,17 +2699,63 @@ if (createForm) {
     loadingDiv.classList.remove('hidden');
     previewDiv.classList.add('hidden');
 
-    // Simulate IA call in client (using Gemini formatting if possible)
+    // Helper function to generate bridged content
+    function generateBridgedArticle(sourceTheme, hostTheme, keyword, targetUrl) {
+      let title = `Como aliar ${sourceTheme} e ${hostTheme} para obter resultados extraordinários`;
+      let body = '';
+
+      if (sourceTheme === 'Dinheiro' && hostTheme.includes('Moda')) {
+        title = `Como Ganhar Dinheiro e Empreender no Mercado da Moda`;
+        body = `
+          <p>O mercado fashion está em constante expansão e a busca por formas de rentabilizar marcas e serviços cresce a cada dia. Para quem deseja entender melhor sobre finanças neste nicho, compreender como faturar alto é o divisor de águas.</p>
+          <p>Uma excelente alternativa de crescimento passa por dominar técnicas de marketing e investimento focadas. Ao utilizar <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong>, empreendedores da moda conseguem posicionar seus produtos para o público de maior poder aquisitivo, maximizando a margem de lucro.</p>
+          <p>Gerenciar o fluxo de caixa, planejar coleções viáveis e saber onde investir em divulgação digital são as chaves essenciais para quem busca o sucesso financeiro unindo o mundo dos negócios à estética e estilo.</p>
+        `;
+      }
+      else if (sourceTheme === 'Dinheiro' && hostTheme.includes('Decoração')) {
+        title = `Decoração Inteligente: Como Economizar Dinheiro ao Mobiliar seu Espaço`;
+        body = `
+          <p>Decorar uma casa de forma elegante não precisa custar uma fortuna. Hoje em dia, o design de interiores moderno valoriza muito o custo-benefício e o planejamento financeiro inteligente.</p>
+          <p>A melhor forma de economizar sem perder o estilo é pesquisar materiais e fornecedores alternativos. Integrar soluções como <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong> ajuda a planejar as compras passo a passo, evitando compras por impulso e mantendo o orçamento sob controle.</p>
+          <p>Seja reaproveitando móveis antigos com técnicas de DIY (faça você mesmo) ou investindo em iluminação minimalista, é totalmente possível alcançar um resultado visual premium e sofisticado gastando muito menos.</p>
+        `;
+      }
+      else if (sourceTheme === 'Tecnologia' && hostTheme.includes('Moda')) {
+        title = `A Revolução da Tecnologia Vestível e a Moda do Futuro`;
+        body = `
+          <p>A moda e a tecnologia estão colidindo de formas fascinantes nos últimos anos. Desde tecidos inteligentes até provadores virtuais em 3D, a inovação digital está redesenhando como vestimos e compramos roupas.</p>
+          <p>Esta fusão não se resume apenas a gadgets de pulso; ela alcança a otimização de toda a cadeia logística das marcas. Ao buscar inovação com <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong>, os estilistas e engenheiros criam experiências de compra interativas que encantam o consumidor moderno.</p>
+          <p>No futuro próximo, roupas customizadas por inteligência artificial e sensores de saúde integrados diretamente às fibras de linho e algodão serão itens padrão no nosso guarda-roupa diário.</p>
+        `;
+      }
+      else if (sourceTheme === 'Saúde' && hostTheme.includes('Alimentação')) {
+        title = `Alimentação Funcional: O Segredo de uma Saúde Blindada`;
+        body = `
+          <p>A nutrição correta é a base principal para evitar doenças e manter a energia elevada. Consumir alimentos naturais e funcionais ajuda o organismo a funcionar em sua capacidade máxima.</p>
+          <p>Introduzir receitas balanceadas no dia a dia é o primeiro passo. Focar no consumo de macronutrientes adequados e soluções saudáveis como <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong> fornece ao corpo os micronutrientes fundamentais para fortalecer a imunidade.</p>
+          <p>Lembre-se sempre de consultar um especialista para ajustar suas porções e criar uma rotina alimentar rica em fibras, proteínas limpas e gorduras boas.</p>
+        `;
+      }
+      else {
+        title = `Tendências: A Integração de ${sourceTheme} no Universo de ${hostTheme}`;
+        body = `
+          <p>Em um mercado globalizado e interconectado, a fusão de diferentes especialidades é o que move a inovação. Entender como integrar conceitos de ${sourceTheme} com o nicho de ${hostTheme} cria oportunidades únicas de diferenciação.</p>
+          <p>Esse cruzamento estratégico de audiências gera maior valor. Ao utilizar recursos como <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong>, profissionais conseguem estabelecer autoridade nos dois mundos de forma orgânica e contextualizada.</p>
+          <p>O futuro pertence a projetos que constroem pontes inteligentes e conectam necessidades diversas com soluções focadas, oferecendo uma experiência holística para os clientes.</p>
+        `;
+      }
+
+      return { title, body };
+    }
+
+    const sourceTheme = document.getElementById('pro-article-source-theme').value;
+
+    // Simulate IA call in client
     setTimeout(() => {
       const masked = maskDomain(hostBlog);
       const hostTheme = theme || 'Geral';
       
-      const generatedTitle = `O Impacto de escolher ${keyword} para o seu projeto`;
-      const generatedBody = `
-        <p>Ao planejar uma estratégia eficiente, focar em termos relevantes é o que gera os melhores resultados a longo prazo. Um dos aspectos de maior importância é entender o papel chave que <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong> desempenha neste ecossistema.</p>
-        <p>A otimização focada em nichos de mercado (como ${hostTheme}) garante que os rastreadores consigam entender a semântica do conteúdo. Criar artigos úteis, estruturados com cabeçalhos corretos e boa legibilidade, atrai visitas de alta qualidade e converte melhor.</p>
-        <p>Em suma, focar no valor para o usuário final, utilizando links de relevância contextuais ancorados em termos específicos como <em>"${keyword}"</em>, assegura o crescimento contínuo de relevância nos motores de busca.</p>
-      `;
+      const article = generateBridgedArticle(sourceTheme, hostTheme, keyword, targetUrl);
 
       // Save to created articles database
       let created = [];
@@ -2733,8 +2779,8 @@ if (createForm) {
       
       document.getElementById('pro-preview-mask-domain').textContent = `Blog Destino: ${masked}`;
       document.getElementById('pro-preview-content').innerHTML = `
-        <h3 style="margin-bottom: 10px; color: var(--primary);">${generatedTitle}</h3>
-        ${generatedBody}
+        <h3 style="margin-bottom: 10px; color: var(--primary); font-weight:700;">${article.title}</h3>
+        ${article.body}
       `;
 
       showToast('Artigo gerado e publicado na rede oculta com sucesso!', 'success');
