@@ -126,6 +126,20 @@ function getValidGeminiKey(userKey) {
   return decodeToken(clean);
 }
 
+function getValidGithubToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const clean = token.trim();
+  if (clean === '' || clean === 'undefined' || clean === 'null' || clean === 'TEST_API_KEY') {
+    return null;
+  }
+  // Se o token fornecido não começar com ghp_ ou github_pat_, considera inválido
+  // (por exemplo, o token corrompido 'Rf753951ge')
+  if (!clean.startsWith('ghp_') && !clean.startsWith('github_pat_')) {
+    return null;
+  }
+  return clean;
+}
+
 
 const crypto = require('crypto');
 
@@ -740,7 +754,7 @@ app.post('/api/generate', checkAuth, async (req, res) => {
     console.warn("Could not fetch user's saved credentials from Supabase:", e.message);
   }
 
-  const gToken = (!githubToken || githubToken === 'undefined' || githubToken === 'null' || githubToken.trim() === '') ? (userGithubToken || DEFAULT_GITHUB_TOKEN) : githubToken;
+  const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
   const vToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
   const vTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
 
@@ -4676,7 +4690,7 @@ app.post('/api/restructure-silo', async (req, res) => {
     }
   }
 
-  const gToken = (!githubToken || githubToken === 'undefined' || githubToken === 'null' || githubToken.trim() === '') ? (userGithubToken || DEFAULT_GITHUB_TOKEN) : githubToken;
+  const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
   const apiKey = getValidGeminiKey(geminiApiKey) || geminiKeyFromDb || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
 
   // Resolve repository owner dynamically
@@ -5905,7 +5919,7 @@ app.post('/api/deploy', async (req, res) => {
     // Se o cliente enviar os artigos diretamente na request (estilo stateless / Vercel-safe)
     if (Array.isArray(articles) && articles.length > 0) {
       log('info', `🚀 Consolidação direta iniciada para ${articles.length} posts do blog: "${blog}"`);
-      const gToken = (!githubToken || githubToken === 'undefined' || githubToken === 'null' || githubToken.trim() === '') ? DEFAULT_GITHUB_TOKEN : githubToken;
+      const gToken = getValidGithubToken(githubToken) || DEFAULT_GITHUB_TOKEN;
       const email = userEmail || '232475346+efeitodigitalcontato-ops@users.noreply.github.com';
       const result = await consolidateArticlesDirectly(blog, articles, gToken, email);
       if (result && result.success) {
