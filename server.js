@@ -5831,6 +5831,67 @@ async function consolidateArticlesDirectly(repoName, articles, gToken, userEmail
   }
 }
 
+// FUNÇÃO AUXILIAR PARA FORÇAR REDEPLOY DA VERCEL DIRETAMENTE VIA API (evita Seat Block do Git Push)
+async function triggerVercelDeployForRepo(repoName) {
+  try {
+    const vToken = DEFAULT_VERCEL_TOKEN;
+    const tId = DEFAULT_VERCEL_TEAM;
+    if (!vToken || !tId) {
+      console.warn('[Vercel Deploy] Vercel token or Team ID is not set.');
+      return;
+    }
+
+    // 1. Busca o projeto correspondente ao repositório git no Vercel
+    const listRes = await apiRequest({
+      hostname: 'api.vercel.com',
+      path: `/v9/projects?teamId=${tId}&limit=100`,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${vToken}`
+      }
+    });
+
+    if (listRes.statusCode !== 200 || !listRes.body || !listRes.body.projects) {
+      console.error(`[Vercel Deploy] Falha ao listar projetos no Vercel:`, listRes.statusCode);
+      return;
+    }
+
+    const project = listRes.body.projects.find(p => p.link && p.link.repo === repoName);
+    if (!project) {
+      console.error(`[Vercel Deploy] Nenhum projeto Vercel correspondente ao repo: ${repoName}`);
+      return;
+    }
+
+    console.log(`[Vercel Deploy] Iniciando deploy direto via API da Vercel para o projeto: ${project.name} (ID: ${project.id})`);
+
+    // 2. Dispara a compilação diretamente via endpoint de deployments da Vercel
+    const deployRes = await apiRequest({
+      hostname: 'api.vercel.com',
+      path: `/v13/deployments?teamId=${tId}`,
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${vToken}`,
+        'Content-Type': 'application/json'
+      }
+    }, {
+      name: project.name,
+      gitSource: {
+        type: 'github',
+        repoId: project.link.repoId,
+        ref: 'main'
+      }
+    });
+
+    if (deployRes.statusCode === 200 || deployRes.statusCode === 201) {
+      console.log(`[Vercel Deploy] Deploy via API iniciado com sucesso para: ${project.name}! URL: ${deployRes.body.url}`);
+    } else {
+      console.error(`[Vercel Deploy] Falha ao iniciar deploy via API:`, deployRes.body);
+    }
+  } catch (err) {
+    console.error(`[Vercel Deploy] Erro na função triggerVercelDeployForRepo:`, err.message);
+  }
+}
+
 // ROTA POST: Publicar e Efetuar Deploy no Sibling Blog (com suporte Multi-Panel)
 app.post('/api/deploy', async (req, res) => {
   try {
@@ -5849,6 +5910,8 @@ app.post('/api/deploy', async (req, res) => {
       const result = await consolidateArticlesDirectly(blog, articles, gToken, email);
       if (result && result.success) {
         log('success', `🚀 [DEPLOY COM SUCESSO] ${articles.length} posts enviados para o GitHub!`);
+        // Força o trigger direto na API da Vercel
+        triggerVercelDeployForRepo(blog);
         return res.json({ status: 'deployed', consolidated: true, count: articles.length });
       } else {
         throw new Error(result.error || 'Falha ao consolidar os posts.');
@@ -5872,6 +5935,8 @@ app.post('/api/deploy', async (req, res) => {
             execSync(`git -C "${blogPath}" pull --rebase origin main`, { stdio: 'ignore' });
           } catch (pullErr) {}
         }
+        // Força o trigger direto na API da Vercel
+        triggerVercelDeployForRepo(blog);
         return res.json({ status: 'deployed', consolidated: true, count: result.count });
       } else {
         throw new Error(result.reason || 'Falha ao consolidar a fila.');
@@ -5902,6 +5967,8 @@ app.post('/api/deploy', async (req, res) => {
     execSync(`git -C "${blogPath}" push origin main`, { stdio: 'inherit' });
 
     log('success', "🚀 [DEPLOY COM SUCESSO] Código enviado! Vercel compilando na nuvem.");
+    // Força o trigger direto na API da Vercel
+    triggerVercelDeployForRepo(blog);
     res.json({ status: 'deployed' });
   } catch (err) {
     const logFn = (req.body && req.body.panelId) ? (t, m, e) => sendPanelLog(req.body.panelId, t, m, e) : sendLog;
