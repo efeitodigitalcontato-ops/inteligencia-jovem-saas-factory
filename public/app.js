@@ -5792,6 +5792,8 @@ window.triggerSuccessConfetti = function() {
 // IMAGES PANEL AND AUTO-HEALER FUNCTIONALITY
 // ============================================================================
 
+const DEFAULT_ORG = 'efeitodigitalcontato-ops';
+
 window.populateImagesSites = function() {
   const select = document.getElementById('images-blog-select');
   if (!select) return;
