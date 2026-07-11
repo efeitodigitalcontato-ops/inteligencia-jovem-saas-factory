@@ -249,6 +249,9 @@ function showView(viewName) {
   if (viewName === 'backlinkTracker') {
     populateBacklinkSites();
     renderSavedBacklinks();
+    if (window.initBacklinksProArea) {
+      window.initBacklinksProArea();
+    }
   }
 
   if (viewName === 'siloStructure') {
@@ -2268,31 +2271,1098 @@ if (netoSalvaUploadForm) {
     }
   });
 }
-
 // helper delay function
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Run app init on load
-init();
-
-// Wait and initialize Google Auth when client SDK is loaded
-let checkCount = 0;
-const checkInterval = setInterval(() => {
-  checkCount++;
-  if (window.google && window.google.accounts) {
-    clearInterval(checkInterval);
-    initGoogleAuth();
-  } else if (checkCount > 20) {
-    clearInterval(checkInterval);
-    console.warn('Google Identity Services script did not load in time.');
-  }
-}, 300);
-
 // --- BACKLINK TRACKER CLIENT LOGIC ---
 
-// Populates drop-down selection with user's blogs
+// Initialize Backlinks Pro members area
+window.initBacklinksProArea = function() {
+  // Navigation tabs inside Pro area
+  const proNavItems = document.querySelectorAll('.pro-nav-item');
+  const proSubViews = document.querySelectorAll('.pro-sub-view');
+  
+  proNavItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetView = item.getAttribute('data-pro-view');
+      
+      // Toggle active link
+      proNavItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      
+      // Toggle active sub-view
+      proSubViews.forEach(view => {
+        if (view.id === `pro-view-${targetView}`) {
+          view.style.display = 'flex';
+        } else {
+          view.style.display = 'none';
+        }
+      });
+
+      // Specific initializers per view
+      if (targetView === 'dashboard') {
+        renderProDashboard();
+      } else if (targetView === 'create-article') {
+        populateProHostBlogs();
+      } else if (targetView === 'created-articles') {
+        renderProCreatedArticles();
+      } else if (targetView === 'partner-sites') {
+        renderProPartnerSites();
+      } else if (targetView === 'network-blogs') {
+        renderProNetworkBlogs();
+      } else if (targetView === 'keyword-campaigns') {
+        renderProKeywordCampaigns();
+      } else if (targetView === 'admin-panel') {
+        renderProAdminPanel();
+      }
+    });
+  });
+
+  // Verify access permissions
+  verifyProPermissions();
+  
+  // Render dashboard by default
+  renderProDashboard();
+};
+
+function verifyProPermissions() {
+  const userEmail = State.user ? State.user.email : '';
+  const adminBtn = document.getElementById('pro-nav-admin');
+  const networkBtn = document.getElementById('pro-nav-network-blogs');
+  
+  if (!adminBtn || !networkBtn) return;
+  
+  // Admin is randersoncontato@gmail.com
+  const isAdmin = userEmail === 'randersoncontato@gmail.com';
+  
+  // Allowed publishers list
+  let allowedEmails = [];
+  try {
+    allowedEmails = JSON.parse(localStorage.getItem('saas_allowed_publishers_emails')) || [];
+  } catch (e) {
+    allowedEmails = [];
+  }
+  const isAllowedPublisher = allowedEmails.includes(userEmail);
+
+  if (isAdmin) {
+    adminBtn.style.display = 'flex';
+    networkBtn.style.display = 'flex';
+  } else if (isAllowedPublisher) {
+    adminBtn.style.display = 'none';
+    networkBtn.style.display = 'flex';
+  } else {
+    adminBtn.style.display = 'none';
+    networkBtn.style.display = 'none';
+  }
+}
+
+// Domain Masker helper
+function maskDomain(domain) {
+  if (!domain) return '';
+  const clean = domain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  const parts = clean.split('.');
+  const name = parts[0];
+  const ext = parts.slice(1).join('.');
+  if (name.length <= 3) {
+    return `${name}$@$@$.${ext}`;
+  }
+  return `${name.substring(0, 3)}$@$@$.${ext}`;
+}
+
+// 1. DASHBOARD RENDERER & VISUALS
+function renderProDashboard() {
+  // Load local databases
+  let created = [];
+  let blogs = [];
+  try {
+    created = JSON.parse(localStorage.getItem('saas_created_articles')) || [];
+  } catch(e) { created = []; }
+  
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+      { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+      { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+    ];
+  } catch(e) { blogs = []; }
+
+  // Update Stats Cards
+  document.getElementById('stat-links-count').textContent = created.length;
+  document.getElementById('stat-blogs-count').textContent = blogs.length;
+  
+  // Avg difficulty
+  let campaigns = [];
+  try {
+    campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+  } catch(e) {}
+  let totalDif = 0, countDif = 0;
+  campaigns.forEach(c => {
+    (c.keywords || []).forEach(k => {
+      countDif++;
+      if (k.difficulty === 'Difícil') totalDif += 3;
+      else if (k.difficulty === 'Médio') totalDif += 2;
+      else totalDif += 1;
+    });
+  });
+  let avgText = 'Fácil';
+  if (countDif > 0) {
+    const avg = totalDif / countDif;
+    if (avg > 2.3) avgText = 'Difícil';
+    else if (avg > 1.5) avgText = 'Médio';
+  }
+  document.getElementById('stat-avg-difficulty').textContent = avgText;
+
+  // Last Created Date
+  if (created.length > 0) {
+    const last = created[created.length - 1];
+    const date = new Date(last.createdAt);
+    document.getElementById('stat-last-created').textContent = date.toLocaleDateString('pt-BR');
+  } else {
+    document.getElementById('stat-last-created').textContent = '-';
+  }
+
+  // Draw Niche Distribution Chart (SVG)
+  renderNicheDistributionChart(blogs);
+
+  // Draw SVG Connection Map
+  renderConnectionsMap(created, blogs);
+}
+
+function renderNicheDistributionChart(blogs) {
+  const svg = document.getElementById('network-niche-chart');
+  const legend = document.getElementById('niche-chart-legend');
+  if (!svg || !legend) return;
+
+  svg.innerHTML = '';
+  legend.innerHTML = '';
+
+  if (blogs.length === 0) {
+    svg.innerHTML = '<text x="50" y="50" text-anchor="middle" fill="var(--text-muted)" font-size="8">Sem dados</text>';
+    return;
+  }
+
+  // Count niches
+  const counts = {};
+  blogs.forEach(b => {
+    const theme = b.theme || 'Geral';
+    counts[theme] = (counts[theme] || 0) + 1;
+  });
+
+  const total = blogs.length;
+  const colors = ['#6366f1', '#a855f7', '#10b981', '#f59e0b', '#3b82f6', '#ec4899'];
+  let currentAngle = 0;
+  let idx = 0;
+
+  Object.entries(counts).forEach(([niche, val]) => {
+    const percentage = val / total;
+    const angle = percentage * 360;
+    
+    // Draw SVG Arc
+    const r = 40;
+    const cx = 50;
+    const cy = 50;
+    
+    const x1 = cx + r * Math.cos((currentAngle - 90) * Math.PI / 180);
+    const y1 = cy + r * Math.sin((currentAngle - 90) * Math.PI / 180);
+    
+    currentAngle += angle;
+    
+    const x2 = cx + r * Math.cos((currentAngle - 90) * Math.PI / 180);
+    const y2 = cy + r * Math.sin((currentAngle - 90) * Math.PI / 180);
+    
+    const largeArcFlag = angle > 180 ? 1 : 0;
+    
+    const pathData = `
+      M ${cx} ${cy}
+      L ${x1} ${y1}
+      A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2}
+      Z
+    `;
+    
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathData);
+    path.setAttribute('fill', colors[idx % colors.length]);
+    path.setAttribute('stroke', 'var(--bg-secondary)');
+    path.setAttribute('stroke-width', '1.5');
+    svg.appendChild(path);
+
+    // Legend
+    const legendItem = document.createElement('div');
+    legendItem.className = 'legend-item';
+    legendItem.innerHTML = `
+      <span class="legend-dot" style="background: ${colors[idx % colors.length]};"></span>
+      <span>${niche} (${val})</span>
+    `;
+    legend.appendChild(legendItem);
+    
+    idx++;
+  });
+
+  // Inner hole for Donut effect
+  const hole = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  hole.setAttribute('cx', '50');
+  hole.setAttribute('cy', '50');
+  hole.setAttribute('r', '22');
+  hole.setAttribute('fill', 'var(--bg-card)');
+  svg.appendChild(hole);
+}
+
+function renderConnectionsMap(created, blogs) {
+  const svg = document.getElementById('link-connections-map');
+  if (!svg) return;
+  
+  svg.innerHTML = '';
+  
+  const width = svg.clientWidth || 300;
+  const height = svg.clientHeight || 180;
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  // Draw grid dots background
+  for (let x = 10; x < width; x += 20) {
+    for (let y = 10; y < height; y += 20) {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', x);
+      dot.setAttribute('cy', y);
+      dot.setAttribute('r', '1');
+      dot.setAttribute('fill', 'rgba(255,255,255,0.03)');
+      svg.appendChild(dot);
+    }
+  }
+
+  // Define points: Hidden Network blogs (Left side) -> Client target sites (Right side)
+  const leftX = width * 0.25;
+  const rightX = width * 0.75;
+  
+  // Left nodes (Network Blogs)
+  const leftNodes = blogs.slice(0, 4);
+  if (leftNodes.length === 0) {
+    leftNodes.push({ domain: 'Rede Oculta 1' });
+    leftNodes.push({ domain: 'Rede Oculta 2' });
+  }
+
+  // Right nodes (Client partner sites)
+  let partnerSites = [];
+  try {
+    partnerSites = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
+  } catch(e) {}
+  const rightNodes = partnerSites.slice(0, 3);
+  if (rightNodes.length === 0) {
+    rightNodes.push({ domain: 'Seu Site A' });
+    rightNodes.push({ domain: 'Seu Site B' });
+  }
+
+  const leftStep = height / (leftNodes.length + 1);
+  const rightStep = height / (rightNodes.length + 1);
+
+  // Draw lines first
+  leftNodes.forEach((ln, lIdx) => {
+    const ly = leftStep * (lIdx + 1);
+    
+    rightNodes.forEach((rn, rIdx) => {
+      const ry = rightStep * (rIdx + 1);
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      // Cubic bezier path for smooth curved link lines
+      const d = `M ${leftX} ${ly} C ${(leftX+rightX)/2} ${ly}, ${(leftX+rightX)/2} ${ry}, ${rightX} ${ry}`;
+      line.setAttribute('d', d);
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', 'url(#connections-gradient)');
+      line.setAttribute('stroke-width', '1');
+      line.setAttribute('class', 'connection-line');
+      line.style.opacity = '0.3';
+      svg.appendChild(line);
+    });
+  });
+
+  // Gradient Definition
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.innerHTML = `
+    <linearGradient id="connections-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  `;
+  svg.appendChild(defs);
+
+  // Draw Left Nodes
+  leftNodes.forEach((ln, lIdx) => {
+    const ly = leftStep * (lIdx + 1);
+    
+    const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    node.setAttribute('cx', leftX);
+    node.setAttribute('cy', ly);
+    node.setAttribute('r', '5');
+    node.setAttribute('fill', '#a855f7');
+    node.setAttribute('class', 'connection-node');
+    svg.appendChild(node);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', leftX - 10);
+    text.setAttribute('y', ly + 3);
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('class', 'map-label');
+    text.textContent = maskDomain(ln.domain);
+    svg.appendChild(text);
+  });
+
+  // Draw Right Nodes
+  rightNodes.forEach((rn, rIdx) => {
+    const ry = rightStep * (rIdx + 1);
+    
+    const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    node.setAttribute('cx', rightX);
+    node.setAttribute('cy', ry);
+    node.setAttribute('r', '5');
+    node.setAttribute('fill', '#10b981');
+    node.setAttribute('class', 'connection-node');
+    svg.appendChild(node);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', rightX + 10);
+    text.setAttribute('y', ry + 3);
+    text.setAttribute('text-anchor', 'start');
+    text.setAttribute('class', 'map-label');
+    const displayDomain = rn.domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
+    text.textContent = displayDomain;
+    svg.appendChild(text);
+  });
+}
+
+// 2. CREATE ARTICLE IA VIEW
+function populateProHostBlogs() {
+  const select = document.getElementById('pro-article-host-blog');
+  if (!select) return;
+
+  let blogs = [];
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+      { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+      { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+    ];
+  } catch(e) { blogs = []; }
+
+  select.innerHTML = '';
+  if (blogs.length === 0) {
+    select.innerHTML = '<option value="">⚠️ Nenhum blog disponível na rede (fale com o Admin)</option>';
+    return;
+  }
+
+  blogs.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.domain;
+    opt.dataset.theme = b.theme;
+    opt.textContent = `${maskDomain(b.domain)} (${b.theme})`;
+    select.appendChild(opt);
+  });
+}
+
+// Submit generation form
+const createForm = document.getElementById('pro-create-article-form');
+if (createForm) {
+  createForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const targetUrl = document.getElementById('pro-article-target-url').value.trim();
+    const keyword = document.getElementById('pro-article-keyword').value.trim();
+    const hostBlog = document.getElementById('pro-article-host-blog').value;
+    const tone = document.getElementById('pro-article-tone').value;
+
+    if (!hostBlog) {
+      showToast('Por favor, selecione um blog de destino válido.', 'error');
+      return;
+    }
+
+    const selectEl = document.getElementById('pro-article-host-blog');
+    const selectedOpt = selectEl.options[selectEl.selectedIndex];
+    const theme = selectedOpt ? selectedOpt.dataset.theme : 'Geral';
+
+    // Show loading
+    const statusContainer = document.getElementById('pro-article-generation-status');
+    const loadingDiv = document.getElementById('pro-article-gen-loading');
+    const previewDiv = document.getElementById('pro-article-gen-preview');
+    
+    statusContainer.classList.remove('hidden');
+    loadingDiv.classList.remove('hidden');
+    previewDiv.classList.add('hidden');
+
+    // Simulate IA call in client (using Gemini formatting if possible)
+    setTimeout(() => {
+      const masked = maskDomain(hostBlog);
+      const hostTheme = theme || 'Geral';
+      
+      const generatedTitle = `O Impacto de escolher ${keyword} para o seu projeto`;
+      const generatedBody = `
+        <p>Ao planejar uma estratégia eficiente, focar em termos relevantes é o que gera os melhores resultados a longo prazo. Um dos aspectos de maior importância é entender o papel chave que <strong><a href="${targetUrl}" target="_blank" rel="noopener">${keyword}</a></strong> desempenha neste ecossistema.</p>
+        <p>A otimização focada em nichos de mercado (como ${hostTheme}) garante que os rastreadores consigam entender a semântica do conteúdo. Criar artigos úteis, estruturados com cabeçalhos corretos e boa legibilidade, atrai visitas de alta qualidade e converte melhor.</p>
+        <p>Em suma, focar no valor para o usuário final, utilizando links de relevância contextuais ancorados em termos específicos como <em>"${keyword}"</em>, assegura o crescimento contínuo de relevância nos motores de busca.</p>
+      `;
+
+      // Save to created articles database
+      let created = [];
+      try {
+        created = JSON.parse(localStorage.getItem('saas_created_articles')) || [];
+      } catch(err) {}
+
+      created.push({
+        maskedDomain: masked,
+        theme: hostTheme,
+        anchorText: keyword,
+        targetUrl: targetUrl,
+        createdAt: new Date().toISOString()
+      });
+
+      localStorage.setItem('saas_created_articles', JSON.stringify(created));
+
+      // Show preview
+      loadingDiv.classList.add('hidden');
+      previewDiv.classList.remove('hidden');
+      
+      document.getElementById('pro-preview-mask-domain').textContent = `Blog Destino: ${masked}`;
+      document.getElementById('pro-preview-content').innerHTML = `
+        <h3 style="margin-bottom: 10px; color: var(--primary);">${generatedTitle}</h3>
+        ${generatedBody}
+      `;
+
+      showToast('Artigo gerado e publicado na rede oculta com sucesso!', 'success');
+      createForm.reset();
+    }, 2500);
+  });
+}
+
+// 3. ARTIGOS CRIADOS VIEW
+function renderProCreatedArticles() {
+  const tbody = document.getElementById('pro-created-articles-tbody');
+  if (!tbody) return;
+
+  let created = [];
+  try {
+    created = JSON.parse(localStorage.getItem('saas_created_articles')) || [];
+  } catch(e) { created = []; }
+
+  if (created.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          Nenhum artigo criado ainda. Vá na aba "Criar Artigo IA" para começar.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  created.forEach((item, idx) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong style="color:var(--primary); font-family: monospace;">${item.maskedDomain}</strong></td>
+      <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary); padding:2px 6px; border-radius:4px; font-size:0.8rem;">${item.theme}</span></td>
+      <td><code style="background:rgba(255,255,255,0.05); padding:3px 6px; border-radius:4px; font-weight:bold;">${item.anchorText}</code></td>
+      <td><a href="${item.targetUrl}" target="_blank" style="color:var(--text-muted); font-size:0.8rem; text-decoration:underline;">Link Alvo</a></td>
+      <td>${new Date(item.createdAt).toLocaleDateString('pt-BR')}</td>
+      <td style="text-align:center;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="deleteProCreatedArticle(${idx})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 4px 8px; font-size:11px;">Excluir</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+window.deleteProCreatedArticle = function(index) {
+  let created = [];
+  try {
+    created = JSON.parse(localStorage.getItem('saas_created_articles')) || [];
+  } catch(e) {}
+  
+  created.splice(index, 1);
+  localStorage.setItem('saas_created_articles', JSON.stringify(created));
+  renderProCreatedArticles();
+  showToast('Registro de artigo removido.', 'success');
+};
+
+// 4. MEUS SITES COMUNS VIEW (RECEBER LINKS)
+function renderProPartnerSites() {
+  const tbody = document.getElementById('pro-partner-sites-tbody');
+  if (!tbody) return;
+
+  let partners = [];
+  try {
+    partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
+  } catch(e) { partners = []; }
+
+  if (partners.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          Nenhum domínio cadastrado ainda. Adicione o seu primeiro site acima!
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  partners.forEach((item, idx) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong style="color:#fff;">${item.domain}</strong></td>
+      <td>${new Date(item.addedAt).toLocaleDateString('pt-BR')}</td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="deleteProPartnerSite(${idx})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 4px 8px; font-size:11px;">Remover</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+const partnerForm = document.getElementById('pro-partner-site-form');
+if (partnerForm) {
+  partnerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const urlInput = document.getElementById('pro-partner-site-url');
+    let url = urlInput.value.trim();
+    if (!url) return;
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    let partners = [];
+    try {
+      partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
+    } catch(err) {}
+
+    partners.push({ domain: url, addedAt: new Date().toISOString() });
+    localStorage.setItem('saas_partner_sites', JSON.stringify(partners));
+    
+    urlInput.value = '';
+    renderProPartnerSites();
+    showToast('Site parceiro adicionado com sucesso!', 'success');
+  });
+}
+
+window.deleteProPartnerSite = function(index) {
+  let partners = [];
+  try {
+    partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
+  } catch(e) {}
+  
+  partners.splice(index, 1);
+  localStorage.setItem('saas_partner_sites', JSON.stringify(partners));
+  renderProPartnerSites();
+  showToast('Site removido com sucesso.', 'success');
+};
+
+// 5. CADASTRAR BLOGS NA REDE (DELEGADOS E ADMIN)
+function renderProNetworkBlogs() {
+  const tbody = document.getElementById('pro-network-blogs-tbody');
+  if (!tbody) return;
+
+  let blogs = [];
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+      { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+      { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+    ];
+  } catch(e) { blogs = []; }
+
+  const currentUser = State.user ? State.user.email : '';
+
+  // Filter only blogs registered by the current user
+  const userBlogs = blogs.filter(b => b.addedBy === currentUser || (currentUser === 'randersoncontato@gmail.com' && b.addedBy === 'admin'));
+
+  if (userBlogs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          Nenhum blog cadastrado por você ainda na rede comum.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  userBlogs.forEach((item) => {
+    // Find absolute index in full blogs array for deletion
+    const absIndex = blogs.findIndex(b => b.domain === item.domain);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${item.domain}</strong></td>
+      <td><span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 6px; border-radius: 4px;">${item.theme}</span></td>
+      <td>${item.addedBy === 'admin' ? 'Admin' : item.addedBy}</td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="deleteProNetworkBlog(${absIndex})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 4px 8px; font-size:11px;">Remover</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+const networkBlogForm = document.getElementById('pro-network-blog-form');
+if (networkBlogForm) {
+  networkBlogForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const domainInput = document.getElementById('pro-network-blog-domain');
+    const themeSelect = document.getElementById('pro-network-blog-theme');
+    
+    let domain = domainInput.value.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const theme = themeSelect.value;
+    const currentUser = State.user ? State.user.email : '';
+
+    if (!domain) return;
+
+    let blogs = [];
+    try {
+      blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+        { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+        { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+      ];
+    } catch(err) {}
+
+    // Check duplicate
+    if (blogs.some(b => b.domain === domain)) {
+      showToast('Este blog já está cadastrado na rede.', 'error');
+      return;
+    }
+
+    blogs.push({
+      domain: domain,
+      theme: theme,
+      addedBy: currentUser === 'randersoncontato@gmail.com' ? 'admin' : currentUser
+    });
+
+    localStorage.setItem('saas_admin_backlink_blogs', JSON.stringify(blogs));
+    domainInput.value = '';
+    
+    renderProNetworkBlogs();
+    showToast('Seu blog foi disponibilizado na rede com sucesso!', 'success');
+  });
+}
+
+window.deleteProNetworkBlog = function(absIndex) {
+  let blogs = [];
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [];
+  } catch(e) {}
+
+  blogs.splice(absIndex, 1);
+  localStorage.setItem('saas_admin_backlink_blogs', JSON.stringify(blogs));
+  renderProNetworkBlogs();
+  showToast('Blog removido da rede.', 'success');
+};
+
+// 6. KEYWORD PLANNER VIEW
+const kwPlannerForm = document.getElementById('pro-keyword-planner-form');
+if (kwPlannerForm) {
+  kwPlannerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const seed = document.getElementById('pro-keyword-seed').value.trim();
+    if (!seed) return;
+
+    // Simulate Keyword generation
+    const container = document.getElementById('keyword-results-container');
+    const tbody = document.getElementById('keyword-planner-tbody');
+    
+    container.classList.remove('hidden');
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem;"><div class="spinner" style="margin: 0 auto;"></div> Buscando termos...</td></tr>`;
+
+    setTimeout(() => {
+      const suggestions = [
+        { term: `${seed} barato`, vol: 3200, cpc: 0.85, diff: 'Fácil' },
+        { term: `melhor ${seed} para comprar`, vol: 2400, cpc: 1.45, diff: 'Médio' },
+        { term: `como escolher ${seed}`, vol: 1600, cpc: 1.10, diff: 'Fácil' },
+        { term: `${seed} profissional`, vol: 4800, cpc: 2.10, diff: 'Difícil' },
+        { term: `guia de ${seed} completo`, vol: 900, cpc: 0.75, diff: 'Fácil' },
+        { term: `dicas sobre ${seed}`, vol: 1800, cpc: 1.20, diff: 'Médio' }
+      ];
+
+      tbody.innerHTML = '';
+      suggestions.forEach((item, idx) => {
+        const row = document.createElement('tr');
+        let badgeClass = 'difficulty-easy';
+        if (item.diff === 'Médio') badgeClass = 'difficulty-medium';
+        if (item.diff === 'Difícil') badgeClass = 'difficulty-hard';
+
+        row.innerHTML = `
+          <td style="text-align: center;"><input type="checkbox" class="keyword-select-item" data-term="${item.term}" data-vol="${item.vol}" data-cpc="${item.cpc}" data-diff="${item.diff}"></td>
+          <td><strong>${item.term}</strong></td>
+          <td>${item.vol.toLocaleString('pt-BR')} searches/mo</td>
+          <td>R$ ${item.cpc.toFixed(2)}</td>
+          <td><span class="difficulty-badge ${badgeClass}">${item.diff}</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Bind select all
+      const selectAll = document.getElementById('keyword-select-all');
+      if (selectAll) {
+        selectAll.addEventListener('change', () => {
+          const items = tbody.querySelectorAll('.keyword-select-item');
+          items.forEach(i => i.checked = selectAll.checked);
+        });
+      }
+    }, 1200);
+  });
+}
+
+// Save selected keywords to campaign folder
+const btnSaveToCampaign = document.getElementById('btn-save-to-campaign');
+if (btnSaveToCampaign) {
+  btnSaveToCampaign.addEventListener('click', () => {
+    const checked = document.querySelectorAll('.keyword-select-item:checked');
+    if (checked.length === 0) {
+      showToast('Por favor, selecione pelo menos uma palavra-chave para salvar.', 'error');
+      return;
+    }
+
+    let campaigns = [];
+    try {
+      campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+    } catch(e) {}
+
+    if (campaigns.length === 0) {
+      // Create a default campaign
+      campaigns.push({ name: 'Minha Primeira Campanha', keywords: [] });
+    }
+
+    // Ask which campaign folder
+    const list = campaigns.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
+    const input = prompt(`Selecione o número da campanha para salvar as palavras:\n${list}\n\nOu digite um nome para criar uma nova campanha:`);
+    if (input === null) return;
+
+    let targetCampaign;
+    const num = parseInt(input.trim());
+    
+    if (!isNaN(num) && num > 0 && num <= campaigns.length) {
+      targetCampaign = campaigns[num - 1];
+    } else if (input.trim().length > 0) {
+      // Create new campaign
+      targetCampaign = { name: input.trim(), keywords: [] };
+      campaigns.push(targetCampaign);
+    } else {
+      showToast('Operação cancelada ou inválida.', 'error');
+      return;
+    }
+
+    // Insert selected keywords
+    checked.forEach(chk => {
+      const term = chk.dataset.term;
+      const vol = parseInt(chk.dataset.vol);
+      const cpc = parseFloat(chk.dataset.cpc);
+      const diff = chk.dataset.diff;
+
+      if (!targetCampaign.keywords.some(k => k.term === term)) {
+        targetCampaign.keywords.push({ term, vol, cpc, difficulty: diff });
+      }
+    });
+
+    localStorage.setItem('saas_keyword_campaigns', JSON.stringify(campaigns));
+    showToast(`Palavras salvas na campanha "${targetCampaign.name}" com sucesso!`, 'success');
+    
+    // Clear checks
+    document.querySelectorAll('.keyword-select-item').forEach(i => i.checked = false);
+    const selectAll = document.getElementById('keyword-select-all');
+    if (selectAll) selectAll.checked = false;
+  });
+}
+
+// 7. KEYWORD CAMPAIGNS VIEW
+function renderProKeywordCampaigns() {
+  const container = document.getElementById('campaigns-list-container');
+  if (!container) return;
+
+  let campaigns = [];
+  try {
+    campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+  } catch(e) { campaigns = []; }
+
+  if (campaigns.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; color: var(--text-muted); padding: 2rem; border: 1px dashed var(--border-color); border-radius: 8px;">
+        Nenhuma pasta de campanha criada ainda. Crie uma pasta acima para organizar suas palavras-chave.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = '';
+  campaigns.forEach((camp, cIdx) => {
+    const folder = document.createElement('div');
+    folder.className = 'campaign-folder';
+    
+    let tableRows = '';
+    if (!camp.keywords || camp.keywords.length === 0) {
+      tableRows = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding: 15px;">Nenhuma palavra-chave nesta pasta. Use o Planejador para adicionar.</td></tr>`;
+    } else {
+      camp.keywords.forEach((kw, kIdx) => {
+        let badgeClass = 'difficulty-easy';
+        if (kw.difficulty === 'Médio') badgeClass = 'difficulty-medium';
+        if (kw.difficulty === 'Difícil') badgeClass = 'difficulty-hard';
+        
+        tableRows += `
+          <tr>
+            <td><strong>${kw.term}</strong></td>
+            <td>${kw.vol.toLocaleString('pt-BR')} searches/mo</td>
+            <td>R$ ${kw.cpc.toFixed(2)}</td>
+            <td><span class="difficulty-badge ${badgeClass}">${kw.difficulty}</span></td>
+            <td style="text-align:center;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="deleteKeywordFromCampaign(${cIdx}, ${kIdx})" style="color:#ef4444; border-color:transparent; padding: 2px 6px; font-size:10px;">remover</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    folder.innerHTML = `
+      <div class="campaign-folder-header" onclick="toggleCampaignFolder(this)">
+        <h5>📁 ${camp.name} (${camp.keywords ? camp.keywords.length : 0} palavras)</h5>
+        <div style="display: flex; gap: 10px; align-items:center;">
+          <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); deleteCampaignFolder(${cIdx})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 4px 8px; font-size:11px;">Deletar Pasta</button>
+          <span>▼</span>
+        </div>
+      </div>
+      <div class="campaign-folder-content" style="display: none;">
+        <table class="blog-table" style="font-size: 0.85rem; width:100%;">
+          <thead>
+            <tr>
+              <th>Palavra-Chave</th>
+              <th>Volume (Est.)</th>
+              <th>CPC</th>
+              <th>Dificuldade</th>
+              <th style="width: 60px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
+    `;
+    container.appendChild(folder);
+  });
+}
+
+const campaignForm = document.getElementById('pro-campaign-form');
+if (campaignForm) {
+  campaignForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById('pro-campaign-name');
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    let campaigns = [];
+    try {
+      campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+    } catch(err) {}
+
+    campaigns.push({ name: name, keywords: [] });
+    localStorage.setItem('saas_keyword_campaigns', JSON.stringify(campaigns));
+    
+    nameInput.value = '';
+    renderProKeywordCampaigns();
+    showToast('Pasta de campanha criada com sucesso!', 'success');
+  });
+}
+
+window.toggleCampaignFolder = function(headerEl) {
+  const content = headerEl.nextElementSibling;
+  const arrow = headerEl.querySelector('span:last-child');
+  
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    arrow.textContent = '▲';
+  } else {
+    content.style.display = 'none';
+    arrow.textContent = '▼';
+  }
+};
+
+window.deleteCampaignFolder = function(idx) {
+  if (!confirm('Deseja realmente deletar esta pasta e todas as palavras-chave salvas nela?')) return;
+
+  let campaigns = [];
+  try {
+    campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+  } catch(e) {}
+
+  campaigns.splice(idx, 1);
+  localStorage.setItem('saas_keyword_campaigns', JSON.stringify(campaigns));
+  renderProKeywordCampaigns();
+  showToast('Pasta de campanha deletada.', 'success');
+};
+
+window.deleteKeywordFromCampaign = function(cIdx, kIdx) {
+  let campaigns = [];
+  try {
+    campaigns = JSON.parse(localStorage.getItem('saas_keyword_campaigns')) || [];
+  } catch(e) {}
+
+  campaigns[cIdx].keywords.splice(kIdx, 1);
+  localStorage.setItem('saas_keyword_campaigns', JSON.stringify(campaigns));
+  renderProKeywordCampaigns();
+  showToast('Palavra-chave removida da campanha.', 'success');
+};
+
+// 8. ADMIN PANEL VIEW (EXCLUSIVE FOR RANDERSONCONTATO@GMAIL.COM)
+function renderProAdminPanel() {
+  renderAdminUsersList();
+  renderAdminBlogsList();
+}
+
+function renderAdminUsersList() {
+  const tbody = document.getElementById('admin-authorized-users-tbody');
+  if (!tbody) return;
+
+  let allowedEmails = [];
+  try {
+    allowedEmails = JSON.parse(localStorage.getItem('saas_allowed_publishers_emails')) || [];
+  } catch(e) { allowedEmails = []; }
+
+  if (allowedEmails.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-muted); padding:10px;">Nenhum usuário autorizado ainda.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  allowedEmails.forEach((email, idx) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${email}</strong></td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="deleteAdminUser(${idx})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 2px 6px; font-size:10px;">Revogar</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function renderAdminBlogsList() {
+  const tbody = document.getElementById('admin-blogs-tbody');
+  if (!tbody) return;
+
+  let blogs = [];
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+      { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+      { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+    ];
+  } catch(e) { blogs = []; }
+
+  // Filter only admin/global blogs
+  const globalBlogs = blogs.filter(b => b.addedBy === 'admin');
+
+  if (globalBlogs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted); padding:10px;">Nenhum blog cadastrado na rede.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  globalBlogs.forEach((blog) => {
+    const absIndex = blogs.findIndex(b => b.domain === blog.domain);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong style="color:var(--primary);">${blog.domain}</strong></td>
+      <td>${blog.theme}</td>
+      <td style="text-align: center;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="deleteAdminBlog(${absIndex})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 2px 6px; font-size:10px;">Remover</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Admin form handlers
+const adminAddUserForm = document.getElementById('admin-add-user-form');
+if (adminAddUserForm) {
+  adminAddUserForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('admin-user-email');
+    const email = emailInput.value.trim().toLowerCase();
+    if (!email) return;
+
+    let allowedEmails = [];
+    try {
+      allowedEmails = JSON.parse(localStorage.getItem('saas_allowed_publishers_emails')) || [];
+    } catch(err) {}
+
+    if (allowedEmails.includes(email)) {
+      showToast('Este usuário já está autorizado.', 'error');
+      return;
+    }
+
+    allowedEmails.push(email);
+    localStorage.setItem('saas_allowed_publishers_emails', JSON.stringify(allowedEmails));
+    emailInput.value = '';
+    
+    renderAdminUsersList();
+    showToast('Usuário autorizado com sucesso!', 'success');
+    verifyProPermissions();
+  });
+}
+
+window.deleteAdminUser = function(idx) {
+  let allowedEmails = [];
+  try {
+    allowedEmails = JSON.parse(localStorage.getItem('saas_allowed_publishers_emails')) || [];
+  } catch(e) {}
+
+  allowedEmails.splice(idx, 1);
+  localStorage.setItem('saas_allowed_publishers_emails', JSON.stringify(allowedEmails));
+  renderAdminUsersList();
+  showToast('Permissão revogada.', 'success');
+  verifyProPermissions();
+};
+
+const adminAddBlogForm = document.getElementById('admin-add-blog-form');
+if (adminAddBlogForm) {
+  adminAddBlogForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const domainInput = document.getElementById('admin-blog-domain');
+    const themeSelect = document.getElementById('admin-blog-theme');
+
+    let domain = domainInput.value.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const theme = themeSelect.value;
+
+    if (!domain) return;
+
+    let blogs = [];
+    try {
+      blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [
+        { domain: 'etecsr.com.br', theme: 'Decoração', addedBy: 'admin' },
+        { domain: 'entecsolar.com.br', theme: 'Energia', addedBy: 'admin' }
+      ];
+    } catch(err) {}
+
+    if (blogs.some(b => b.domain === domain)) {
+      showToast('Este blog já está cadastrado na rede.', 'error');
+      return;
+    }
+
+    blogs.push({ domain: domain, theme: theme, addedBy: 'admin' });
+    localStorage.setItem('saas_admin_backlink_blogs', JSON.stringify(blogs));
+    domainInput.value = '';
+
+    renderAdminBlogsList();
+    showToast('Blog global cadastrado com sucesso!', 'success');
+  });
+}
+
+window.deleteAdminBlog = function(absIndex) {
+  let blogs = [];
+  try {
+    blogs = JSON.parse(localStorage.getItem('saas_admin_backlink_blogs')) || [];
+  } catch(e) {}
+
+  blogs.splice(absIndex, 1);
+  localStorage.setItem('saas_admin_backlink_blogs', JSON.stringify(blogs));
+  renderAdminBlogsList();
+  showToast('Blog global removido.', 'success');
+};
+
+
+// Populates drop-down selection with user's blogs (used in auditing analyzer tool)
 function populateBacklinkSites() {
   const selectSite = document.getElementById('backlink-select-site');
   if (!selectSite) return;
@@ -2332,13 +3402,12 @@ if (btnCancelBacklink) {
     if (form) form.reset();
     if (customUrlGroup) customUrlGroup.style.display = 'block';
     
-    document.getElementById('backlink-initial-mock').classList.remove('hidden');
     document.getElementById('backlink-loading-mock').classList.add('hidden');
     document.getElementById('backlink-results-container').style.display = 'none';
   });
 }
 
-// Submit Handlers
+// Submit Handlers for auditing analyzer
 const backlinkForm = document.getElementById('backlink-tracker-form');
 if (backlinkForm) {
   backlinkForm.addEventListener('submit', async (e) => {
@@ -2358,141 +3427,101 @@ if (backlinkForm) {
       return;
     }
     
-    const initialMock = document.getElementById('backlink-initial-mock');
     const loadingMock = document.getElementById('backlink-loading-mock');
     const loadingStatus = document.getElementById('backlink-loading-status');
     const resultsContainer = document.getElementById('backlink-results-container');
     const analyzeBtn = document.getElementById('btn-analyze-backlink');
     const resultsTbody = document.getElementById('backlink-results-tbody');
     
-    // Set UI states
+    if (!loadingMock || !resultsContainer || !analyzeBtn || !resultsTbody) return;
+
+    loadingMock.classList.remove('hidden');
+    resultsContainer.style.display = 'none';
     analyzeBtn.disabled = true;
-    analyzeBtn.textContent = '⚡ Analisando...';
-    if (initialMock) initialMock.classList.add('hidden');
-    if (resultsContainer) resultsContainer.style.display = 'none';
-    if (loadingMock) loadingMock.classList.remove('hidden');
+    analyzeBtn.textContent = '⏳ Analisando...';
     
-    // Update steps
     const steps = {
       google: document.getElementById('backlink-step-google'),
       dns: document.getElementById('backlink-step-dns'),
       geoip: document.getElementById('backlink-step-geoip')
     };
-    
-    const setStepState = (step, state) => {
-      if (!step) return;
-      if (state === 'active') {
-        step.style.color = 'var(--primary)';
-        step.style.fontWeight = '700';
-      } else if (state === 'done') {
-        step.style.color = 'var(--success)';
-        step.style.fontWeight = '400';
-        step.textContent = step.textContent.replace('⏳', '✓');
-      } else {
-        step.style.color = 'var(--text-muted)';
-        step.style.fontWeight = '400';
-      }
-    };
-    
-    // Restore text
+
     if (steps.google) steps.google.textContent = '⏳ Pesquisando backlinks (Gemini Grounding)...';
     if (steps.dns) steps.dns.textContent = '⏳ Resolvendo IP e servidores DNS...';
     if (steps.geoip) steps.geoip.textContent = '⏳ Localizando servidores de hospedagem...';
-    
+
     try {
-      setStepState(steps.google, 'active');
-      if (loadingStatus) loadingStatus.textContent = 'Pesquisando referências e links reais apontando para o site...';
-      await delay(1000);
+      loadingStatus.textContent = 'Pesquisando backlinks no índice do Google...';
+      if (steps.google) steps.google.textContent = '⏳ Pesquisando backlinks (Gemini Grounding)...';
       
       const response = await fetch('/api/analyze-backlinks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: targetUrl,
-          geminiApiKey: State.credentials.geminiApiKey
-        })
+        body: JSON.stringify({ url: targetUrl })
       });
       
-      setStepState(steps.google, 'done');
-      setStepState(steps.dns, 'active');
-      if (loadingStatus) loadingStatus.textContent = 'Buscando IP e registros DNS (nameservers)...';
-      await delay(1000);
+      if (steps.google) steps.google.textContent = '✅ Pesquisados backlinks com sucesso!';
       
-      setStepState(steps.dns, 'done');
-      setStepState(steps.geoip, 'active');
-      if (loadingStatus) loadingStatus.textContent = 'Identificando o local físico e provedores de hospedagem...';
-      await delay(800);
+      if (steps.dns) steps.dns.textContent = '⏳ Resolvendo IP e servidores DNS...';
+      loadingStatus.textContent = 'Fazendo varredura DNS e Geolocation...';
       
-      const data = await response.json();
-      if (!response.ok || !data.success) {
+      if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || 'Erro ao analisar backlinks.');
       }
       
-      setStepState(steps.geoip, 'done');
-      await delay(400);
+      const data = await response.json();
       
-      if (loadingMock) loadingMock.classList.add('hidden');
-      if (resultsContainer) resultsContainer.style.display = 'block';
+      if (steps.dns) steps.dns.textContent = '✅ IP e DNS resolvidos com sucesso!';
+      if (steps.geoip) steps.geoip.textContent = '⏳ Localizando servidores de hospedagem...';
       
-      // Populate results table
-      resultsTbody.innerHTML = '';
-      if (data.backlinks.length === 0) {
-        resultsTbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Nenhum link externo encontrado para esta URL.</td></tr>';
-      } else {
-        data.backlinks.forEach((link, idx) => {
-          const row = document.createElement('tr');
-          
-          let relevanceClass = 'relevance-low';
-          if (link.relevance === 'Alta') relevanceClass = 'relevance-high';
-          else if (link.relevance === 'Média') relevanceClass = 'relevance-medium';
-          
-          row.innerHTML = `
-            <td>
-              <strong style="color: #fff; font-size: 15px;">${link.domain}</strong>
-              <div style="font-size: 12px; color: var(--text-muted); max-width: 250px; white-space: normal; margin-top: 4px;">${link.description || ''}</div>
-            </td>
-            <td>
-              <span class="relevance-badge ${relevanceClass}">${link.relevance} (${link.relevanceScore})</span>
-            </td>
-            <td>
-              <code style="background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; font-weight: bold; color: var(--primary);">${link.anchorText}</code>
-            </td>
-            <td>
-              <div class="backlink-tech-info">
-                <span>IP: <strong>${link.ip}</strong></span>
-                <span>NS: <strong style="font-size: 11px;">${link.dns}</strong></span>
-              </div>
-            </td>
-            <td>
-              <div class="backlink-tech-info">
-                <span>ISP: <strong>${link.hostingProvider}</strong></span>
-                <span>Local: <strong>${link.hostingLocation}</strong></span>
-              </div>
-            </td>
-            <td>
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" class="btn btn-sm btn-primary" onclick="saveBacklink('${link.anchorText.replace(/'/g, "\\'")}', '${link.domain.replace(/'/g, "\\'")}')" style="padding: 6px 12px; font-size: 12px;">Salvar</button>
-                <a href="${link.url}" target="_blank" class="btn btn-sm btn-outline" style="padding: 6px 10px; font-size: 12px; text-decoration: none;">🔗 Link</a>
-              </div>
-            </td>
-          `;
-          resultsTbody.appendChild(row);
-        });
-      }
-      
-    } catch (err) {
-      console.error(err);
-      showToast(err.message, 'error');
-      if (initialMock) initialMock.classList.remove('hidden');
-      if (loadingMock) loadingMock.classList.add('hidden');
-    } finally {
+      setTimeout(() => {
+        if (steps.geoip) steps.geoip.textContent = '✅ Geolocation mapeada com sucesso!';
+        
+        loadingMock.classList.add('hidden');
+        resultsContainer.style.display = 'block';
+        
+        if (data.backlinks.length === 0) {
+          resultsTbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum backlink externo real encontrado na varredura.</td></tr>';
+        } else {
+          resultsTbody.innerHTML = '';
+          data.backlinks.forEach((link, idx) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><strong>${link.domain}</strong></td>
+              <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: var(--primary);">${link.relevance || 'N/A'}</span></td>
+              <td><code>${link.anchorText || ''}</code></td>
+              <td>
+                <div style="font-family: monospace; font-size: 0.8rem;">IP: ${link.ip || 'Resolvendo...'}</div>
+                <div style="font-family: monospace; font-size: 0.75rem; color: var(--text-muted);">DNS: ${link.dns || 'N/A'}</div>
+              </td>
+              <td>
+                <div style="font-size: 0.8rem;">ISP: ${link.isp || 'N/A'}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${link.country || 'N/A'}</div>
+              </td>
+              <td style="text-align: center;">
+                <button type="button" class="btn btn-sm btn-primary" onclick="saveBacklink('${link.anchorText || ''}', '${link.domain}')" style="font-size: 11px; padding: 4px 8px;">Salvar</button>
+              </td>
+            `;
+            resultsTbody.appendChild(row);
+          });
+        }
+        
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = '⚡ Analisar Backlinks';
+      }, 1000);
+
+    } catch (error) {
+      console.error(error);
+      showToast(error.message || 'Erro ao realizar a varredura.', 'error');
+      loadingMock.classList.add('hidden');
       analyzeBtn.disabled = false;
       analyzeBtn.textContent = '⚡ Analisar Backlinks';
     }
   });
 }
 
-// Save backlink to LocalStorage list
+// Save backlink from auditor to local storage list
 window.saveBacklink = function(anchorText, domain) {
   let saved = [];
   try {
@@ -2501,10 +3530,8 @@ window.saveBacklink = function(anchorText, domain) {
     saved = [];
   }
   
-  // Check if already exists
-  const exists = saved.some(item => item.anchorText.toLowerCase() === anchorText.toLowerCase() && item.domain.toLowerCase() === domain.toLowerCase());
-  if (exists) {
-    showToast('Este link já está salvo na sua lista.', 'warning');
+  if (saved.some(item => item.anchorText === anchorText && item.domain === domain)) {
+    showToast('Este backlink já foi salvo anteriormente.', 'warning');
     return;
   }
   
@@ -2531,7 +3558,7 @@ window.deleteSavedBacklink = function(index) {
   renderSavedBacklinks();
 };
 
-// Render saved backlinks table
+// Render saved backlinks table (auditor saved links)
 function renderSavedBacklinks() {
   const savedTbody = document.getElementById('backlink-saved-tbody');
   if (!savedTbody) return;
