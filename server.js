@@ -9,6 +9,7 @@ const https = require('https');
 const http = require('http');
 const git = require('isomorphic-git');
 const gitHttp = require('isomorphic-git/http/node');
+const sharp = require('sharp');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -5515,8 +5516,14 @@ No comecinho do texto, adicione uma linha curta assim para me ajudar a extrair a
                 }
                 imgPath = path.join(repoImagesQueueDir, imgName);
               }
-              logFn('info', `📥 [Pexels] Baixando imagem real...`);
-              await downloadImage(imageUrl, imgPath);
+              logFn('info', `📥 [Pexels] Baixando e otimizando imagem real (Máx 800x800)...`);
+              const imgRes = await fetch(imageUrl);
+              const arrayBuffer = await imgRes.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              await sharp(buffer)
+                .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 80 })
+                .toFile(imgPath);
               localImageName = `images/posts/${imgName}`;
               finalHeroImage = `/${localImageName}`;
               logFn('success', `✅ [Pexels] Imagem configurada: ${finalHeroImage}`);
@@ -5754,13 +5761,20 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
     const imgName = `${slug}.jpg`;
     let localImageName = `images/posts/${imgName}`;
 
-    // Download the image to a temp location
+    // Download and resize the image to a temp location using sharp (max 800x800)
     const tempImgDir = path.join('/tmp', 'downloaded_images');
     if (!fs.existsSync(tempImgDir)) {
       fs.mkdirSync(tempImgDir, { recursive: true });
     }
     const tempImgPath = path.join(tempImgDir, imgName);
-    await downloadImage(imageUrl, tempImgPath);
+    
+    const imgRes = await fetch(imageUrl);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    await sharp(buffer)
+      .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toFile(tempImgPath);
 
     if (isLocal) {
       const publicImagesDir = path.join(blogPath, 'public', 'images', 'posts');
