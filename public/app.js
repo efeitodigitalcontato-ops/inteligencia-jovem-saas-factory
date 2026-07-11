@@ -5795,31 +5795,19 @@ window.triggerSuccessConfetti = function() {
 window.populateImagesSites = function() {
   const select = document.getElementById('images-blog-select');
   if (!select) return;
-  select.innerHTML = '<option value="">-- Selecione o Blog --</option>';
-
-  const cached = blogsCache.get(State.user.id);
-  if (cached && cached.blogs) {
-    cached.blogs.forEach(b => {
-      const opt = document.createElement('option');
-      opt.value = b.repoName;
-      opt.textContent = b.repoName.replace('afiliados-blog-', '').toUpperCase();
-      select.appendChild(opt);
-    });
-  } else {
-    fetch('/api/all-blogs')
-      .then(res => res.json())
-      .then(data => {
-        if (data.blogs) {
-          data.blogs.forEach(b => {
-            const opt = document.createElement('option');
-            opt.value = b.repoName;
-            opt.textContent = b.repoName.replace('afiliados-blog-', '').toUpperCase();
-            select.appendChild(opt);
-          });
-        }
-      })
-      .catch(err => console.error('Erro ao buscar blogs para imagens:', err));
+  
+  if (!State.sites || State.sites.length === 0) {
+    select.innerHTML = '<option value="">-- Nenhum blog encontrado --</option>';
+    return;
   }
+
+  select.innerHTML = '<option value="">-- Selecione o Blog --</option>';
+  State.sites.forEach(site => {
+    const opt = document.createElement('option');
+    opt.value = site.repoName;
+    opt.textContent = site.repoName.replace('afiliados-blog-', '').toUpperCase();
+    select.appendChild(opt);
+  });
 };
 
 window.loadBlogArticlesForImages = async function() {
