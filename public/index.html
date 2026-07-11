@@ -1239,7 +1239,7 @@
               <div class="success-overlay" id="success-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(15,23,42,0.95); z-index: 10; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; gap: 20px; border-radius: 16px;">
                 <div class="success-icon" style="width: 72px; height: 72px; background-color: rgba(16,185,129,0.1); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold;">✓</div>
                 <h2 style="font-size: 24px; font-weight: 700; color: var(--success);">Artigo Publicado com Sucesso!</h2>
-                <p style="color: var(--text-muted); max-width: 400px; font-size: 15px; line-height: 1.5;">O artigo foi adicionado ao seu repositório GitHub. O deploy automático da Vercel foi iniciado na nuvem e o novo conteúdo estará visível no site em poucos minutos!</p>
+                <p style="color: var(--text-muted); max-width: 400px; font-size: 15px; line-height: 1.5;">O artigo foi adicionado ao seu repositório GitHub. O deploy automático na VPS foi iniciado e o novo conteúdo estará visível no site em poucos minutos!</p>
                 <div style="display: flex; gap: 12px; margin-top: 10px;">
                   <button onclick="resetGenerator()" class="btn btn-primary" style="background: var(--primary); box-shadow: none; border: none; font-weight: 600; font-size: 16px; padding: 14px; border-radius: 8px; cursor: pointer; color: white;">Criar Outro Artigo</button>
                 </div>
@@ -3343,7 +3343,7 @@ except KeyboardInterrupt:
         return;
       }
 
-      if (!confirm('Fazer push de ' + localQueue.length + ' artigos e acionar rebuild no Servidor/Vercel?')) return;
+      if (!confirm('Fazer push de ' + localQueue.length + ' artigos e acionar rebuild no Servidor VPS?')) return;
       
       cnToast('⏳ Iniciando deploy...');
       fetch('/api/deploy', {

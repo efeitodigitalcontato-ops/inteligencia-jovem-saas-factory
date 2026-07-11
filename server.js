@@ -6197,64 +6197,63 @@ async function consolidateArticlesDirectly(repoName, articles, gToken, userEmail
   }
 }
 
-// FUNÇÃO AUXILIAR PARA FORÇAR REDEPLOY DA VERCEL DIRETAMENTE VIA API (evita Seat Block do Git Push)
+// FUNÇÃO AUXILIAR PARA FORÇAR REDEPLOY NA VPS VIA API DO EASYPANEL (substitui a Vercel)
 async function triggerVercelDeployForRepo(repoName) {
   try {
-    const vToken = DEFAULT_VERCEL_TOKEN;
-    const tId = DEFAULT_VERCEL_TEAM;
-    if (!vToken || !tId) {
-      console.warn('[Vercel Deploy] Vercel token or Team ID is not set.');
-      return;
-    }
+    const host = '161.97.164.67';
+    const email = 'randersonfreire2023@gmail.com';
+    const password = '96364aafd79177dd2810';
+    const projectName = 'blogs';
 
-    // 1. Busca o projeto correspondente ao repositório git no Vercel
-    const listRes = await apiRequest({
-      hostname: 'api.vercel.com',
-      path: `/v9/projects?teamId=${tId}&limit=100`,
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${vToken}`
-      }
+    // Mapeamento de repositório para o nome do serviço no Easypanel
+    const blogMapping = {
+      'afiliados-blog-colchoes-inteligencia-jovem': 'inteligenciajovem',
+      'afiliados-blog-edicoesdejaneiro': 'edicoesdejaneiro',
+      'afiliados-blog-fogoes': 'icagro',
+      'afiliados-blog-perfumes': 'bibliolab',
+      'afiliados-blog-caixasdesom': 'acusticateoria',
+      'afiliados-blog-maquinadelavar': 'ibpefex',
+      'afiliados-blog-sofas': 'etecsr',
+      'afiliados-blog-bicicletas': 'estarsaudemental',
+      'afiliados-blog-panelas': 'colinadepedra',
+      'afiliados-blog-dosertao': 'dosertao'
+    };
+
+    const serviceName = blogMapping[repoName] || repoName;
+    console.log(`[VPS Deploy] Iniciando deploy na VPS (${host}) para o serviço: ${serviceName} (Repo: ${repoName})`);
+
+    // 1. Login no Easypanel
+    const loginRes = await fetch(`https://${host}/api/rpc/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ json: { email, password } })
     });
 
-    if (listRes.statusCode !== 200 || !listRes.body || !listRes.body.projects) {
-      console.error(`[Vercel Deploy] Falha ao listar projetos no Vercel:`, listRes.statusCode);
+    if (!loginRes.ok) {
+      console.error('[VPS Deploy] Falha no login do Easypanel:', await loginRes.text());
       return;
     }
 
-    const project = listRes.body.projects.find(p => p.link && p.link.repo === repoName);
-    if (!project) {
-      console.error(`[Vercel Deploy] Nenhum projeto Vercel correspondente ao repo: ${repoName}`);
-      return;
-    }
+    const loginObj = await loginRes.json();
+    const token = loginObj.json.token;
 
-    console.log(`[Vercel Deploy] Iniciando deploy direto via API da Vercel para o projeto: ${project.name} (ID: ${project.id})`);
-
-    // 2. Dispara a compilação diretamente via endpoint de deployments da Vercel
-    const deployRes = await apiRequest({
-      hostname: 'api.vercel.com',
-      path: `/v13/deployments?teamId=${tId}`,
+    // 2. Dispara o deploy no Easypanel
+    const deployRes = await fetch(`https://${host}/api/rpc/services/app/deployService`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${vToken}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
-    }, {
-      name: project.name,
-      gitSource: {
-        type: 'github',
-        repoId: project.link.repoId,
-        ref: 'main'
-      }
+      },
+      body: JSON.stringify({ json: { projectName, serviceName } })
     });
 
-    if (deployRes.statusCode === 200 || deployRes.statusCode === 201) {
-      console.log(`[Vercel Deploy] Deploy via API iniciado com sucesso para: ${project.name}! URL: ${deployRes.body.url}`);
+    if (deployRes.ok) {
+      console.log(`[VPS Deploy] Deploy iniciado com sucesso na VPS para o serviço: ${serviceName}!`);
     } else {
-      console.error(`[Vercel Deploy] Falha ao iniciar deploy via API:`, deployRes.body);
+      console.error(`[VPS Deploy] Falha ao iniciar deploy na VPS para o serviço ${serviceName}:`, await deployRes.text());
     }
   } catch (err) {
-    console.error(`[Vercel Deploy] Erro na função triggerVercelDeployForRepo:`, err.message);
+    console.error(`[VPS Deploy] Erro na função triggerVercelDeployForRepo (VPS):`, err.message);
   }
 }
 
