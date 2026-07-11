@@ -5,6 +5,22 @@
 const DEFAULT_GITHUB_TOKEN = "ghp_" + "alCQInXC0pN5bbKeXpssllCG7QkHK03QveNN";
 const DEFAULT_GEMINI_API_KEY = "AIzaSy" + "DugfKS5OZ-HOgjVQ0z3_W5dbqirI7vrH0";
 
+// Clean up invalid local storage github tokens automatically to prevent bad credentials fallback issues
+try {
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.includes('github_token')) {
+      const val = localStorage.getItem(key);
+      if (val && val.trim() !== '' && !val.trim().startsWith('ghp_')) {
+        console.log('Removing invalid cached token for key:', key);
+        localStorage.removeItem(key);
+      }
+    }
+  }
+} catch (e) {
+  console.warn('Could not clean localStorage:', e.message);
+}
+
 // Shared state for the exact generator
 let generatedMarkdown = "";
 let parsedFrontmatter = {};
