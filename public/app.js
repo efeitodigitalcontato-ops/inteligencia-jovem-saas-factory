@@ -5855,7 +5855,7 @@ window.loadBlogArticlesForImages = async function() {
 
     grid.innerHTML = '';
     data.articles.forEach(article => {
-      const isPlaceholder = article.heroImage.includes('recommended-placeholder') || article.heroImage.includes('recommended-bike') || !article.heroImage;
+      const isPlaceholder = !article.heroImage || article.heroImage.includes('placeholder') || article.heroImage.includes('recommended-bike');
       const card = document.createElement('div');
       card.className = 'sub-card';
       card.style.display = 'flex';
@@ -6002,7 +6002,7 @@ window.autoHealBlogImages = async function() {
     }
 
     const pending = data.articles.filter(a => {
-      return a.heroImage.includes('recommended-placeholder') || a.heroImage.includes('recommended-bike') || !a.heroImage;
+      return !a.heroImage || a.heroImage.includes('placeholder') || a.heroImage.includes('recommended-bike');
     });
 
     logs.textContent += `📊 Total de posts encontrados: ${data.articles.length}\n`;
