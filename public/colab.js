@@ -955,7 +955,7 @@ async function startGeneration() {
     : `⚠️ ${okCount} OK · ${failCount} falha(s) de ${totalCount}`;
 
   if (allOk) {
-    appendLog(`\n\n🎉 CONCLUÍDO! ${totalCount} artigos gerados e publicados no GitHub.\nA Vercel reconstruirá o site automaticamente em alguns minutos.`, 'ok');
+    appendLog(`\n\n🎉 CONCLUÍDO! ${totalCount} artigos gerados e publicados no GitHub.\nO servidor reconstruirá o site automaticamente em alguns minutos.`, 'ok');
   } else {
     appendLog(`\n⚠️ Finalizado: ${okCount}/${totalCount} artigos. ${failCount} falharam.`, 'info');
   }
@@ -981,7 +981,7 @@ async function triggerDeploy() {
     return;
   }
 
-  if (!confirm(`Fazer push de ${localQueue.length} artigos para o GitHub e acionar o rebuild na Vercel?`)) return;
+  if (!confirm(`Fazer push de ${localQueue.length} artigos para o GitHub e acionar o rebuild no Servidor/Vercel?`)) return;
 
   btn.disabled = true;
   btn.innerHTML = '⏳ Deployando...';
@@ -1010,6 +1010,6 @@ async function triggerDeploy() {
     showToast(`❌ Erro de conexão: ${err.message}`);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '✈️ Deploy Vercel';
+    btn.innerHTML = '✈️ Realizar Deploy';
   }
 }
