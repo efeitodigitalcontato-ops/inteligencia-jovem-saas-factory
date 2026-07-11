@@ -14,5 +14,8 @@
     "express": "^4.19.2",
     "isomorphic-git": "^1.25.10",
     "sharp": "^0.32.6"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
