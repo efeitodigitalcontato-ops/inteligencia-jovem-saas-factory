@@ -5368,7 +5368,7 @@ async function sseCountdown(seconds, reason, panelId) {
   log('info', "🚀 Retomando fila de geração!");
 }
 
-async function processAndWriteSseArticle(title, selectedBlog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken) {
+async function processAndWriteSseArticle(title, selectedBlog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey) {
   const rootDir = path.join(__dirname, '..');
   const blogPath = path.join(rootDir, selectedBlog);
   const isLocal = fs.existsSync(blogPath);
@@ -5484,6 +5484,49 @@ No comecinho do texto, adicione uma linha curta assim para me ajudar a extrair a
 
       const pubDate = new Date().toISOString().split('T')[0];
       
+      let finalHeroImage = heroImage || (selectedBlog.includes('bicicleta') ? '/recommended-bike.jpg' : '/recommended-placeholder.jpg');
+      let localImageName = null;
+
+      if (pexelsApiKey) {
+        const logFn = panelId ? (t, m, e) => sendPanelLog(panelId, t, m, e) : sendLog;
+        logFn('info', `🔍 [Pexels] Buscando imagem real para "${title}"...`);
+        try {
+          const searchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(title)}&per_page=1&locale=pt-BR`;
+          const searchRes = await fetch(searchUrl, {
+            headers: { Authorization: pexelsApiKey }
+          });
+          if (searchRes.ok) {
+            const searchData = await searchRes.json();
+            const imageUrl = searchData.photos?.[0]?.src?.large;
+            if (imageUrl) {
+              const imgName = `${slug}.jpg`;
+              let imgPath = "";
+              if (isLocal) {
+                const publicImagesDir = path.join(blogPath, 'public', 'images', 'posts');
+                if (!fs.existsSync(publicImagesDir)) {
+                  fs.mkdirSync(publicImagesDir, { recursive: true });
+                }
+                imgPath = path.join(publicImagesDir, imgName);
+              } else {
+                const repoQueueDir = path.join(QUEUE_DIR, selectedBlog);
+                const repoImagesQueueDir = path.join(repoQueueDir, 'images');
+                if (!fs.existsSync(repoImagesQueueDir)) {
+                  fs.mkdirSync(repoImagesQueueDir, { recursive: true });
+                }
+                imgPath = path.join(repoImagesQueueDir, imgName);
+              }
+              logFn('info', `📥 [Pexels] Baixando imagem real...`);
+              await downloadImage(imageUrl, imgPath);
+              localImageName = `images/posts/${imgName}`;
+              finalHeroImage = `/${localImageName}`;
+              logFn('success', `✅ [Pexels] Imagem configurada: ${finalHeroImage}`);
+            }
+          }
+        } catch (imgErr) {
+          logFn('warning', `⚠️ [Pexels] Falha ao baixar imagem: ${imgErr.message}`);
+        }
+      }
+
       // Montar bloco de Frontmatter YAML limpo
       const frontmatter = `---
 title: ${JSON.stringify(title)}
@@ -5491,7 +5534,7 @@ description: ${JSON.stringify(description)}
 pubDate: "${pubDate}"
 category: "${category || 'Dicas'}"
 author: "${authorName || 'Redação Ninja'}"
-heroImage: "${heroImage || '/recommended-placeholder.jpg'}"
+heroImage: "${finalHeroImage}"
 ---
 
 ${bodyText}`;
@@ -5531,7 +5574,7 @@ ${bodyText}`;
         const queueMetadata = {
           fileName: finalFilename,
           content: frontmatter,
-          imageName: null,
+          imageName: localImageName,
           title: title,
           userEmail: 'randerson@inteligenciajovem.com.br'
         };
@@ -5644,7 +5687,7 @@ app.get('/api/logs-poll', (req, res) => {
 // ROTA POST: Iniciar Geração em Lote de Alta Performance (SSE + Multi-Panel)
 app.post('/api/generate-bulk-sse', async (req, res) => {
   try {
-    const { titles, blog, apiKeys, apiKey, category, tone, affiliate, heroImage, authorName, panelId, githubToken } = req.body;
+    const { titles, blog, apiKeys, apiKey, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey } = req.body;
 
     // Check if this panel is already busy
     if (panelId && panelBusy.get(panelId)) {
@@ -5689,7 +5732,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
         // Cascata de 1.5s entre inícios para não bombardear a rede no mesmo milissegundo
         await sseSleep(i * 1500);
         log('status', `🚀 Disparando em paralelo artigo ${i + 1} de ${titles.length}: "${title}"`, { current: i + 1, total: titles.length });
-        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken);
+        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey);
         
         if (ok && !isLocalMode(blog)) {
           completedCount++;
