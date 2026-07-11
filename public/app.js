@@ -65,7 +65,8 @@ const el = {
     settings: document.getElementById('view-settings'),
     domainConfig: document.getElementById('view-domain-config'),
     netoSalva: document.getElementById('view-neto-salva'),
-    payment: document.getElementById('view-payment')
+    payment: document.getElementById('view-payment'),
+    imagesPanel: document.getElementById('view-images-panel')
   },
 
   // Auth
@@ -116,6 +117,7 @@ const el = {
   setVercelToken: document.getElementById('settings-vercel-token'),
   setVercelTeam: document.getElementById('settings-vercel-team'),
   setGeminiKey: document.getElementById('settings-gemini-key'),
+  setPexelsKey: document.getElementById('settings-pexels-key'),
 
   // Domain Config
   domainSiteName: document.getElementById('domain-site-name'),
@@ -256,6 +258,10 @@ function showView(viewName) {
 
   if (viewName === 'siloStructure') {
     populateSiloSites();
+  }
+
+  if (viewName === 'imagesPanel') {
+    populateImagesSites();
   }
 
   if (viewName === 'netoSalva') {
@@ -574,6 +580,7 @@ document.querySelector('a[href="#silo-structure"]').addEventListener('click', (e
 document.querySelector('a[href="#site-position"]').addEventListener('click', (e) => { e.preventDefault(); showView('sitePosition'); });
 document.querySelector('a[href="#backlink-tracker"]').addEventListener('click', (e) => { e.preventDefault(); showView('backlinkTracker'); });
 document.querySelector('a[href="#neto-salva"]').addEventListener('click', (e) => { e.preventDefault(); showView('netoSalva'); });
+document.querySelector('a[href="#images-panel"]').addEventListener('click', (e) => { e.preventDefault(); showView('imagesPanel'); });
 document.querySelector('a[href="#settings"]').addEventListener('click', (e) => { e.preventDefault(); showView('settings'); });
 
 el.loginNavBtn.addEventListener('click', () => { showView('auth'); el.tabLoginBtn.click(); });
@@ -963,6 +970,8 @@ el.settingsForm.addEventListener('submit', async (e) => {
       geminiApiKey: State.user.geminiApiKey || ""
     };
 
+    localStorage.setItem('pexels_api_key', el.setPexelsKey.value.trim());
+
     showToast('Credenciais salvas com sucesso no banco de dados!', 'success');
     showView('dashboard');
   } catch (err) {
@@ -1325,6 +1334,9 @@ async function handleGoogleAuthCallback(response) {
     el.setVercelToken.value = State.credentials.vercelToken || '';
     el.setVercelTeam.value = State.credentials.vercelTeamId || '';
     el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+    if (el.setPexelsKey) {
+      el.setPexelsKey.value = localStorage.getItem('pexels_api_key') || '';
+    }
 
     updateAuthUI(true);
     renderBlogList();
@@ -4908,6 +4920,9 @@ document.addEventListener('DOMContentLoaded', () => {
         el.setGithubToken.value = State.credentials.githubToken || '';
         el.setVercelToken.value = State.credentials.vercelToken || '';
         el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+    if (el.setPexelsKey) {
+      el.setPexelsKey.value = localStorage.getItem('pexels_api_key') || '';
+    }
 
         showToast('Configuração inicial concluída com sucesso!', 'success');
         closeSafiraOnboarding();
@@ -5770,6 +5785,286 @@ window.triggerSuccessConfetti = function() {
     
     document.body.appendChild(confetti);
     setTimeout(() => confetti.remove(), duration * 1000);
+  }
+};
+
+// ============================================================================
+// IMAGES PANEL AND AUTO-HEALER FUNCTIONALITY
+// ============================================================================
+
+window.populateImagesSites = function() {
+  const select = document.getElementById('images-blog-select');
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Selecione o Blog --</option>';
+
+  const cached = blogsCache.get(State.user.id);
+  if (cached && cached.blogs) {
+    cached.blogs.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.repoName;
+      opt.textContent = b.repoName.replace('afiliados-blog-', '').toUpperCase();
+      select.appendChild(opt);
+    });
+  } else {
+    fetch('/api/all-blogs')
+      .then(res => res.json())
+      .then(data => {
+        if (data.blogs) {
+          data.blogs.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.repoName;
+            opt.textContent = b.repoName.replace('afiliados-blog-', '').toUpperCase();
+            select.appendChild(opt);
+          });
+        }
+      })
+      .catch(err => console.error('Erro ao buscar blogs para imagens:', err));
+  }
+};
+
+window.loadBlogArticlesForImages = async function() {
+  const blog = document.getElementById('images-blog-select').value;
+  const grid = document.getElementById('articles-images-grid');
+  if (!grid) return;
+
+  if (!blog) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Selecione um blog acima para carregar a lista de artigos.</div>';
+    return;
+  }
+
+  grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-main); padding:40px;"><span class="spinner" style="width:24px; height:24px; display:inline-block; margin-right:8px;"></span> Carregando artigos do GitHub...</div>';
+
+  try {
+    const gitToken = State.credentials.githubToken;
+    const response = await fetch(`/api/blog-articles?blog=${blog}&githubToken=${gitToken}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Erro ao carregar artigos.');
+    }
+
+    if (data.articles.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:40px;">Nenhum artigo encontrado neste blog.</div>';
+      return;
+    }
+
+    grid.innerHTML = '';
+    data.articles.forEach(article => {
+      const isPlaceholder = article.heroImage.includes('recommended-placeholder') || article.heroImage.includes('recommended-bike') || !article.heroImage;
+      const card = document.createElement('div');
+      card.className = 'sub-card';
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.gap = '12px';
+      card.style.border = isPlaceholder ? '1px dashed #ef4444' : '1px solid var(--border-color)';
+      card.style.padding = '16px';
+      card.style.borderRadius = '12px';
+      card.style.backgroundColor = 'rgba(255,255,255,0.01)';
+
+      const thumbUrl = article.heroImage ? (article.heroImage.startsWith('/') ? `https://raw.githubusercontent.com/${DEFAULT_ORG}/${blog}/main/public${article.heroImage}` : article.heroImage) : '';
+
+      card.innerHTML = `
+        <div style="position:relative; width:100%; height:140px; border-radius:8px; overflow:hidden; background:#111;">
+          <img src="${thumbUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2210%22>Sem Imagem</text></svg>'}" 
+               id="img-preview-${article.slug}" 
+               style="width:100%; height:100%; object-fit:cover;"
+               onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23ef4444%22 font-size=%228%22>Erro Carregamento (404)</text></svg>'\">
+          ${isPlaceholder ? `<span style="position:absolute; top:8px; left:8px; background:#ef4444; color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">Placeholder</span>` : ''}
+        </div>
+        <div style="font-weight:bold; font-size:0.95rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${article.title}">${article.title}</div>
+        <div style="font-size:0.8rem; color:var(--text-muted); font-family:monospace; word-break:break-all;">Hero: ${article.heroImage || 'Nenhuma'}</div>
+        
+        <div style="display:flex; gap:8px; margin-top:auto;">
+          <input type="text" id="custom-img-url-${article.slug}" class="form-control" style="flex:1; padding:8px; font-size:0.8rem;" placeholder="Nova URL de Imagem">
+          <button class="btn btn-outline" onclick="updateArticleImageManual('${article.slug}')" style="padding:8px 12px; font-size:0.8rem;">Salvar</button>
+        </div>
+        
+        <button class="btn btn-sm" onclick="autoSearchPexelsSingle('${article.slug}', '${article.title.replace(/'/g, "\\'")}')" style="width:100%; background:rgba(99,102,241,0.1); color:var(--primary); border:1px solid rgba(99,102,241,0.2); font-weight:bold; font-size:0.8rem; padding:8px; border-radius:6px; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+          🔍 Autobuscar no Pexels
+        </button>
+      `;
+      grid.appendChild(card);
+    });
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--danger); padding:40px;">Erro ao carregar artigos: ${err.message}</div>`;
+  }
+};
+
+window.updateArticleImageManual = async function(slug) {
+  const blog = document.getElementById('images-blog-select').value;
+  const imageUrl = document.getElementById(`custom-img-url-${slug}`).value.trim();
+
+  if (!imageUrl) {
+    showToast('Insira uma URL de imagem válida.', 'warning');
+    return;
+  }
+
+  showToast('Iniciando envio e atualização...', 'info');
+
+  try {
+    const gitToken = State.credentials.githubToken;
+    const response = await fetch('/api/update-article-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blog, slug, imageUrl, githubToken: gitToken })
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Erro ao salvar imagem.');
+    }
+
+    showToast('Imagem de destaque atualizada com sucesso!', 'success');
+    
+    const previewImg = document.getElementById(`img-preview-${slug}`);
+    if (previewImg) {
+      previewImg.src = data.heroImage.startsWith('/') ? `https://raw.githubusercontent.com/${DEFAULT_ORG}/${blog}/main/public${data.heroImage}` : data.heroImage;
+    }
+  } catch (err) {
+    console.error(err);
+    showToast(`Erro ao atualizar imagem: ${err.message}`, 'error');
+  }
+};
+
+window.autoSearchPexelsSingle = async function(slug, title) {
+  const pexelsKey = localStorage.getItem('pexels_api_key');
+  if (!pexelsKey) {
+    showToast('Chave de API do Pexels não configurada. Configure nas Configurações.', 'warning');
+    return;
+  }
+
+  showToast(`Buscando imagem para "${title}"...`, 'info');
+
+  try {
+    const searchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(title)}&per_page=1&locale=pt-BR`;
+    const res = await fetch(searchUrl, {
+      headers: { Authorization: pexelsKey }
+    });
+    if (!res.ok) throw new Error('Falha ao conectar na API do Pexels.');
+
+    const data = await res.json();
+    const imageUrl = data.photos?.[0]?.src?.large;
+
+    if (!imageUrl) {
+      showToast('Nenhuma imagem encontrada no Pexels para este título.', 'warning');
+      return;
+    }
+
+    const input = document.getElementById(`custom-img-url-${slug}`);
+    if (input) input.value = imageUrl;
+    
+    await updateArticleImageManual(slug);
+  } catch (err) {
+    console.error(err);
+    showToast(`Erro ao buscar Pexels: ${err.message}`, 'error');
+  }
+};
+
+window.autoHealBlogImages = async function() {
+  const blog = document.getElementById('images-blog-select').value;
+  const pexelsKey = localStorage.getItem('pexels_api_key');
+
+  if (!blog) {
+    showToast('Selecione um blog primeiro.', 'warning');
+    return;
+  }
+  if (!pexelsKey) {
+    showToast('Insira sua Chave de API do Pexels nas Configurações.', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('btn-auto-heal-images');
+  const progressContainer = document.getElementById('image-heal-progress-container');
+  const progressBar = document.getElementById('image-heal-progress-bar');
+  const percentageText = document.getElementById('image-heal-percentage');
+  const statusText = document.getElementById('image-heal-status-text');
+  const logs = document.getElementById('image-heal-logs');
+
+  btn.disabled = true;
+  progressContainer.style.display = 'block';
+  logs.textContent = '🔍 Iniciando varredura...\n';
+  progressBar.style.width = '0%';
+  percentageText.textContent = '0%';
+
+  try {
+    const gitToken = State.credentials.githubToken;
+    const response = await fetch(`/api/blog-articles?blog=${blog}&githubToken=${gitToken}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Erro ao buscar artigos do blog.');
+    }
+
+    const pending = data.articles.filter(a => {
+      return a.heroImage.includes('recommended-placeholder') || a.heroImage.includes('recommended-bike') || !a.heroImage;
+    });
+
+    logs.textContent += `📊 Total de posts encontrados: ${data.articles.length}\n`;
+    logs.textContent += `🚨 Posts com placeholder/sem imagem: ${pending.length}\n`;
+
+    if (pending.length === 0) {
+      logs.textContent += `✓ Tudo pronto! Todos os artigos já possuem imagens válidas.\n`;
+      btn.disabled = false;
+      statusText.textContent = 'Varredura concluída!';
+      return;
+    }
+
+    let successCount = 0;
+    for (let i = 0; i < pending.length; i++) {
+      const article = pending[i];
+      const stepPct = Math.round(((i + 1) / pending.length) * 100);
+      statusText.textContent = `Corrigindo (${i + 1}/${pending.length}): ${article.title}`;
+      logs.textContent += `\n👉 [${i+1}/${pending.length}] Corrigindo: "${article.title}"...\n`;
+      
+      try {
+        logs.textContent += `  🔍 Pesquisando imagem no Pexels...\n`;
+        const searchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(article.title)}&per_page=1&locale=pt-BR`;
+        const searchRes = await fetch(searchUrl, { headers: { Authorization: pexelsKey } });
+        if (!searchRes.ok) throw new Error('API do Pexels retornou erro.');
+        
+        const searchData = await searchRes.json();
+        const imageUrl = searchData.photos?.[0]?.src?.large;
+        
+        if (!imageUrl) {
+          logs.textContent += `  ⚠️ Nenhuma foto encontrada no Pexels.\n`;
+          continue;
+        }
+
+        logs.textContent += `  📥 Baixando e enviando para o GitHub...\n`;
+        const updateRes = await fetch('/api/update-article-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ blog, slug: article.slug, imageUrl, githubToken: gitToken })
+        });
+        
+        const updateData = await updateRes.json();
+        if (!updateRes.ok || !updateData.success) {
+          throw new Error(updateData.error || 'Falha ao salvar.');
+        }
+
+        logs.textContent += `  ✅ Sucesso! Imagem atualizada.\n`;
+        successCount++;
+      } catch (err) {
+        logs.textContent += `  ❌ Erro: ${err.message}\n`;
+      }
+
+      progressBar.style.width = `${stepPct}%`;
+      percentageText.textContent = `${stepPct}%`;
+      logs.scrollTop = logs.scrollHeight;
+
+      await new Promise(r => setTimeout(r, 1500));
+    }
+
+    logs.textContent += `\n🏁 FIM! Corrigidos ${successCount} de ${pending.length} artigos com sucesso.\n`;
+    statusText.textContent = 'Concluído!';
+    loadBlogArticlesForImages();
+  } catch (err) {
+    console.error(err);
+    logs.textContent += `\n❌ Erro Geral: ${err.message}\n`;
+    statusText.textContent = 'Erro durante a varredura';
+  } finally {
+    btn.disabled = false;
   }
 };
 

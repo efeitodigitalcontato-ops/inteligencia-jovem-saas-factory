@@ -5632,6 +5632,301 @@ app.post('/api/save-article', async (req, res) => {
   }
 });
 
+// Helper function to parse frontmatter from markdown content
+function parseFrontmatter(content) {
+  const parts = content.split('---');
+  const metadata = {};
+  if (parts.length >= 3) {
+    const yaml = parts[1];
+    const lines = yaml.split('\n');
+    lines.forEach(line => {
+      const idx = line.indexOf(':');
+      if (idx !== -1) {
+        const key = line.substring(0, idx).trim();
+        let value = line.substring(idx + 1).trim();
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.substring(1, value.length - 1);
+        } else if (value.startsWith("'") && value.endsWith("'")) {
+          value = value.substring(1, value.length - 1);
+        }
+        metadata[key] = value;
+      }
+    });
+  }
+  return metadata;
+}
+
+// Endpoint to list all articles and their current heroImage
+app.get('/api/blog-articles', checkAuth, async (req, res) => {
+  const selectedBlog = req.query.blog;
+  const customGitToken = req.query.githubToken;
+  const gToken = customGitToken || DEFAULT_GITHUB_TOKEN;
+
+  if (!selectedBlog) {
+    return res.status(400).json({ error: 'O parâmetro blog é obrigatório.' });
+  }
+
+  try {
+    const rootDir = path.join(__dirname, '..');
+    const blogPath = path.join(rootDir, selectedBlog);
+    const isLocal = fs.existsSync(blogPath);
+
+    if (isLocal) {
+      const blogContentDir = path.join(blogPath, 'src', 'content', 'blog');
+      if (!fs.existsSync(blogContentDir)) {
+        return res.json({ success: true, articles: [] });
+      }
+      const files = fs.readdirSync(blogContentDir).filter(f => f.endsWith('.md'));
+      const articles = files.map(file => {
+        const filePath = path.join(blogContentDir, file);
+        const fileContent = fs.readFileSync(filePath, 'utf8');
+        const meta = parseFrontmatter(fileContent);
+        return {
+          title: meta.title || file.replace('.md', ''),
+          slug: file.replace('.md', ''),
+          heroImage: meta.heroImage || ''
+        };
+      });
+      return res.json({ success: true, articles });
+    } else {
+      // Remote GitHub repository
+      const owner = DEFAULT_ORG;
+      const repo = selectedBlog;
+      const branch = 'main';
+
+      const contentsRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/contents/src/content/blog?ref=${branch}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App',
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (contentsRes.statusCode !== 200) {
+        return res.status(contentsRes.statusCode).json({ error: `Falha ao listar arquivos no GitHub: ${JSON.stringify(contentsRes.body)}` });
+      }
+
+      const files = Array.isArray(contentsRes.body) ? contentsRes.body.filter(f => f.name.endsWith('.md')) : [];
+      const articles = [];
+
+      const promises = files.map(async (f) => {
+        try {
+          const fileRes = await fetch(f.download_url);
+          if (fileRes.ok) {
+            const fileContent = await fileRes.text();
+            const meta = parseFrontmatter(fileContent);
+            articles.push({
+              title: meta.title || f.name.replace('.md', ''),
+              slug: f.name.replace('.md', ''),
+              heroImage: meta.heroImage || ''
+            });
+          }
+        } catch (e) {
+          console.error(`Erro ao baixar conteúdo do post remoto ${f.name}:`, e);
+        }
+      });
+      await Promise.all(promises);
+
+      return res.json({ success: true, articles });
+    }
+  } catch (err) {
+    console.error('Erro ao listar artigos do blog:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint to download and update an article's featured image
+app.post('/api/update-article-image', checkAuth, async (req, res) => {
+  const { blog: selectedBlog, slug, imageUrl, githubToken } = req.body;
+  const gToken = githubToken || DEFAULT_GITHUB_TOKEN;
+
+  if (!selectedBlog || !slug || !imageUrl) {
+    return res.status(400).json({ error: 'blog, slug e imageUrl são obrigatórios.' });
+  }
+
+  try {
+    const rootDir = path.join(__dirname, '..');
+    const blogPath = path.join(rootDir, selectedBlog);
+    const isLocal = fs.existsSync(blogPath);
+    const imgName = `${slug}.jpg`;
+    let localImageName = `images/posts/${imgName}`;
+
+    // Download the image to a temp location
+    const tempImgDir = path.join('/tmp', 'downloaded_images');
+    if (!fs.existsSync(tempImgDir)) {
+      fs.mkdirSync(tempImgDir, { recursive: true });
+    }
+    const tempImgPath = path.join(tempImgDir, imgName);
+    await downloadImage(imageUrl, tempImgPath);
+
+    if (isLocal) {
+      const publicImagesDir = path.join(blogPath, 'public', 'images', 'posts');
+      if (!fs.existsSync(publicImagesDir)) {
+        fs.mkdirSync(publicImagesDir, { recursive: true });
+      }
+      const finalImgPath = path.join(publicImagesDir, imgName);
+      fs.copyFileSync(tempImgPath, finalImgPath);
+
+      const filePath = path.join(blogPath, 'src', 'content', 'blog', `${slug}.md`);
+      if (fs.existsSync(filePath)) {
+        let content = fs.readFileSync(filePath, 'utf8');
+        content = content.replace(/heroImage:\s*".*?"/g, `heroImage: "/${localImageName}"`);
+        content = content.replace(/heroImage:\s*'.*?'/g, `heroImage: "/${localImageName}"`);
+        fs.writeFileSync(filePath, content, 'utf8');
+      }
+      return res.json({ success: true, heroImage: `/${localImageName}` });
+    } else {
+      const owner = DEFAULT_ORG;
+      const repo = selectedBlog;
+      const branch = 'main';
+
+      // 1. Upload image blob to GitHub
+      const imgContent = fs.readFileSync(tempImgPath).toString('base64');
+      const blobRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/blobs`,
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App',
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }, { content: imgContent, encoding: 'base64' });
+
+      if (blobRes.statusCode !== 201) {
+        throw new Error(`Falha ao criar blob de imagem no GitHub: ${JSON.stringify(blobRes.body)}`);
+      }
+      const imageBlobSha = blobRes.body.sha;
+
+      // 2. Get the markdown file content from GitHub
+      const mdFileRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/contents/src/content/blog/${slug}.md?ref=${branch}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App',
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (mdFileRes.statusCode !== 200) {
+        throw new Error(`Artigo ${slug}.md não encontrado no GitHub.`);
+      }
+
+      const fileSha = mdFileRes.body.sha;
+      let mdContent = Buffer.from(mdFileRes.body.content, 'base64').toString('utf8');
+
+      // Update frontmatter
+      mdContent = mdContent.replace(/heroImage:\s*".*?"/g, `heroImage: "/${localImageName}"`);
+      mdContent = mdContent.replace(/heroImage:\s*'.*?'/g, `heroImage: "/${localImageName}"`);
+
+      // 3. Create blob for updated markdown
+      const mdBlobRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/blobs`,
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App',
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }, { content: mdContent, encoding: 'utf-8' });
+
+      if (mdBlobRes.statusCode !== 201) {
+        throw new Error(`Falha ao criar blob markdown: ${JSON.stringify(mdBlobRes.body)}`);
+      }
+      const mdBlobSha = mdBlobRes.body.sha;
+
+      // 4. Get main branch HEAD commit and tree
+      const refRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App'
+        }
+      });
+      const commitSha = refRes.body.object.sha;
+
+      const commitRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/commits/${commitSha}`,
+        method: 'GET',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App'
+        }
+      });
+      const baseTreeSha = commitRes.body.tree.sha;
+
+      // 5. Create new tree containing both the image and the updated markdown
+      const treeItems = [
+        {
+          path: `public/images/posts/${imgName}`,
+          mode: '100644',
+          type: 'blob',
+          sha: imageBlobSha
+        },
+        {
+          path: `src/content/blog/${slug}.md`,
+          mode: '100644',
+          type: 'blob',
+          sha: mdBlobSha
+        }
+      ];
+
+      const createTreeRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/trees`,
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App',
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }, { base_tree: baseTreeSha, tree: treeItems });
+      const newTreeSha = createTreeRes.body.sha;
+
+      // 6. Create Commit
+      const createCommitRes = await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/commits`,
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App'
+        }
+      }, {
+        message: `style: atualizar imagem de destaque para o post ${slug}`,
+        tree: newTreeSha,
+        parents: [commitSha]
+      });
+      const newCommitSha = createCommitRes.body.sha;
+
+      // 7. Update Ref
+      await apiRequest({
+        hostname: 'api.github.com',
+        path: `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${gToken}`,
+          'User-Agent': 'SaaS-Generator-App'
+        }
+      }, { sha: newCommitSha });
+
+      return res.json({ success: true, heroImage: `/${localImageName}` });
+    }
+  } catch (err) {
+    console.error('Erro ao atualizar imagem do artigo:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // ROTA SSE: Stream de Logs em Tempo Real (Legacy - single client)
 app.get('/api/logs', (req, res) => {
   res.writeHead(200, {
