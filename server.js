@@ -5660,7 +5660,7 @@ function parseFrontmatter(content) {
 app.get('/api/blog-articles', checkAuth, async (req, res) => {
   const selectedBlog = req.query.blog;
   const customGitToken = req.query.githubToken;
-  const gToken = customGitToken || DEFAULT_GITHUB_TOKEN;
+  const gToken = getValidGithubToken(customGitToken) || DEFAULT_GITHUB_TOKEN;
 
   if (!selectedBlog) {
     return res.status(400).json({ error: 'O parâmetro blog é obrigatório.' });
@@ -5741,7 +5741,7 @@ app.get('/api/blog-articles', checkAuth, async (req, res) => {
 // Endpoint to download and update an article's featured image
 app.post('/api/update-article-image', checkAuth, async (req, res) => {
   const { blog: selectedBlog, slug, imageUrl, githubToken } = req.body;
-  const gToken = githubToken || DEFAULT_GITHUB_TOKEN;
+  const gToken = getValidGithubToken(githubToken) || DEFAULT_GITHUB_TOKEN;
 
   if (!selectedBlog || !slug || !imageUrl) {
     return res.status(400).json({ error: 'blog, slug e imageUrl são obrigatórios.' });
