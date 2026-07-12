@@ -5932,7 +5932,11 @@ window.loadBlogArticlesForImages = async function() {
 
     grid.innerHTML = '';
     data.articles.forEach(article => {
-      const isPlaceholder = !article.heroImage || article.heroImage.includes('placeholder') || article.heroImage.includes('recommended-bike');
+      const isPlaceholder = !article.heroImage || 
+                            article.heroImage.includes('placeholder') || 
+                            article.heroImage.includes('recommended-') || 
+                            article.heroImage.includes('/wp-content/') || 
+                            article.heroImage.includes('/uploads/');
       const card = document.createElement('div');
       card.className = 'sub-card';
       card.style.display = 'flex';
@@ -6079,7 +6083,11 @@ window.autoHealBlogImages = async function() {
     }
 
     const pending = data.articles.filter(a => {
-      return !a.heroImage || a.heroImage.includes('placeholder') || a.heroImage.includes('recommended-bike');
+      return !a.heroImage || 
+             a.heroImage.includes('placeholder') || 
+             a.heroImage.includes('recommended-') || 
+             a.heroImage.includes('/wp-content/') || 
+             a.heroImage.includes('/uploads/');
     });
 
     logs.textContent += `📊 Total de posts encontrados: ${data.articles.length}\n`;
