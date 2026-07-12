@@ -126,7 +126,11 @@ function getValidGeminiKey(userKey) {
   if (clean === '' || clean.toUpperCase() === 'TEST_API_KEY' || clean === 'null' || clean === 'undefined') {
     return null;
   }
-  return decodeToken(clean);
+  let decoded = decodeToken(clean);
+  if (decoded.includes('|||')) {
+    decoded = decoded.split('|||')[0];
+  }
+  return decoded;
 }
 
 function getValidGithubToken(token) {
@@ -940,7 +944,11 @@ app.post('/api/generate', checkAuth, async (req, res) => {
       const owner = finalOwnerRepo.split('/')[0];
       generatorContent = generatorContent.replace(/const REPO_OWNER = .*/g, `const REPO_OWNER = "${owner}";`);
       if (geminiApiKey) {
-        const encodedKey = Buffer.from(geminiApiKey).toString('base64').split('').reverse().join('');
+        let cleanGeminiKey = geminiApiKey;
+        if (cleanGeminiKey.includes('|||')) {
+          cleanGeminiKey = cleanGeminiKey.split('|||')[0];
+        }
+        const encodedKey = Buffer.from(cleanGeminiKey).toString('base64').split('').reverse().join('');
         generatorContent = generatorContent.replace(/const DEFAULT_GEMINI_KEY = .*/g, `const DEFAULT_GEMINI_KEY = atob("${encodedKey}".split("").reverse().join(""));`);
       }
       fs.writeFileSync(generatorPath, generatorContent, 'utf8');
@@ -4695,7 +4703,7 @@ app.post('/api/restructure-silo', async (req, res) => {
   }
 
   const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
-  const apiKey = getValidGeminiKey(geminiApiKey) || geminiKeyFromDb || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
+  const apiKey = getValidGeminiKey(geminiApiKey) || getValidGeminiKey(geminiKeyFromDb) || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
 
   // Resolve repository owner dynamically
   let repoOwner = DEFAULT_ORG;
@@ -5139,7 +5147,7 @@ app.post('/api/safira/chat', async (req, res) => {
     }
   }
 
-  const apiKey = getValidGeminiKey(geminiApiKey) || geminiKeyFromDb || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
+  const apiKey = getValidGeminiKey(geminiApiKey) || getValidGeminiKey(geminiKeyFromDb) || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
 
   const systemInstruction = `Você é a Safira, a assistente de IA oficial e especialista do Gerador Ninja.
 Você conversa com o usuário ${userName} de forma prestativa, inteligente, profissional e amigável.

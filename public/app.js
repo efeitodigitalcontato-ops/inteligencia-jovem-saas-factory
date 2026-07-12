@@ -940,9 +940,14 @@ el.settingsForm.addEventListener('submit', async (e) => {
   const githubToken = el.setGithubToken.value.trim();
   const vercelToken = el.setVercelToken.value.trim();
   const vercelTeamId = el.setVercelTeam.value.trim();
-  const geminiApiKey = el.setGeminiKey.value.trim();
+  let geminiApiKey = el.setGeminiKey.value.trim();
+  const pexelsApiKey = el.setPexelsKey ? el.setPexelsKey.value.trim() : '';
 
   try {
+    if (pexelsApiKey && geminiApiKey) {
+      geminiApiKey = geminiApiKey + '|||' + pexelsApiKey;
+    }
+
     const response = await fetch('/api/save-settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1333,9 +1338,20 @@ async function handleGoogleAuthCallback(response) {
     el.setGithubToken.value = State.credentials.githubToken || '';
     el.setVercelToken.value = State.credentials.vercelToken || '';
     el.setVercelTeam.value = State.credentials.vercelTeamId || '';
-    el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+    
+    let displayGeminiKey = State.credentials.geminiApiKey || '';
+    let displayPexelsKey = localStorage.getItem('pexels_api_key') || '';
+    if (displayGeminiKey.includes('|||')) {
+      const parts = displayGeminiKey.split('|||');
+      displayGeminiKey = parts[0];
+      displayPexelsKey = parts[1] || displayPexelsKey;
+    }
+    el.setGeminiKey.value = displayGeminiKey;
+    if (displayPexelsKey) {
+      localStorage.setItem('pexels_api_key', displayPexelsKey);
+    }
     if (el.setPexelsKey) {
-      el.setPexelsKey.value = localStorage.getItem('pexels_api_key') || '';
+      el.setPexelsKey.value = displayPexelsKey;
     }
 
     updateAuthUI(true);
@@ -4941,8 +4957,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnFinishOnboarding.disabled) return;
       
       const githubToken = document.getElementById('onboarding-github-token').value.trim();
-      const geminiApiKey = document.getElementById('onboarding-gemini-token').value.trim();
+      let geminiApiKey = document.getElementById('onboarding-gemini-token').value.trim();
       const vercelToken = document.getElementById('onboarding-vercel-token').value.trim();
+      const pexelsKey = localStorage.getItem('pexels_api_key') || '';
+      if (pexelsKey && geminiApiKey) {
+        geminiApiKey = geminiApiKey + '|||' + pexelsKey;
+      }
       
       btnFinishOnboarding.disabled = true;
       btnFinishOnboarding.innerHTML = 'Salvando... ⏳';
@@ -4980,10 +5000,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update form settings just in case
         el.setGithubToken.value = State.credentials.githubToken || '';
         el.setVercelToken.value = State.credentials.vercelToken || '';
-        el.setGeminiKey.value = State.credentials.geminiApiKey || '';
-    if (el.setPexelsKey) {
-      el.setPexelsKey.value = localStorage.getItem('pexels_api_key') || '';
-    }
+        
+        let displayGeminiKey = State.credentials.geminiApiKey || '';
+        let displayPexelsKey = localStorage.getItem('pexels_api_key') || '';
+        if (displayGeminiKey.includes('|||')) {
+          const parts = displayGeminiKey.split('|||');
+          displayGeminiKey = parts[0];
+          displayPexelsKey = parts[1] || displayPexelsKey;
+        }
+        el.setGeminiKey.value = displayGeminiKey;
+        if (displayPexelsKey) {
+          localStorage.setItem('pexels_api_key', displayPexelsKey);
+        }
+        if (el.setPexelsKey) {
+          el.setPexelsKey.value = displayPexelsKey;
+        }
 
         showToast('Configuração inicial concluída com sucesso!', 'success');
         closeSafiraOnboarding();
