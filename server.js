@@ -6209,8 +6209,13 @@ async function consolidateArticlesDirectly(repoName, articles, gToken, userEmail
 }
 
 // FUNÇÃO AUXILIAR PARA FORÇAR REDEPLOY NA VPS VIA API DO EASYPANEL (substitui a Vercel)
-async function triggerVercelDeployForRepo(repoName) {
+async function triggerVercelDeployForRepo(repoName, userEmail) {
   try {
+    const isRanderson = userEmail && userEmail.toLowerCase().trim() === 'randersoncontato@gmail.com';
+    if (!isRanderson) {
+      console.log(`[Deploy] Ignorando deploy VPS para o repo ${repoName} (usuário: ${userEmail || 'desconhecido'}), pois deve rodar no fluxo da Vercel autônoma.`);
+      return;
+    }
     const host = '161.97.164.67';
     const email = 'randersonfreire2023@gmail.com';
     const password = '96364aafd79177dd2810';
@@ -6287,7 +6292,7 @@ app.post('/api/deploy', async (req, res) => {
       if (result && result.success) {
         log('success', `🚀 [DEPLOY COM SUCESSO] ${articles.length} posts enviados para o GitHub!`);
         // Força o trigger direto na API da Vercel
-        triggerVercelDeployForRepo(blog);
+        triggerVercelDeployForRepo(blog, userEmail);
         return res.json({ status: 'deployed', consolidated: true, count: articles.length });
       } else {
         throw new Error(result.error || 'Falha ao consolidar os posts.');
@@ -6312,7 +6317,7 @@ app.post('/api/deploy', async (req, res) => {
           } catch (pullErr) {}
         }
         // Força o trigger direto na API da Vercel
-        triggerVercelDeployForRepo(blog);
+        triggerVercelDeployForRepo(blog, userEmail);
         return res.json({ status: 'deployed', consolidated: true, count: result.count });
       } else {
         throw new Error(result.reason || 'Falha ao consolidar a fila.');
@@ -6344,7 +6349,7 @@ app.post('/api/deploy', async (req, res) => {
 
     log('success', "🚀 [DEPLOY COM SUCESSO] Código enviado! Vercel compilando na nuvem.");
     // Força o trigger direto na API da Vercel
-    triggerVercelDeployForRepo(blog);
+    triggerVercelDeployForRepo(blog, userEmail);
     res.json({ status: 'deployed' });
   } catch (err) {
     const logFn = (req.body && req.body.panelId) ? (t, m, e) => sendPanelLog(req.body.panelId, t, m, e) : sendLog;

@@ -4189,7 +4189,7 @@ function showSafiraComicBubble(selector, stepIndex) {
     position = "top";
   } else if (stepIndex === 6) {
     title = "Cura e Otimização de Imagens";
-    text = "Na aba de <strong>Imagens</strong>, você pode gerenciar capas e rodar a varredura automática. O blog recém-criado já vem pré-selecionado! Clique no botão <strong>'Corrigir Imagens Quebradas & Placeholders'</strong> para varrer o blog e preencher capas genéricas com imagens reais de alta qualidade e otimizadas via Pexels.";
+    text = "Na aba de <strong>Imagens</strong>, você pode gerenciar capas e rodar a varredura automática. O blog recém-criado já vem pré-selecionado! Certifique-se de ter inserido sua <strong>Chave de API do Pexels</strong> nas Configurações para buscar fotos reais. Clique no botão <strong>'Corrigir Imagens Quebradas & Placeholders'</strong> para varrer o blog e preencher capas com imagens reais de alta qualidade e otimizadas.";
     position = "top";
   } else if (stepIndex === 7) {
     title = "Neto Salva (Backup)";
