@@ -16,10 +16,12 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const app = express();
 app.use(cors());
 app.use(express.json({
+  limit: '100mb',
   verify: (req, res, buf) => {
     req.rawBody = buf;
   }
 }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // In-memory debug logs to capture serverless runtime info
 global.debugLogs = [];
@@ -3421,6 +3423,7 @@ app.post('/api/check-google-position', checkAuth, async (req, res) => {
   const cleanKeyword = keyword.trim();
   const cleanUrl = url.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
+  const userEmail = req.user?.email || 'unknown';
   console.log(`Checking position for domain/URL: "${cleanUrl}" with keyword: "${cleanKeyword}" (User: ${userEmail}, Repo: ${repoName})`);
 
   const apiKey = getValidGeminiKey(geminiApiKey) || process.env.GEMINI_API_KEY || decodeToken('enc:QUl6YVN5RHVnZktTNU9aLUhPZ2pWUTB6M19XNWRicWlySTd2ckgw');
@@ -6220,10 +6223,10 @@ async function triggerVercelDeployForRepo(repoName) {
     };
 
     const serviceName = blogMapping[repoName] || repoName;
-    console.log(`[VPS Deploy] Iniciando deploy na VPS (${host}) para o serviço: ${serviceName} (Repo: ${repoName})`);
+    console.log(`[VPS Deploy] Iniciando deploy na VPS (${host}:3000) para o serviço: ${serviceName} (Repo: ${repoName})`);
 
-    // 1. Login no Easypanel
-    const loginRes = await fetch(`https://${host}/api/rpc/auth/login`, {
+    // 1. Login no Easypanel (usando porta 3000 diretamente para evitar Bad Gateway do proxy)
+    const loginRes = await fetch(`http://${host}:3000/api/rpc/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ json: { email, password } })
@@ -6238,7 +6241,7 @@ async function triggerVercelDeployForRepo(repoName) {
     const token = loginObj.json.token;
 
     // 2. Dispara o deploy no Easypanel
-    const deployRes = await fetch(`https://${host}/api/rpc/services/app/deployService`, {
+    const deployRes = await fetch(`http://${host}:3000/api/rpc/services/app/deployService`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
