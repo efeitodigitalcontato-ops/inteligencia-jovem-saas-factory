@@ -5905,6 +5905,32 @@ window.populateImagesSites = function() {
 };
 
 window.loadBlogArticlesForImages = async function() {
+  window.brokenImagesSlugs = new Set();
+  window.markImageAsBroken = function(slug) {
+    window.brokenImagesSlugs.add(slug);
+    const imgEl = document.getElementById(`img-preview-${slug}`);
+    const card = imgEl?.closest('.sub-card');
+    if (card) {
+      card.style.border = '1px dashed #ef4444';
+      if (!card.querySelector('.placeholder-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'placeholder-badge';
+        badge.style.position = 'absolute';
+        badge.style.top = '8px';
+        badge.style.left = '8px';
+        badge.style.background = '#ef4444';
+        badge.style.color = '#fff';
+        badge.style.fontSize = '10px';
+        badge.style.fontWeight = 'bold';
+        badge.style.padding = '4px 8px';
+        badge.style.borderRadius = '4px';
+        badge.style.zIndex = '10';
+        badge.textContent = 'Erro 404';
+        imgEl.parentElement.appendChild(badge);
+      }
+    }
+  };
+
   const blog = document.getElementById('images-blog-select').value;
   const grid = document.getElementById('articles-images-grid');
   if (!grid) return;
@@ -5954,7 +5980,7 @@ window.loadBlogArticlesForImages = async function() {
           <img src="${thumbUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22 font-size=%2210%22>Sem Imagem</text></svg>'}" 
                id="img-preview-${article.slug}" 
                style="width:100%; height:100%; object-fit:cover;"
-               onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23ef4444%22 font-size=%228%22>Erro Carregamento (404)</text></svg>'\">
+               onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23ef4444%22 font-size=%228%22>Erro Carregamento (404)</text></svg>'; window.markImageAsBroken && window.markImageAsBroken('${article.slug}')">
           ${isPlaceholder ? `<span style="position:absolute; top:8px; left:8px; background:#ef4444; color:#fff; font-size:10px; font-weight:bold; padding:4px 8px; border-radius:4px;">Placeholder</span>` : ''}
         </div>
         <div style="font-weight:bold; font-size:0.95rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${article.title}">${article.title}</div>
@@ -6087,7 +6113,8 @@ window.autoHealBlogImages = async function() {
              a.heroImage.includes('placeholder') || 
              a.heroImage.includes('recommended-') || 
              a.heroImage.includes('/wp-content/') || 
-             a.heroImage.includes('/uploads/');
+             a.heroImage.includes('/uploads/') ||
+             (window.brokenImagesSlugs && window.brokenImagesSlugs.has(a.slug));
     });
 
     logs.textContent += `📊 Total de posts encontrados: ${data.articles.length}\n`;
