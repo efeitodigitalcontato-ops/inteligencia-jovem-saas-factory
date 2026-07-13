@@ -830,8 +830,8 @@ async function callGeminiAPI(bodyData, userApiKey = null) {
         }
       }, bodyData);
 
-      // Self-heal: If key is unauthorized (401) or blocked (403), retry with verified working fallback key
-      if ((apiRes.statusCode === 401 || apiRes.statusCode === 403) && userApiKey) {
+      // Self-heal: If user key fails for any reason (non-200), retry with verified working fallback key
+      if (apiRes.statusCode !== 200 && userApiKey) {
         console.log(`User key returned ${apiRes.statusCode} for ${model}. Retrying with verified fallback key...`);
         const fallbackKey = process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
         apiRes = await apiRequest({
