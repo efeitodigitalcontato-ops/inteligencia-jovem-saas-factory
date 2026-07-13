@@ -6099,6 +6099,85 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
       }
       return res.json({ success: true, heroImage: `/${localImageName}` });
     } else {
+      const userEmail = req.user ? req.user.email : null;
+      const isRanderson = userEmail && userEmail.toLowerCase().trim() === 'randersoncontato@gmail.com';
+
+      if (!isRanderson) {
+        // Blindagem e Consolidação em lotes de 25 para os demais usuários
+        const repoQueueDir = path.join(QUEUE_DIR, selectedBlog);
+        const repoImagesQueueDir = path.join(repoQueueDir, 'images');
+        fs.mkdirSync(repoQueueDir, { recursive: true });
+        fs.mkdirSync(repoImagesQueueDir, { recursive: true });
+
+        // Salva config do repositório
+        fs.writeFileSync(path.join(repoQueueDir, '_config.json'), JSON.stringify({ githubToken: resolvedToken, userEmail }, null, 2), 'utf8');
+
+        // Salva imagem na fila
+        const destImgDir = path.join(repoImagesQueueDir, 'images', 'posts');
+        fs.mkdirSync(destImgDir, { recursive: true });
+        fs.copyFileSync(tempImgPath, path.join(destImgDir, imgName));
+
+        // Obtém conteúdo do markdown
+        const queueFilePath = path.join(repoQueueDir, `${slug}.json`);
+        let mdContent;
+        if (fs.existsSync(queueFilePath)) {
+          try {
+            const queuedData = JSON.parse(fs.readFileSync(queueFilePath, 'utf8'));
+            mdContent = queuedData.content;
+          } catch (e) {
+            console.error(`Erro ao ler post enfileirado existente:`, e);
+          }
+        }
+
+        if (!mdContent) {
+          const owner = await resolveRepoOwner(resolvedToken, selectedBlog);
+          const repo = selectedBlog;
+          const branch = 'main';
+          const mdFileRes = await apiRequest({
+            hostname: 'api.github.com',
+            path: `/repos/${owner}/${repo}/contents/src/content/blog/${slug}.md?ref=${branch}`,
+            method: 'GET',
+            headers: {
+              'Authorization': `token ${resolvedToken}`,
+              'User-Agent': 'SaaS-Generator-App',
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          if (mdFileRes.statusCode !== 200) {
+            throw new Error(`Artigo ${slug}.md não encontrado no GitHub.`);
+          }
+
+          mdContent = Buffer.from(mdFileRes.body.content, 'base64').toString('utf8');
+        }
+
+        // Atualiza frontmatter no markdown
+        mdContent = mdContent.replace(/heroImage:\s*".*?"/g, `heroImage: "/${localImageName}"`);
+        mdContent = mdContent.replace(/heroImage:\s*'.*?'/g, `heroImage: "/${localImageName}"`);
+
+        const queueMetadata = {
+          fileName: `src/content/blog/${slug}.md`,
+          content: mdContent,
+          imageName: `images/posts/${imgName}`,
+          title: slug.replace(/-/g, ' '),
+          userEmail
+        };
+
+        fs.writeFileSync(queueFilePath, JSON.stringify(queueMetadata, null, 2), 'utf8');
+        console.log(`Imagem corrigida enfileirada com sucesso localmente para ${selectedBlog}: ${slug}`);
+
+        // Verifica tamanho da fila para consolidar se chegou a 25
+        const files = fs.readdirSync(repoQueueDir).filter(f => f.endsWith('.json') && f !== '_config.json');
+        let consolidated = false;
+        if (files.length >= 25) {
+          console.log(`[Queue Image Fix] Lote de 25 atingido (${files.length} itens). Consolidando fila...`);
+          await consolidateRepoQueue(selectedBlog, resolvedToken, userEmail);
+          consolidated = true;
+        }
+
+        return res.json({ success: true, heroImage: `/${localImageName}`, queued: true, consolidated });
+      }
+
       const owner = await resolveRepoOwner(resolvedToken, selectedBlog);
       const repo = selectedBlog;
       const branch = 'main';
