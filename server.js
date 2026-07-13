@@ -5779,10 +5779,20 @@ function parseFrontmatter(content) {
 app.get('/api/blog-articles', checkAuth, async (req, res) => {
   const selectedBlog = req.query.blog;
   const customGitToken = req.query.githubToken;
-  const gToken = getValidGithubToken(customGitToken) || DEFAULT_GITHUB_TOKEN;
-
+  
   if (!selectedBlog) {
     return res.status(400).json({ error: 'O parâmetro blog é obrigatório.' });
+  }
+
+  let resolvedToken = getValidGithubToken(customGitToken);
+  if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
+    const tokenRes = await getGithubTokenFromSupabase(selectedBlog);
+    if (tokenRes) {
+      resolvedToken = tokenRes;
+    }
+  }
+  if (!resolvedToken) {
+    resolvedToken = DEFAULT_GITHUB_TOKEN;
   }
 
   try {
@@ -5809,7 +5819,7 @@ app.get('/api/blog-articles', checkAuth, async (req, res) => {
       return res.json({ success: true, articles });
     } else {
       // Remote GitHub repository
-      const owner = DEFAULT_ORG;
+      const owner = await resolveRepoOwner(resolvedToken, selectedBlog);
       const repo = selectedBlog;
       const branch = 'main';
 
@@ -5818,7 +5828,7 @@ app.get('/api/blog-articles', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/contents/src/content/blog?ref=${branch}`,
         method: 'GET',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -5860,10 +5870,20 @@ app.get('/api/blog-articles', checkAuth, async (req, res) => {
 // Endpoint to download and update an article's featured image
 app.post('/api/update-article-image', checkAuth, async (req, res) => {
   const { blog: selectedBlog, slug, imageUrl, githubToken } = req.body;
-  const gToken = getValidGithubToken(githubToken) || DEFAULT_GITHUB_TOKEN;
 
   if (!selectedBlog || !slug || !imageUrl) {
     return res.status(400).json({ error: 'blog, slug e imageUrl são obrigatórios.' });
+  }
+
+  let resolvedToken = getValidGithubToken(githubToken);
+  if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
+    const tokenRes = await getGithubTokenFromSupabase(selectedBlog);
+    if (tokenRes) {
+      resolvedToken = tokenRes;
+    }
+  }
+  if (!resolvedToken) {
+    resolvedToken = DEFAULT_GITHUB_TOKEN;
   }
 
   try {
@@ -5905,7 +5925,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
       }
       return res.json({ success: true, heroImage: `/${localImageName}` });
     } else {
-      const owner = DEFAULT_ORG;
+      const owner = await resolveRepoOwner(resolvedToken, selectedBlog);
       const repo = selectedBlog;
       const branch = 'main';
 
@@ -5916,7 +5936,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/blobs`,
         method: 'POST',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -5933,7 +5953,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/contents/src/content/blog/${slug}.md?ref=${branch}`,
         method: 'GET',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -5956,7 +5976,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/blobs`,
         method: 'POST',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -5973,7 +5993,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
         method: 'GET',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App'
         }
       });
@@ -5984,7 +6004,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/commits/${commitSha}`,
         method: 'GET',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App'
         }
       });
@@ -6011,7 +6031,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/trees`,
         method: 'POST',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App',
           'Accept': 'application/vnd.github.v3+json'
         }
@@ -6024,7 +6044,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/commits`,
         method: 'POST',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App'
         }
       }, {
@@ -6040,7 +6060,7 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         path: `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
         method: 'PATCH',
         headers: {
-          'Authorization': `token ${gToken}`,
+          'Authorization': `token ${resolvedToken}`,
           'User-Agent': 'SaaS-Generator-App'
         }
       }, { sha: newCommitSha });
