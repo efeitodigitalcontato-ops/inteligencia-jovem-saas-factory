@@ -2938,16 +2938,48 @@ app.post('/api/login', async (req, res) => {
       }
 
       console.log(`Migrating user ${email} to Supabase Auth...`);
-      const { data: signUpData, error: signUpError } = await supabase.auth.admin.createUser({
-        email: email.toLowerCase(),
-        password: password,
-        email_confirm: true
-      });
+      let signUpData = null;
+      let signUpError = null;
+
+      try {
+        const result = await supabase.auth.admin.createUser({
+          email: email.toLowerCase(),
+          password: password,
+          email_confirm: true
+        });
+        signUpData = result.data;
+        signUpError = result.error;
+      } catch (err) {
+        signUpError = err;
+      }
+
+      if (signUpError && signUpError.message && signUpError.message.includes('already been registered')) {
+        console.log(`User ${email} is already registered in Supabase. Attempting to update their password instead...`);
+        try {
+          const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers();
+          if (!usersError && usersData) {
+            const match = usersData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+            if (match) {
+              const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(match.id, { password: password });
+              if (!updateError) {
+                signUpData = { user: updateData.user || match };
+                signUpError = null;
+                console.log(`Successfully updated existing Supabase user password during migration fallback.`);
+              } else {
+                signUpError = updateError;
+              }
+            }
+          }
+        } catch (err) {
+          signUpError = err;
+        }
+      }
 
       if (signUpError) {
         console.error('Failed to sign up migrated user in Supabase Auth:', signUpError.message);
         return res.status(500).json({ error: 'Erro ao migrar conta para o Supabase Auth.', details: signUpError.message });
       }
+
 
       const newUserId = signUpData.user.id;
       let githubToken = "";
