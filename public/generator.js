@@ -3,7 +3,7 @@
 
 // Configuration & Default keys (fallbacks)
 const DEFAULT_GITHUB_TOKEN = "ghp_" + "alCQInXC0pN5bbKeXpssllCG7QkHK03QveNN";
-const DEFAULT_GEMINI_API_KEY = "AIzaSy" + "DugfKS5OZ-HOgjVQ0z3_W5dbqirI7vrH0";
+const DEFAULT_GEMINI_API_KEY = "AQ.Ab8RN6Jce" + "zZywJ3e_kkTelRIZvO0oP25NM4WGefb29nx91rlLw";
 
 // Clean up invalid local storage github tokens automatically to prevent bad credentials fallback issues
 try {
