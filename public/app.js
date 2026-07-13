@@ -1446,34 +1446,24 @@ O resultado DEVE ser estritamente um array JSON válido de objetos, onde cada ob
 
 Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código como \`\`\`json ou \`\`\` no início ou final do texto.`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      const repoName = selectedSiteOption ? selectedSiteOption.value : (typeof selectedBulkBlog !== 'undefined' ? selectedBulkBlog : '');
+      const response = await fetch('/api/generate-title-ideas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ googleSearch: {} }],
-          generationConfig: { temperature: 0.85 }
+          keyword: keyword,
+          theme: theme,
+          repoName: repoName,
+          geminiApiKey: apiKey
         })
       });
       
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Falha desconhecida na API do Gemini.');
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Falha desconhecida na API do Gemini.');
       }
       
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) {
-        let rawText = data.candidates[0].content.parts[0].text.trim();
-        if (rawText.startsWith("```json")) {
-          rawText = rawText.substring(7);
-        } else if (rawText.startsWith("```")) {
-          rawText = rawText.substring(3);
-        }
-        if (rawText.endsWith("```")) {
-          rawText = rawText.substring(0, rawText.lastIndexOf("```"));
-        }
-        rawText = rawText.trim();
-        
-        const ideas = JSON.parse(rawText).slice(0, 20);
+      const ideas = data.ideas.slice(0, 20);
         
         const listContainer = document.getElementById('titles-list');
         if (listContainer) {
@@ -1515,11 +1505,6 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
             }, 300);
           }
         }
-      } else {
-        const candidate = data.candidates && data.candidates[0];
-        const finishReason = candidate ? candidate.finishReason : 'UNKNOWN';
-        throw new Error(`Resposta sem conteúdo do Gemini. Motivo de finalização: ${finishReason}`);
-      }
     } catch (err) {
       console.error(err);
       showToast('Erro ao gerar ideias de títulos: ' + err.message, 'error');
