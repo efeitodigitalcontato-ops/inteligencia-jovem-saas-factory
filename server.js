@@ -6010,6 +6010,41 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
   try {
     const { titles, blog, apiKeys, apiKey, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey } = req.body;
 
+    let resolvedToken = getValidGithubToken(githubToken);
+    if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
+      if (supabase) {
+        try {
+          const { data: siteData } = await supabase
+            .from('sites')
+            .select('user_id')
+            .eq('repo_name', blog)
+            .single();
+            
+          if (siteData && siteData.user_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('github_token')
+              .eq('id', siteData.user_id)
+              .single();
+              
+            if (profileData && profileData.github_token) {
+              const decodedToken = decodeToken(profileData.github_token);
+              const validDecoded = getValidGithubToken(decodedToken);
+              if (validDecoded) {
+                resolvedToken = validDecoded;
+              }
+            }
+          }
+        } catch (dbErr) {
+          console.error('[SSE Generate] Erro ao consultar token no Supabase:', dbErr.message);
+        }
+      }
+    }
+    
+    if (!resolvedToken) {
+      resolvedToken = DEFAULT_GITHUB_TOKEN;
+    }
+
     // Check if this panel is already busy
     if (panelId && panelBusy.get(panelId)) {
       return res.status(409).json({ error: 'Este painel já está gerando. Aguarde.' });
@@ -6053,14 +6088,14 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
         // Cascata de 1.5s entre inícios para não bombardear a rede no mesmo milissegundo
         await sseSleep(i * 1500);
         log('status', `🚀 Disparando em paralelo artigo ${i + 1} de ${titles.length}: "${title}"`, { current: i + 1, total: titles.length });
-        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey);
+        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, resolvedToken, pexelsApiKey);
         
         if (ok && !isLocalMode(blog)) {
           completedCount++;
           if (completedCount % 25 === 0) {
             log('info', `📦 Lote de 25 atingido (${completedCount} gerados)! Disparando deploy automático para o GitHub...`);
             try {
-              const res = await consolidateRepoQueue(blog, githubToken, userEmail);
+              const res = await consolidateRepoQueue(blog, resolvedToken, userEmail);
               if (res && res.success) {
                 log('success', `✅ Deploy do lote de 25 artigos realizado com sucesso!`);
               }
@@ -6082,7 +6117,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
     if (successCount > 0 && (completedCount % 25 !== 0) && !isLocalMode(blog)) {
       log('info', `🧹 Consolidando os artigos restantes na fila...`);
       try {
-        await consolidateRepoQueue(blog, githubToken, userEmail);
+        await consolidateRepoQueue(blog, resolvedToken, userEmail);
         log('success', `✅ Deploy final dos artigos restantes realizado com sucesso!`);
       } catch (err) {}
     }
@@ -6284,12 +6319,46 @@ app.post('/api/deploy', async (req, res) => {
 
     const log = panelId ? (t, m, e) => sendPanelLog(panelId, t, m, e) : sendLog;
 
+    let resolvedToken = getValidGithubToken(githubToken);
+    if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
+      if (supabase) {
+        try {
+          const { data: siteData } = await supabase
+            .from('sites')
+            .select('user_id')
+            .eq('repo_name', blog)
+            .single();
+            
+          if (siteData && siteData.user_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('github_token')
+              .eq('id', siteData.user_id)
+              .single();
+              
+            if (profileData && profileData.github_token) {
+              const decodedToken = decodeToken(profileData.github_token);
+              const validDecoded = getValidGithubToken(decodedToken);
+              if (validDecoded) {
+                resolvedToken = validDecoded;
+              }
+            }
+          }
+        } catch (dbErr) {
+          console.error('[API Deploy] Erro ao consultar token no Supabase:', dbErr.message);
+        }
+      }
+    }
+    
+    if (!resolvedToken) {
+      resolvedToken = DEFAULT_GITHUB_TOKEN;
+    }
+
     // Se o cliente enviar os artigos diretamente na request (estilo stateless / Vercel-safe)
     if (Array.isArray(articles) && articles.length > 0) {
       log('info', `🚀 Consolidação direta iniciada para ${articles.length} posts do blog: "${blog}"`);
-      const gToken = getValidGithubToken(githubToken) || DEFAULT_GITHUB_TOKEN;
       const email = userEmail || '232475346+efeitodigitalcontato-ops@users.noreply.github.com';
-      const result = await consolidateArticlesDirectly(blog, articles, gToken, email);
+      const result = await consolidateArticlesDirectly(blog, articles, resolvedToken, email);
       if (result && result.success) {
         log('success', `🚀 [DEPLOY COM SUCESSO] ${articles.length} posts enviados para o GitHub!`);
         // Força o trigger direto na API da Vercel
@@ -6308,7 +6377,7 @@ app.post('/api/deploy', async (req, res) => {
 
     if (hasQueuedPosts) {
       log('info', `ℹ️ Encontrados posts na fila local de consolidação. Enviando via REST API...`);
-      const result = await consolidateRepoQueue(blog, githubToken, userEmail);
+      const result = await consolidateRepoQueue(blog, resolvedToken, userEmail);
       if (result && result.success) {
         log('success', `🚀 [DEPLOY COM SUCESSO] Fila de posts consolidada e enviada para o GitHub!`);
         if (fs.existsSync(blogPath)) {
