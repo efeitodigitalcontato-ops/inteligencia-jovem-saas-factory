@@ -3330,7 +3330,10 @@ app.post('/api/save-settings', checkAuth, async (req, res) => {
 
     console.log(`[SAVE-SETTINGS] Salvando credenciais no Supabase para: ${req.user.email}`);
 
-    const updateData = {};
+    const updateData = {
+      id: req.user.id,
+      email: req.user.email
+    };
     if (githubToken !== undefined) updateData.github_token = encodeToken(githubToken);
     if (vercelToken !== undefined) updateData.vercel_token = encodeToken(vercelToken);
     if (vercelTeamId !== undefined) updateData.vercel_team_id = vercelTeamId;
@@ -3339,8 +3342,7 @@ app.post('/api/save-settings', checkAuth, async (req, res) => {
 
     const { data: profile, error: updateErr } = await supabase
       .from('profiles')
-      .update(updateData)
-      .eq('id', req.user.id)
+      .upsert(updateData)
       .select()
       .single();
 
