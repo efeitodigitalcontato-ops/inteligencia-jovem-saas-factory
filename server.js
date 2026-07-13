@@ -245,6 +245,136 @@ async function getGithubTokenFromSupabase(blogName) {
       resolve(null);
     }
   });
+async function getGeminiApiKeyFromSupabase(blogName) {
+  const urlStr = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!urlStr || !key || !blogName) {
+    return null;
+  }
+  
+  return new Promise((resolve) => {
+    try {
+      const url = new URL(`${urlStr}/rest/v1/sites?repo_name=eq.${blogName}&select=user_id`);
+      const https = require('https');
+      const req = https.request({
+        hostname: url.hostname,
+        port: 443,
+        path: url.pathname + url.search,
+        method: 'GET',
+        headers: {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 5000
+      }, (res) => {
+        let body = '';
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', async () => {
+          try {
+            if (res.statusCode !== 200) {
+              return resolve(null);
+            }
+            const siteList = JSON.parse(body);
+            if (!Array.isArray(siteList) || siteList.length === 0 || !siteList[0].user_id) {
+              return resolve(null);
+            }
+            const userId = siteList[0].user_id;
+            
+            // Buscar perfil
+            const profileUrl = new URL(`${urlStr}/rest/v1/profiles?id=eq.${userId}&select=gemini_api_key`);
+            const reqProf = https.request({
+              hostname: profileUrl.hostname,
+              port: 443,
+              path: profileUrl.pathname + profileUrl.search,
+              method: 'GET',
+              headers: {
+                'apikey': key,
+                'Authorization': `Bearer ${key}`,
+                'Content-Type': 'application/json'
+              },
+              timeout: 5000
+            }, (resProf) => {
+              let bodyProf = '';
+              resProf.on('data', (chunk) => { bodyProf += chunk; });
+              resProf.on('end', () => {
+                try {
+                  if (resProf.statusCode !== 200) {
+                    return resolve(null);
+                  }
+                  const profileList = JSON.parse(bodyProf);
+                  if (Array.isArray(profileList) && profileList.length > 0 && profileList[0].gemini_api_key) {
+                    const decoded = decodeToken(profileList[0].gemini_api_key);
+                    const valid = getValidGeminiKey(decoded);
+                    if (valid) {
+                      console.log('[Supabase Resolve] Gemini key resolvida com sucesso via REST API!');
+                      return resolve(valid);
+                    }
+                  }
+                  resolve(null);
+                } catch (e) {
+                  resolve(null);
+                }
+              });
+            });
+            reqProf.on('error', () => resolve(null));
+            reqProf.end();
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.end();
+    } catch (err) {
+      resolve(null);
+    }
+  });
+}
+
+async function resolveGeminiApiKey(geminiApiKey, repoName, authHeader) {
+  // 1. Try getValidGeminiKey from requested geminiApiKey
+  let valid = getValidGeminiKey(geminiApiKey);
+  if (valid) return valid;
+
+  // 2. Try to get it from Supabase based on repoName
+  if (repoName) {
+    valid = await getGeminiApiKeyFromSupabase(repoName);
+    if (valid) return valid;
+  }
+
+  // 3. Try to get it from Supabase based on Auth header
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    if (supabase) {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser(token);
+        if (user && !error) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('gemini_api_key')
+            .eq('id', user.id)
+            .single();
+          if (profile && profile.gemini_api_key) {
+            const decoded = decodeToken(profile.gemini_api_key);
+            valid = getValidGeminiKey(decoded);
+            if (valid) return valid;
+          }
+        }
+      } catch (e) {
+        console.error('[Resolve Gemini] Erro ao buscar pelo token:', e.message);
+      }
+    }
+  }
+
+  // 4. Fallback to process.env.GEMINI_API_KEY
+  if (process.env.GEMINI_API_KEY) {
+    valid = getValidGeminiKey(process.env.GEMINI_API_KEY);
+    if (valid) return valid;
+  }
+
+  // 5. Fallback to default decrypted token
+  return decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
 }
 
 
@@ -1715,8 +1845,16 @@ app.post('/api/generate-title-ideas', async (req, res) => {
     return res.status(400).json({ error: 'Palavra-chave semente é obrigatória.' });
   }
 
-  const apiKey = getValidGeminiKey(geminiApiKey) || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
-  const gToken = githubToken || DEFAULT_GITHUB_TOKEN;
+  const apiKey = await resolveGeminiApiKey(geminiApiKey, repoName, req.headers.authorization);
+
+  let resolvedToken = githubToken;
+  if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
+    if (repoName) {
+      const dbToken = await getGithubTokenFromSupabase(repoName);
+      if (dbToken) resolvedToken = dbToken;
+    }
+  }
+  const gToken = resolvedToken || DEFAULT_GITHUB_TOKEN;
 
   try {
     let existingTitles = [];
@@ -6199,6 +6337,13 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
     } else if (apiKey) {
       const v = getValidGeminiKey(apiKey);
       if (v) validKeys.push(v);
+    }
+    if (validKeys.length === 0) {
+      console.log(`[SSE Generate] Resolvendo Gemini Key via HTTPS REST API para o blog ${blog}...`);
+      const dbGeminiKey = await getGeminiApiKeyFromSupabase(blog);
+      if (dbGeminiKey) {
+        validKeys.push(dbGeminiKey);
+      }
     }
     if (validKeys.length === 0) {
       validKeys.push(process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc='));
