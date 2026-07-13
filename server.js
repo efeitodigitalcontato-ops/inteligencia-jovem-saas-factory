@@ -1719,6 +1719,7 @@ app.post('/api/bulk-generate', async (req, res) => {
   }
 
   const gToken = githubToken || DEFAULT_GITHUB_TOKEN;
+  const owner = await resolveRepoOwner(gToken, repoName);
   const apiKey = getValidGeminiKey(geminiApiKey) || process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
   const tempDir = path.join(os.tmpdir(), `bulk-builder-${Date.now()}`);
 
@@ -1739,7 +1740,7 @@ app.post('/api/bulk-generate', async (req, res) => {
         fs,
         http: gitHttp,
         dir: tempDir,
-        url: `https://github.com/${DEFAULT_ORG}/${repoName}.git`,
+        url: `https://github.com/${owner}/${repoName}.git`,
         onAuth: () => ({ username: gToken }),
         singleBranch: true,
         depth: 1
@@ -1927,7 +1928,7 @@ author: "Redação"
         fs,
         http: gitHttp,
         dir: tempDir,
-        url: `https://github.com/${DEFAULT_ORG}/${repoName}.git`,
+        url: `https://github.com/${owner}/${repoName}.git`,
         onAuth: () => ({ username: gToken }),
         ref: 'main'
       });
@@ -1983,7 +1984,7 @@ async function consolidateRepoQueue(repoName) {
   console.log(`Consolidando ${files.length} posts para o repositório ${repoName} via GitHub REST API...`);
   
   try {
-    const owner = DEFAULT_ORG;
+    const owner = await resolveRepoOwner(gToken, repoName);
     const repo = repoName;
     const branch = 'main';
 
@@ -6099,7 +6100,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
 // FUNÇÃO PARA CONSOLIDAR ARTIGOS DIRETAMENTE RECEBIDOS NA REQUEST (STATELESS/VERCEL-SAFE)
 async function consolidateArticlesDirectly(repoName, articles, gToken, userEmail) {
   try {
-    const owner = DEFAULT_ORG;
+    const owner = await resolveRepoOwner(gToken, repoName);
     const repo = repoName;
     const branch = 'main';
 
