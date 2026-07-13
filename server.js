@@ -1951,7 +1951,7 @@ author: "Redação"
 });
 
 // FUNÇÃO PARA CONSOLIDAR A FILA DE UM REPOSITÓRIO ESPECÍFICO E DAR PUSH
-async function consolidateRepoQueue(repoName) {
+async function consolidateRepoQueue(repoName, customGithubToken, customUserEmail) {
   const repoQueueDir = path.join(QUEUE_DIR, repoName);
   const repoImagesQueueDir = path.join(repoQueueDir, 'images');
   const configFile = path.join(repoQueueDir, '_config.json');
@@ -1961,13 +1961,13 @@ async function consolidateRepoQueue(repoName) {
     return { success: false, reason: 'Fila vazia' };
   }
 
-  let gToken = DEFAULT_GITHUB_TOKEN;
-  let userEmail = '232475346+efeitodigitalcontato-ops@users.noreply.github.com';
+  let gToken = getValidGithubToken(customGithubToken) || DEFAULT_GITHUB_TOKEN;
+  let userEmail = customUserEmail || '232475346+efeitodigitalcontato-ops@users.noreply.github.com';
   if (fs.existsSync(configFile)) {
     try {
       const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-      if (config.githubToken) gToken = config.githubToken;
-      if (config.userEmail && config.userEmail !== 'randerson@inteligenciajovem.com.br') {
+      if (!customGithubToken && config.githubToken) gToken = getValidGithubToken(config.githubToken) || gToken;
+      if (!customUserEmail && config.userEmail && config.userEmail !== 'randerson@inteligenciajovem.com.br') {
         userEmail = config.userEmail;
       }
     } catch (e) {
@@ -6060,7 +6060,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
           if (completedCount % 25 === 0) {
             log('info', `📦 Lote de 25 atingido (${completedCount} gerados)! Disparando deploy automático para o GitHub...`);
             try {
-              const res = await consolidateRepoQueue(blog);
+              const res = await consolidateRepoQueue(blog, githubToken, userEmail);
               if (res && res.success) {
                 log('success', `✅ Deploy do lote de 25 artigos realizado com sucesso!`);
               }
@@ -6082,7 +6082,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
     if (successCount > 0 && (completedCount % 25 !== 0) && !isLocalMode(blog)) {
       log('info', `🧹 Consolidando os artigos restantes na fila...`);
       try {
-        await consolidateRepoQueue(blog);
+        await consolidateRepoQueue(blog, githubToken, userEmail);
         log('success', `✅ Deploy final dos artigos restantes realizado com sucesso!`);
       } catch (err) {}
     }
@@ -6308,7 +6308,7 @@ app.post('/api/deploy', async (req, res) => {
 
     if (hasQueuedPosts) {
       log('info', `ℹ️ Encontrados posts na fila local de consolidação. Enviando via REST API...`);
-      const result = await consolidateRepoQueue(blog);
+      const result = await consolidateRepoQueue(blog, githubToken, userEmail);
       if (result && result.success) {
         log('success', `🚀 [DEPLOY COM SUCESSO] Fila de posts consolidada e enviada para o GitHub!`);
         if (fs.existsSync(blogPath)) {
