@@ -245,6 +245,8 @@ async function getGithubTokenFromSupabase(blogName) {
       resolve(null);
     }
   });
+}
+
 async function getGeminiApiKeyFromSupabase(blogName) {
   const urlStr = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
