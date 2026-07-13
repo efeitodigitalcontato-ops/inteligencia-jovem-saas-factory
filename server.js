@@ -147,6 +147,106 @@ function getValidGithubToken(token) {
   return clean;
 }
 
+async function getGithubTokenFromSupabase(blogName) {
+  const urlStr = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!urlStr || !key) {
+    console.error('[Supabase Resolve] Variaveis do Supabase ausentes.');
+    return null;
+  }
+  
+  return new Promise((resolve) => {
+    try {
+      const url = new URL(`${urlStr}/rest/v1/sites?repo_name=eq.${blogName}&select=user_id`);
+      const https = require('https');
+      const req = https.request({
+        hostname: url.hostname,
+        port: 443,
+        path: url.pathname + url.search,
+        method: 'GET',
+        headers: {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 5000
+      }, (res) => {
+        let body = '';
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', async () => {
+          try {
+            if (res.statusCode !== 200) {
+              console.error('[Supabase Resolve] Erro ao buscar site:', res.statusCode, body);
+              return resolve(null);
+            }
+            const siteList = JSON.parse(body);
+            if (!Array.isArray(siteList) || siteList.length === 0 || !siteList[0].user_id) {
+              console.log('[Supabase Resolve] Site nao encontrado ou sem user_id.');
+              return resolve(null);
+            }
+            const userId = siteList[0].user_id;
+            
+            // Buscar perfil
+            const profileUrl = new URL(`${urlStr}/rest/v1/profiles?id=eq.${userId}&select=github_token`);
+            const reqProf = https.request({
+              hostname: profileUrl.hostname,
+              port: 443,
+              path: profileUrl.pathname + profileUrl.search,
+              method: 'GET',
+              headers: {
+                'apikey': key,
+                'Authorization': `Bearer ${key}`,
+                'Content-Type': 'application/json'
+              },
+              timeout: 5000
+            }, (resProf) => {
+              let bodyProf = '';
+              resProf.on('data', (chunk) => { bodyProf += chunk; });
+              resProf.on('end', () => {
+                try {
+                  if (resProf.statusCode !== 200) {
+                    console.error('[Supabase Resolve] Erro ao buscar perfil:', resProf.statusCode, bodyProf);
+                    return resolve(null);
+                  }
+                  const profileList = JSON.parse(bodyProf);
+                  if (Array.isArray(profileList) && profileList.length > 0 && profileList[0].github_token) {
+                    const decoded = decodeToken(profileList[0].github_token);
+                    const valid = getValidGithubToken(decoded);
+                    if (valid) {
+                      console.log('[Supabase Resolve] Token resolvido com sucesso via REST API!');
+                      return resolve(valid);
+                    }
+                  }
+                  resolve(null);
+                } catch (e) {
+                  console.error('[Supabase Resolve] Erro no parse do perfil:', e.message);
+                  resolve(null);
+                }
+              });
+            });
+            reqProf.on('error', (e) => {
+              console.error('[Supabase Resolve] Erro na request do perfil:', e.message);
+              resolve(null);
+            });
+            reqProf.end();
+          } catch (e) {
+            console.error('[Supabase Resolve] Erro no parse do site:', e.message);
+            resolve(null);
+          }
+        });
+      });
+      req.on('error', (e) => {
+        console.error('[Supabase Resolve] Erro na request do site:', e.message);
+        resolve(null);
+      });
+      req.end();
+    } catch (err) {
+      console.error('[Supabase Resolve] Erro geral:', err.message);
+      resolve(null);
+    }
+  });
+}
+
 
 const crypto = require('crypto');
 
@@ -6012,32 +6112,10 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
 
     let resolvedToken = getValidGithubToken(githubToken);
     if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
-      if (supabase) {
-        try {
-          const { data: siteData } = await supabase
-            .from('sites')
-            .select('user_id')
-            .eq('repo_name', blog)
-            .single();
-            
-          if (siteData && siteData.user_id) {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('github_token')
-              .eq('id', siteData.user_id)
-              .single();
-              
-            if (profileData && profileData.github_token) {
-              const decodedToken = decodeToken(profileData.github_token);
-              const validDecoded = getValidGithubToken(decodedToken);
-              if (validDecoded) {
-                resolvedToken = validDecoded;
-              }
-            }
-          }
-        } catch (dbErr) {
-          console.error('[SSE Generate] Erro ao consultar token no Supabase:', dbErr.message);
-        }
+      console.log(`[SSE Generate] Resolvendo token via HTTPS REST API para o blog ${blog}...`);
+      const tokenRes = await getGithubTokenFromSupabase(blog);
+      if (tokenRes) {
+        resolvedToken = tokenRes;
       }
     }
     
@@ -6321,32 +6399,10 @@ app.post('/api/deploy', async (req, res) => {
 
     let resolvedToken = getValidGithubToken(githubToken);
     if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
-      if (supabase) {
-        try {
-          const { data: siteData } = await supabase
-            .from('sites')
-            .select('user_id')
-            .eq('repo_name', blog)
-            .single();
-            
-          if (siteData && siteData.user_id) {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('github_token')
-              .eq('id', siteData.user_id)
-              .single();
-              
-            if (profileData && profileData.github_token) {
-              const decodedToken = decodeToken(profileData.github_token);
-              const validDecoded = getValidGithubToken(decodedToken);
-              if (validDecoded) {
-                resolvedToken = validDecoded;
-              }
-            }
-          }
-        } catch (dbErr) {
-          console.error('[API Deploy] Erro ao consultar token no Supabase:', dbErr.message);
-        }
+      console.log(`[API Deploy] Resolvendo token via HTTPS REST API para o blog ${blog}...`);
+      const tokenRes = await getGithubTokenFromSupabase(blog);
+      if (tokenRes) {
+        resolvedToken = tokenRes;
       }
     }
     
