@@ -833,7 +833,7 @@ async function callGeminiAPI(bodyData, userApiKey = null) {
       // Self-heal: If key is unauthorized (401) or blocked (403), retry with verified working fallback key
       if ((apiRes.statusCode === 401 || apiRes.statusCode === 403) && userApiKey) {
         console.log(`User key returned ${apiRes.statusCode} for ${model}. Retrying with verified fallback key...`);
-        const fallbackKey = decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
+        const fallbackKey = process.env.GEMINI_API_KEY || decodeToken('enc:QVEuQWI4Uk42TGpBdTFBX0x1WG9Qal94emppd2llV0VjUk1RVzZXNGgzQzdQMEhEVzloZWc=');
         apiRes = await apiRequest({
           hostname: 'generativelanguage.googleapis.com',
           port: 443,
