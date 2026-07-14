@@ -6322,6 +6322,9 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
         }
       }, { sha: newCommitSha });
 
+      // Trigger deploy for VPS/Vercel
+      triggerVercelDeployForRepo(selectedBlog, userEmail);
+
       return res.json({ success: true, heroImage: `/${localImageName}` });
     }
   } catch (err) {
