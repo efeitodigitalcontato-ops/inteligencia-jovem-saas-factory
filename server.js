@@ -1874,10 +1874,14 @@ Sua tarefa é usar a sua ferramenta de busca (Google Search) para pesquisar sobr
 
 Com base nas pesquisas verdadeiras feitas na busca do Google e no tema do blog "${theme || 'Geral'}", gere uma lista de EXATAMENTE 20 ideias de títulos de postagem extremamente originais, criativas e otimizadas para taxa de clique (CTR) alta e SEO.
 
+ATENÇÃO CRÍTICA SOBRE O ASSUNTO E NICHO:
+Os títulos gerados DEVEM ser estritamente sobre o assunto da palavra-chave semente "${keyword}".
+Se a palavra-chave semente "${keyword}" não tiver nenhuma relação direta com o tema do blog "${theme || 'Geral'}", você DEVE IGNORAR COMPLETAMENTE o tema do blog e focar 100% e exclusivamente na palavra-chave "${keyword}". Por exemplo, se a palavra-chave for sobre geladeiras e o tema do blog for sobre tênis, ignore tênis e gere títulos de geladeira.
+
 Aqui estão algumas sugestões iniciais de autocomplete do Google:
 ${suggestions.length > 0 ? suggestions.map(s => `- ${s}`).join('\n') : '(Nenhuma sugestão de autocomplete disponível, confie inteiramente na sua pesquisa ao vivo)'}
 
-${existingTitles.length > 0 ? `CRÍTICO: Os seguintes artigos já foram publicados neste blog. NUNCA gere títulos iguais ou excessivamente parecidos com estes (evite canibalização de palavras-chave):\n${existingTitles.map(t => `- ${t}`).join('\n')}\n` : ''}
+${existingTitles.length > 0 ? `CRÍTICO: Os seguintes artigos já foram publicados neste blog. NUNCA gere títulos iguais ou excessivamente parecidos com estes (evite canibalização de palavras-chave). Se esses artigos anteriores forem sobre um assunto completamente diferente da palavra-chave "${keyword}", desconsidere-os:\n${existingTitles.map(t => `- ${t}`).join('\n')}\n` : ''}
 
 REGRAS CRÍTICAS PARA EVITAR REPETIÇÃO E MONOTONIA:
 1. NUNCA comece dois títulos com o mesmo prefixo ou palavra! Varie totalmente a primeira palavra de cada título.
