@@ -6689,6 +6689,14 @@ function updateAuthUI(isLoggedIn) {
 // JORNADA AUTÔNOMA: QUERO QUE O NINJA FAÇA TUDO (SAFIRA)
 // ====================================================
 
+let ninjaJourneyState = {
+  active: false,
+  step: 0,
+  nicho: '',
+  volume: 0,
+  colabTunnel: ''
+};
+
 document.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'btn-ninja-do-all') {
     startNinjaAutoJourney();
@@ -6696,6 +6704,8 @@ document.addEventListener('click', (e) => {
 });
 
 function startNinjaAutoJourney() {
+  ninjaJourneyState = { active: true, step: 1, nicho: '', volume: 0, colabTunnel: '' };
+  
   if (typeof ASMR !== 'undefined') {
     ASMR.playSparkleSweep();
   }
@@ -6711,21 +6721,39 @@ function startNinjaAutoJourney() {
     const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
     if (!chatBody) return;
 
-    chatBody.innerHTML = ''; // Limpar histórico de chat antigo para focar na jornada
+    chatBody.innerHTML = ''; // Limpar histórico antigo
     
-    // 1. Mensagem inicial de Boas-vindas e recomendação de Nicho
-    appendSafiraMessage("🤖 <strong>Agente Ninja (Safira Journey):</strong> Olá! Estou iniciando a Fábrica Autônoma da <strong>Efeito Digital Corp</strong> para você. Vou criar um blog completo de afiliados do zero e otimizá-lo!");
+    appendSafiraMessage("🤖 <strong>Empresário (CEO Efeito Digital):</strong> Olá! Estou assumindo o controle com o <strong>Agente Ninja</strong>. Vamos construir juntos o seu próximo blog de nicho lucrativo de forma 100% autônoma!");
     
     setTimeout(() => {
-      appendSafiraMessage("🔎 <strong>Passo 1: Definir o Nicho Lucrativo</strong><br>Analisamos os volumes de busca e CPC atuais em português. Recomendo um dos nichos abaixo:<br><br>1. 🎮 <strong>Cadeiras Gamer</strong> (CPC: R$ 0,85 | Altíssima conversão Magalu/Amazon)<br>2. ☕ <strong>Cafeteiras Expresso</strong> (CPC: R$ 1,20 | Ótimo ticket médio)<br>3. 🧼 <strong>Robôs Aspiradores</strong> (CPC: R$ 0,95 | Baixa concorrência SEO)<br><br>Clique no menu superior <strong>'Nicho'</strong> para detalhar ou digite sua escolha aqui!");
-      
-      // Oferecer botões rápidos de volume de artigos
-      setTimeout(() => {
-        appendSafiraMessage("📦 <strong>Passo 2: Escolha a quantidade de Artigos</strong><br>Para dominar o Google de forma sólida, qual volume de artigos originais deseja produzir na primeira compilação?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(1000)'>1000 Artigos</button>");
-      }, 1500);
+      appendSafiraMessage("🔎 <strong>Passo 1 de 4: Escolha o Nicho de Mercado</strong><br>Analisamos os nichos com melhor CPC e facilidade de posicionar hoje no Brasil. Qual você prefere?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Cadeiras Gamer\")'>🎮 Cadeiras Gamer</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Cafeteiras Expresso\")'>☕ Cafeteiras Expresso</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Robôs Aspiradores\")'>🧼 Robôs Aspiradores</button><br><br><em>Ou digite abaixo seu nicho de interesse!</em>");
     }, 1000);
   }, 350);
 }
+
+window.selectNinjaNicho = function(nichoEscolhido) {
+  if (typeof ASMR !== 'undefined') ASMR.playPop();
+  ninjaJourneyState.nicho = nichoEscolhido;
+  ninjaJourneyState.step = 2;
+  
+  appendSafiraMessage(`Escolhi o nicho: <strong>${nichoEscolhido}</strong>.`, true);
+  
+  setTimeout(() => {
+    appendSafiraMessage("📦 <strong>Passo 2 de 4: Volume de Artigos</strong><br>Quantos artigos originais gerados por IA você deseja que a máquina produza para cobrir todo o sitemap deste nicho?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(1000)'>1000 Artigos</button>");
+  }, 1000);
+};
+
+window.selectNinjaVolume = function(volumeEscolhido) {
+  if (typeof ASMR !== 'undefined') ASMR.playPop();
+  ninjaJourneyState.volume = volumeEscolhido;
+  ninjaJourneyState.step = 3;
+  
+  appendSafiraMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
+  
+  setTimeout(() => {
+    appendSafiraMessage("⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>Para gerar esta quantidade sem limites de custos, utilizaremos o Google Colab gratuito.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie a URL do túnel (trycloudflare.com) gerada no fim da execução.<br>3. <strong>Cole a URL do túnel aqui no chat</strong> para darmos início!");
+  }, 1000);
+};
 
 function appendSafiraMessage(htmlContent, isUser = false) {
   const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
@@ -6746,31 +6774,42 @@ function appendSafiraMessage(htmlContent, isUser = false) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-window.selectNinjaVolume = function(volume) {
-  if (typeof ASMR !== 'undefined') ASMR.playPop();
-  appendSafiraMessage(`Escolhi produzir <strong>${volume} Artigos</strong>.`, true);
-  
-  setTimeout(() => {
-    appendSafiraMessage(`⚙️ <strong>Passo 3: Conectar a Máquina Infinita</strong><br>Como o volume é alto, utilizaremos a T4 GPU gratuita do Google Colab para não gastar sua cota de API do Gemini.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie o link do túnel (gerado pelo Cloudflare/trycloudflare.com).<br>3. Cole o link no chat abaixo para que a fábrica comece a gerar os artigos!`);
-  }, 1000);
-};
-
-// Capturar colagem de links do túnel do Colab no chat da Safira
+// Ouvir mensagens de chat manuais enviadas pelo input
 document.addEventListener('submit', (e) => {
   const chatForm = e.target.closest('#safira-chat-form') || e.target.closest('#chat-input-form');
-  if (chatForm) {
-    const input = chatForm.querySelector('input') || chatForm.querySelector('textarea');
-    if (input && input.value.includes('trycloudflare.com')) {
-      const tunnelUrl = input.value.trim();
+  if (!chatForm || !ninjaJourneyState.active) return;
+  
+  const input = chatForm.querySelector('input') || chatForm.querySelector('textarea');
+  if (!input) return;
+  
+  const userText = input.value.trim();
+  if (!userText) return;
+  
+  // Se o usuário digitou o nicho manualmente no Passo 1
+  if (ninjaJourneyState.step === 1) {
+    e.preventDefault();
+    input.value = '';
+    selectNinjaNicho(userText);
+  }
+  // Se colou o link do Colab no Passo 3
+  else if (ninjaJourneyState.step === 3 && userText.includes('trycloudflare.com')) {
+    e.preventDefault();
+    input.value = '';
+    ninjaJourneyState.colabTunnel = userText;
+    ninjaJourneyState.step = 4;
+    
+    appendSafiraMessage(`Enviando link do Colab: <code>${userText}</code>`, true);
+    
+    setTimeout(() => {
+      appendSafiraMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background via PM2...");
+      
       setTimeout(() => {
-        appendSafiraMessage(`🔗 Link do túnel recebido: <code>${tunnelUrl}</code>. Conectando...`);
-        setTimeout(() => {
-          appendSafiraMessage(`⚡ <strong>Fábrica Ativada!</strong><br>Criando repositório do blog Astro no seu GitHub e iniciando a fila de geração automatizada em background. Acompanhe o progresso na lista de blogs!<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>Ao terminar a geração, acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas da <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie esses links aos poucos para parecerem naturais ao robô do Google e evitar penalizações!`);
-        }, 1200);
-      }, 100);
-    }
+        appendSafiraMessage(`🎉 <strong>Blog Criado com Sucesso!</strong><br>A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> foi ativada em background no servidor local.<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>1. Acesse o painel **CRM SEO** para ver os rankings.<br>2. Crie backlinks **apenas** para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>.<br>3. 💡 <em>Dica de ouro:</em> Faça isso aos poucos. O Google valoriza o crescimento natural de links de entrada!`);
+      }, 1500);
+    }, 1000);
   }
 });
+
 
 
 
