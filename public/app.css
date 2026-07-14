@@ -227,11 +227,16 @@ body {
   padding: 6px 16px;
   border-radius: 30px;
   border: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .user-email {
   font-size: 13px;
   font-weight: 500;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Views Layout */
