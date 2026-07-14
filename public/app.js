@@ -6686,7 +6686,7 @@ function updateAuthUI(isLoggedIn) {
 }
 
 // ====================================================
-// JORNADA AUTÔNOMA: QUERO QUE O NINJA FAÇA TUDO (SAFIRA)
+// JORNADA AUTÔNOMA: QUERO QUE O NINJA FAÇA TUDO (POPUP EXCLUSIVO)
 // ====================================================
 
 let ninjaJourneyState = {
@@ -6697,75 +6697,77 @@ let ninjaJourneyState = {
   colabTunnel: ''
 };
 
+// Eventos de clique no modal
 document.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'btn-ninja-do-all') {
-    startNinjaAutoJourney();
+    openNinjaDoAllModal();
+  }
+  if (e.target && e.target.id === 'btn-close-ninja-modal') {
+    closeNinjaDoAllModal();
   }
 });
 
-function startNinjaAutoJourney() {
+function openNinjaDoAllModal() {
   ninjaJourneyState = { active: true, step: 1, nicho: '', volume: 0, colabTunnel: '' };
   
-  if (typeof ASMR !== 'undefined') {
-    ASMR.playSparkleSweep();
-  }
+  const modal = document.getElementById('ninja-do-all-modal');
+  if (modal) modal.classList.remove('hidden');
   
-  // Garantir a abertura do chat da Safira
-  const openSafiraBtn = document.getElementById('open-safira-btn') || document.getElementById('safira-floating-trigger');
-  if (openSafiraBtn) {
-    openSafiraBtn.click();
-  }
-  
-  // Customizar a conversa inicial da Safira para a jornada do Ninja
-  setTimeout(() => {
-    const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
-    if (!chatBody) return;
-
+  const chatBody = document.getElementById('ninja-modal-chat-body');
+  if (chatBody) {
     chatBody.innerHTML = ''; // Limpar histórico antigo
     
-    appendSafiraMessage("🤖 <strong>Empresário (CEO Efeito Digital):</strong> Olá! Estou assumindo o controle com o <strong>Agente Ninja</strong>. Vamos construir juntos o seu próximo blog de nicho lucrativo de forma 100% autônoma!");
+    appendNinjaModalMessage("🤖 <strong>Empresário (CEO Efeito Digital):</strong> Olá! Estou iniciando a Fábrica Autônoma com o <strong>Agente Ninja</strong>. Vou construir o seu novo blog lucrativo de afiliados do absoluto zero!");
     
     setTimeout(() => {
-      appendSafiraMessage("🔎 <strong>Passo 1 de 4: Escolha o Nicho de Mercado</strong><br>Analisamos os nichos com melhor CPC e facilidade de posicionar hoje no Brasil. Qual você prefere?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Cadeiras Gamer\")'>🎮 Cadeiras Gamer</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Cafeteiras Expresso\")'>☕ Cafeteiras Expresso</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaNicho(\"Robôs Aspiradores\")'>🧼 Robôs Aspiradores</button><br><br><em>Ou digite abaixo seu nicho de interesse!</em>");
+      appendNinjaModalMessage("🔎 <strong>Passo 1 de 4: Escolha o Nicho de Mercado</strong><br>Analisamos os volumes de busca e CPC de hoje. Qual micro nicho você prefere?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Cadeiras Gamer\")'>🎮 Cadeiras Gamer</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Cafeteiras Expresso\")'>☕ Cafeteiras Expresso</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Robôs Aspiradores\")'>🧼 Robôs Aspiradores</button><br><br><em>Ou digite o nome do seu nicho customizado abaixo!</em>");
     }, 1000);
-  }, 350);
+  }
 }
 
-window.selectNinjaNicho = function(nichoEscolhido) {
+function closeNinjaDoAllModal() {
+  const modal = document.getElementById('ninja-do-all-modal');
+  if (modal) modal.classList.add('hidden');
+  ninjaJourneyState.active = false;
+}
+
+window.selectNinjaModalNicho = function(nichoEscolhido) {
   if (typeof ASMR !== 'undefined') ASMR.playPop();
   ninjaJourneyState.nicho = nichoEscolhido;
   ninjaJourneyState.step = 2;
   
-  appendSafiraMessage(`Escolhi o nicho: <strong>${nichoEscolhido}</strong>.`, true);
+  appendNinjaModalMessage(`Escolhi o nicho: <strong>${nichoEscolhido}</strong>.`, true);
   
   setTimeout(() => {
-    appendSafiraMessage("📦 <strong>Passo 2 de 4: Volume de Artigos</strong><br>Quantos artigos originais gerados por IA você deseja que a máquina produza para cobrir todo o sitemap deste nicho?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(1000)'>1000 Artigos</button>");
+    appendNinjaModalMessage("📦 <strong>Passo 2 de 4: Volume de Artigos</strong><br>Quantos artigos originais gerados por IA você deseja que a máquina produza para cobrir todo o sitemap deste nicho?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(1000)'>1000 Artigos</button>");
   }, 1000);
 };
 
-window.selectNinjaVolume = function(volumeEscolhido) {
+window.selectNinjaModalVolume = function(volumeEscolhido) {
   if (typeof ASMR !== 'undefined') ASMR.playPop();
   ninjaJourneyState.volume = volumeEscolhido;
   ninjaJourneyState.step = 3;
   
-  appendSafiraMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
+  appendNinjaModalMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
   
   setTimeout(() => {
-    appendSafiraMessage("⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>Para gerar esta quantidade sem limites de custos, utilizaremos o Google Colab gratuito.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie a URL do túnel (trycloudflare.com) gerada no fim da execução.<br>3. <strong>Cole a URL do túnel aqui no chat</strong> para darmos início!");
+    appendNinjaModalMessage("⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>Para gerar esta quantidade de graça e sem lentidão, utilizaremos o Google Colab.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie a URL do túnel (trycloudflare.com) gerada no fim do console.<br>3. <strong>Cole a URL do túnel no campo abaixo</strong> para ativarmos a fábrica!");
   }, 1000);
 };
 
-function appendSafiraMessage(htmlContent, isUser = false) {
-  const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
+function appendNinjaModalMessage(htmlContent, isUser = false) {
+  const chatBody = document.getElementById('ninja-modal-chat-body');
   if (!chatBody) return;
   
   const msg = document.createElement('div');
   msg.className = isUser ? 'message user-message' : 'message safira-message';
   msg.style.padding = '12px';
   msg.style.borderRadius = '8px';
-  msg.style.marginBottom = '12px';
-  msg.style.background = isUser ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)';
-  msg.style.border = isUser ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid var(--border-color)';
+  msg.style.marginBottom = '8px';
+  msg.style.alignSelf = isUser ? 'flex-end' : 'flex-start';
+  msg.style.maxWidth = '85%';
+  msg.style.background = isUser ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.03)';
+  msg.style.border = isUser ? '1px solid rgba(99, 102, 241, 0.4)' : '1px solid var(--border-color)';
   msg.style.color = 'var(--text-main)';
   msg.style.lineHeight = '1.5';
   msg.innerHTML = htmlContent;
@@ -6774,41 +6776,42 @@ function appendSafiraMessage(htmlContent, isUser = false) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-// Ouvir mensagens de chat manuais enviadas pelo input
+// Capturar envio de input no form do modal
 document.addEventListener('submit', (e) => {
-  const chatForm = e.target.closest('#safira-chat-form') || e.target.closest('#chat-input-form');
-  if (!chatForm || !ninjaJourneyState.active) return;
-  
-  const input = chatForm.querySelector('input') || chatForm.querySelector('textarea');
-  if (!input) return;
-  
-  const userText = input.value.trim();
-  if (!userText) return;
-  
-  // Se o usuário digitou o nicho manualmente no Passo 1
-  if (ninjaJourneyState.step === 1) {
+  if (e.target && e.target.id === 'ninja-modal-input-form') {
     e.preventDefault();
-    input.value = '';
-    selectNinjaNicho(userText);
-  }
-  // Se colou o link do Colab no Passo 3
-  else if (ninjaJourneyState.step === 3 && userText.includes('trycloudflare.com')) {
-    e.preventDefault();
-    input.value = '';
-    ninjaJourneyState.colabTunnel = userText;
-    ninjaJourneyState.step = 4;
+    if (!ninjaJourneyState.active) return;
     
-    appendSafiraMessage(`Enviando link do Colab: <code>${userText}</code>`, true);
+    const input = document.getElementById('ninja-modal-text-input');
+    if (!input) return;
     
-    setTimeout(() => {
-      appendSafiraMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background via PM2...");
+    const userText = input.value.trim();
+    if (!userText) return;
+    
+    input.value = '';
+    
+    // Se o usuário digitou o nicho manualmente no Passo 1
+    if (ninjaJourneyState.step === 1) {
+      selectNinjaModalNicho(userText);
+    }
+    // Se colou o link do Colab no Passo 3
+    else if (ninjaJourneyState.step === 3 && userText.includes('trycloudflare.com')) {
+      ninjaJourneyState.colabTunnel = userText;
+      ninjaJourneyState.step = 4;
+      
+      appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
       
       setTimeout(() => {
-        appendSafiraMessage(`🎉 <strong>Blog Criado com Sucesso!</strong><br>A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> foi ativada em background no servidor local.<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>1. Acesse o painel **CRM SEO** para ver os rankings.<br>2. Crie backlinks **apenas** para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>.<br>3. 💡 <em>Dica de ouro:</em> Faça isso aos poucos. O Google valoriza o crescimento natural de links de entrada!`);
-      }, 1500);
-    }, 1000);
+        appendNinjaModalMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Criando a estrutura do blog Astro e iniciando a fila de orquestração local em background via PM2...");
+        
+        setTimeout(() => {
+          appendNinjaModalMessage(`🎉 <strong>Blog Criado com Sucesso!</strong><br>A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> foi ativada em background no servidor local.<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>1. Acesse o painel **CRM SEO** para ver os rankings.<br>2. Crie backlinks **apenas** para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>.<br>3. 💡 <em>Dica de ouro:</em> Faça isso aos poucos. O Google valoriza o crescimento natural de links de entrada!`);
+        }, 1500);
+      }, 1000);
+    }
   }
 });
+
 
 
 

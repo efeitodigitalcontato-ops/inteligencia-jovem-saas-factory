@@ -643,6 +643,33 @@
       </div>
     </section>
 
+    <!-- POPUP MODAL: JORNADA DO NINJA FAÇA TUDO -->
+    <div id="ninja-do-all-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+      <div style="background: var(--bg-card, #151b2e); border: 2px solid var(--secondary-glow); border-radius: 20px; width: 90%; max-width: 580px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+        <!-- Header -->
+        <div style="padding: 1.25rem 1.5rem; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/logo-ninja.jpg" alt="Safira" style="width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--secondary-glow); object-fit: cover;">
+            <div>
+              <h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);">Fábrica Autônoma (Agente Ninja)</h4>
+              <span style="font-size: 0.75rem; color: #10b981; display: flex; align-items: center; gap: 4px;">● Online e Pronta</span>
+            </div>
+          </div>
+          <button id="btn-close-ninja-modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <!-- Chat Body -->
+        <div id="ninja-modal-chat-body" style="padding: 1.5rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 250px; max-height: 450px; background: rgba(0,0,0,0.1);">
+          <!-- Populado via JS -->
+        </div>
+        <!-- Input Form Footer -->
+        <form id="ninja-modal-input-form" style="padding: 1rem 1.5rem; background: rgba(255,255,255,0.02); border-top: 1px solid var(--border-color); display: flex; gap: 10px;">
+          <input type="text" id="ninja-modal-text-input" placeholder="Digite sua resposta..." required style="flex: 1; padding: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+          <button type="submit" class="btn btn-primary" style="padding: 0 20px; border-radius: 8px;">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+
     <!-- NOVA SEÇÃO: GERAÇÃO DE ARTIGOS EM LOTE (MULTI-GERADOR) -->
     <section id="view-multi-generator" class="view-section">
       <div class="wizard-container card">
