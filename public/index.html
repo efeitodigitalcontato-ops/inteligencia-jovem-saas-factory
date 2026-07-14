@@ -365,19 +365,94 @@
       </div>
 
       <!-- SUPER BOTÃO: QUERO QUE O NINJA FAÇA TUDO -->
-      <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15)); border: 2px solid var(--secondary-glow); padding: 1.75rem; border-radius: 16px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 8px 32px rgba(168, 85, 247, 0.1);">
+      <style>
+        .gold-refulgent-btn {
+          position: relative;
+          background: linear-gradient(135deg, #d4af37, #ffd700, #aa7c11, #ffd700);
+          background-size: 300% 300%;
+          border: 1px solid rgba(255, 215, 0, 0.6) !important;
+          color: #111 !important;
+          font-size: 1rem;
+          font-weight: 900;
+          padding: 14px 28px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          overflow: hidden;
+          box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+          animation: goldPulse 2.5s infinite, goldBgMove 6s ease infinite;
+          transition: all 0.3s ease;
+        }
+
+        .gold-refulgent-btn::after {
+          content: '';
+          position: absolute;
+          top: -100%;
+          left: -100%;
+          width: 300%;
+          height: 300%;
+          background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.75) 50%,
+            rgba(255, 255, 255, 0) 60%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: rotate(45deg);
+          animation: goldGlint 2.8s infinite ease-in-out;
+        }
+
+        .gold-refulgent-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+        }
+
+        @keyframes goldGlint {
+          0% {
+            top: -150%;
+            left: -150%;
+          }
+          100% {
+            top: 150%;
+            left: 150%;
+          }
+        }
+
+        @keyframes goldPulse {
+          0%, 100% {
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+          }
+        }
+
+        @keyframes goldBgMove {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+      </style>
+      <div class="card" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(255, 215, 0, 0.04)); border: 2px solid rgba(255, 215, 0, 0.25); padding: 1.75rem; border-radius: 16px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 8px 32px rgba(255, 215, 0, 0.05);">
         <div style="flex: 1; min-width: 280px;">
-          <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-            ⚡ Fábrica Autônoma da Efeito Digital
+          <h3 style="margin: 0; font-size: 1.4rem; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px;">
+            ⚜️ Fábrica Autônoma da Efeito Digital
           </h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; margin-bottom: 0;">
             Quer que a IA monte seu blog lucrativo de afiliados do zero? Nós cuidamos de tudo: pesquisa de nicho, volume de até 1000 artigos e otimização de ranking.
           </p>
         </div>
-        <button class="btn btn-primary" id="btn-ninja-do-all" style="background: linear-gradient(135deg, #a855f7, #6366f1); border: none; font-size: 1rem; font-weight: bold; padding: 12px 24px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); cursor: pointer;">
-          🚀 Quero que o Ninja Faça Tudo!
+        <button class="gold-refulgent-btn" id="btn-ninja-do-all">
+          👑 Quero que o Ninja Faça Tudo!
         </button>
       </div>
+
 
       <!-- Blog Sites List -->
       <div class="card blog-list-card">
