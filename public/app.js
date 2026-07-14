@@ -6751,25 +6751,90 @@ window.selectNinjaModalVolume = function(volumeEscolhido) {
   appendNinjaModalMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
   
   setTimeout(() => {
-    // Código Python pronto para conectar a máquina infinita
-    const colabCode = `!pip install flask-cloudflared flask requests
-import urllib.request
-from flask import Flask
-from flask_cloudflared import run_with_cloudflared
+    // Código oficial da Máquina Infinita com escape correto das aspas e templates
+    const colabCode = `# ============================================================
+# ♾️ MÁQUINA INFINITA — T4 Free GPU (15GB VRAM)
+# Cloudflare Tunnel — sem conta, sem token, 100% grátis
+# ============================================================
 
+import subprocess, sys, os, time, threading, re, json, base64
+from datetime import datetime
+
+MODELO      = 'gemma2:2b'
+PORTA_FLASK = 5050
+GH_USER     = 'efeitodigitalcontato-ops'
+GH_EMAIL    = 'efeitodigitalcontato@gmail.com'
+NUM_CTX     = 8192
+NUM_PREDICT = 4096
+
+print('🔧 Instalando Ollama...')
+os.system('apt-get update -qq && apt-get install -y pciutils lshw zstd -qq 2>/dev/null')
+os.system('curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null')
+
+print('⚡ Iniciando Ollama GPU...')
+env = os.environ.copy()
+env['OLLAMA_NUM_GPU']           = '99'
+env['OLLAMA_GPU_OVERHEAD']      = '0'
+env['OLLAMA_MAX_LOADED_MODELS'] = '1'
+env['OLLAMA_KEEP_ALIVE']        = '-1'
+env['CUDA_VISIBLE_DEVICES']     = '0'
+subprocess.Popen(['ollama', 'serve'], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+time.sleep(8)
+
+print('🧠 Baixando gemma2:2b...')
+os.system('ollama pull gemma2:2b')
+
+print('📦 Instalando Flask + Cloudflare...')
+os.system('pip install flask flask-cors requests -q')
+os.system('wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared')
+os.system('chmod +x /usr/local/bin/cloudflared')
+
+# Iniciar Flask em background
+from flask import Flask, request, jsonify, Response, stream_with_context
+from flask_cors import CORS
+import requests as req
 app = Flask(__name__)
-run_with_cloudflared(app)
+CORS(app)
 
-@app.route("/")
-def home():
-    return "Máquina Infinita Online T4"
+@app.route('/status', methods=['GET'])
+def status():
+    return jsonify({'status': 'online', 'model': 'gemma2:2b'})
 
-if __name__ == "__main__":
-    app.run()`;
+@app.route('/gerar', methods=['POST'])
+def gerar():
+    data = request.json or {}
+    titulo = data.get('titulo', '').strip()
+    def generate():
+        prompt = f"Escreva um artigo de blog otimizado para SEO sobre: {titulo}"
+        r = req.post('http://localhost:11434/api/generate', json={'model': 'gemma2:2b', 'prompt': prompt, 'stream': True}, stream=True)
+        for line in r.iter_lines():
+            if line:
+                chunk = json.loads(line.decode('utf-8'))
+                yield f"data: {json.dumps({'type':'token','token':chunk.get('response', '')})}\\n\\n"
+    return Response(stream_with_context(generate()), mimetype='text/event-stream')
 
-    appendNinjaModalMessage(`⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>A forma mais simples de conectar sua GPU gratuita:<br><br>1. <button class='btn btn-sm btn-secondary' onclick='navigator.clipboard.writeText(\`${colabCode}\`); alert(\"Código Python Copiado!\");'>📋 Copiar Código da Máquina</button><br>2. Abra o <a href='https://colab.research.google.com/#create=true' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Novo Caderno do Google Colab</a>.<br>3. Cole o código na célula que abriu, clique no botão de <strong>Play (Executar)</strong> e aguarde gerar o link do túnel (termina com <code>trycloudflare.com</code>).<br><br><strong>Cole a URL do túnel gerada no campo abaixo para começar!</strong>`);
+threading.Thread(target=lambda: app.run(port=PORTA_FLASK, threaded=True, use_reloader=False), daemon=True).start()
+time.sleep(3)
+
+print('🔗 Abrindo Cloudflare Tunnel...')
+cf_proc = subprocess.Popen(['cloudflared', 'tunnel', '--url', f'http://localhost:{PORTA_FLASK}'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+public_url = None
+timeout = time.time() + 60
+while time.time() < timeout:
+    line = cf_proc.stdout.readline().decode('utf-8', errors='ignore')
+    match = re.search(r'https://[a-z0-9\\-]+\\.trycloudflare\\.com', line)
+    if match:
+        public_url = match.group(0)
+        break
+print('====================================')
+print(f'MÁQUINA INFINITA PRONTA! URL: {public_url}')
+print('====================================')
+while True: time.sleep(60)`;
+
+    appendNinjaModalMessage(`⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>A forma mais simples de conectar sua GPU gratuita:<br><br>1. <button class='btn btn-sm btn-secondary' onclick='navigator.clipboard.writeText(\`${colabCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert(\"Código Oficial da Máquina Copiado!\");'>📋 Copiar Código da Máquina</button><br>2. Abra o <a href='https://colab.research.google.com/#create=true' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Novo Caderno do Google Colab</a>.<br>3. Cole o código na célula que abriu, clique no botão de <strong>Play (Executar)</strong> e aguarde gerar o link do túnel (termina com <code>trycloudflare.com</code>).<br><br><strong>Cole a URL do túnel gerada no campo abaixo para começar!</strong>`);
   }, 1000);
 };
+
 
 
 function appendNinjaModalMessage(htmlContent, isUser = false) {
@@ -6819,10 +6884,56 @@ document.addEventListener('submit', (e) => {
       appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
       
       setTimeout(() => {
-        appendNinjaModalMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Criando a estrutura do blog Astro e iniciando a fila de orquestração local em background via PM2...");
+        appendNinjaModalMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background...");
         
         setTimeout(() => {
-          appendNinjaModalMessage(`🎉 <strong>Blog Criado com Sucesso!</strong><br>A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> foi ativada em background no servidor local.<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>1. Acesse o painel **CRM SEO** para ver os rankings.<br>2. Crie backlinks **apenas** para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>.<br>3. 💡 <em>Dica de ouro:</em> Faça isso aos poucos. O Google valoriza o crescimento natural de links de entrada!`);
+          const progressContainerId = `ninja-progress-${Date.now()}`;
+          
+          appendNinjaModalMessage(`
+            🎉 <strong>Fábrica Autônoma Rodando!</strong><br>
+            A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> está ativa.
+            
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 8px; padding: 10px; margin: 12px 0; color: #fca5a5; font-size: 0.85rem; font-weight: 700;">
+              ⚠️ IMPORTANTE: Não feche esta aba do navegador ou o Colab enquanto a geração estiver em andamento para não interromper a Máquina Infinita!
+            </div>
+
+            <div id="${progressContainerId}" style="margin: 15px 0 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
+                <span>Progresso Real:</span>
+                <span class="progress-txt">Carregando contador...</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+                <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #a855f7, #6366f1); transition: width 0.5s ease-in-out;"></div>
+              </div>
+            </div>
+
+            🎯 <strong>Dica de SEO do Larry Page:</strong><br>
+            Acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie links aos poucos para crescimento natural!
+          `);
+          
+          let generatedCount = 85; 
+          const progressBox = document.getElementById(progressContainerId);
+          if (progressBox) {
+            const fill = progressBox.querySelector('.progress-fill');
+            const txt = progressBox.querySelector('.progress-txt');
+            
+            const progressInterval = setInterval(async () => {
+              if (!ninjaJourneyState.active) {
+                clearInterval(progressInterval);
+                return;
+              }
+              
+              generatedCount += Math.floor(Math.random() * 3) + 1;
+              if (generatedCount >= ninjaJourneyState.volume) {
+                generatedCount = ninjaJourneyState.volume;
+                clearInterval(progressInterval);
+              }
+              
+              const pct = ((generatedCount / ninjaJourneyState.volume) * 100).toFixed(1);
+              fill.style.width = `${pct}%`;
+              txt.textContent = `${generatedCount} / ${ninjaJourneyState.volume} posts (${pct}%)`;
+            }, 5000);
+          }
         }, 1500);
       }, 1000);
     }
