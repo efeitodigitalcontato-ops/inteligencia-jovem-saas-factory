@@ -6880,6 +6880,9 @@ print(f'MÁQUINA INFINITA PRONTA! URL: {public_url}')
 print('====================================')
 while True: time.sleep(60)`;
 
+    // Salvar o código em uma variável global acessível pela função
+    window.cachedColabCode = colabCode;
+
     appendNinjaModalMessage(`
       ⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>
       A forma mais simples de conectar sua GPU gratuita sem poluição visual:<br><br>
@@ -6893,7 +6896,7 @@ while True: time.sleep(60)`;
             <span style="font-size: 0.72rem; color: var(--text-muted);">Código Python Pronto e Validado</span>
           </div>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText(\`${colabCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('✓ Código Oficial Copiado!');" style="padding: 8px 16px; font-weight: bold; font-size: 0.82rem; border-radius: 6px;">
+        <button class="btn btn-sm btn-primary" onclick="copyColabCodeToClipboard()" style="padding: 8px 16px; font-weight: bold; font-size: 0.82rem; border-radius: 6px;">
           📋 Copiar Código
         </button>
       </div>
@@ -6905,6 +6908,22 @@ while True: time.sleep(60)`;
       <strong>Cole o link do túnel gerado no campo abaixo e clique em Enviar!</strong>
     `);
   }, 1000);
+};
+
+window.copyColabCodeToClipboard = function() {
+  if (window.cachedColabCode) {
+    navigator.clipboard.writeText(window.cachedColabCode)
+      .then(() => {
+        if (typeof ASMR !== 'undefined') ASMR.playPop();
+        alert('✓ Código Oficial da Máquina Infinita Copiado!');
+      })
+      .catch(err => {
+        console.error('Copy failed:', err);
+        alert('Erro ao copiar código. Por favor, copie manualmente do Colab.');
+      });
+  } else {
+    alert('Erro: Código não encontrado para cópia.');
+  }
 };
 
 
