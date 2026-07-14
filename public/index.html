@@ -40,6 +40,7 @@
         <a href="#images-panel" class="nav-link private-only hidden">Imagens</a>
         <a href="#silo-structure" class="nav-link private-only hidden">Estrutura SILO</a>
         <a href="#site-position" class="nav-link private-only hidden">Posição no Google</a>
+        <a href="#seo-crm" class="nav-link private-only hidden">CRM SEO</a>
         <a href="#backlink-tracker" class="nav-link private-only hidden">Backlinks</a>
         <a href="#neto-salva" class="nav-link private-only hidden">Backup</a>
         <a href="#settings" class="nav-link private-only hidden">Configurações</a>
@@ -1399,6 +1400,97 @@
         </div>
       </div>
     </section>
+
+
+    <!-- NOVA SEÇÃO: CRM DE OPORTUNIDADES SEO (STRIKE ZONE CRM) -->
+    <section id="view-seo-crm" class="view-section">
+      <div class="wizard-container card" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+        <div class="wizard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
+          <div>
+            <span class="wizard-step-indicator" style="background: linear-gradient(135deg, #f59e0b, #d97706);">CGO Larry Page</span>
+            <h2 style="margin-top: 0.5rem; font-size: 1.8rem; font-weight: 800;">CRM de Oportunidades SEO e Monitoramento</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+              Gerencie e otimize os artigos do seu blog focando na <strong>Zona de Impacto (Strike Zone - Posições 11-30)</strong>.
+            </p>
+          </div>
+          <button class="btn btn-primary" id="btn-trigger-seo-crawl" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 600; padding: 10px 20px; border-radius: 8px;">
+            ⚡ Rastrear Rankings (CGO Crawler)
+          </button>
+        </div>
+
+        <!-- Add monitored keyword card -->
+        <div class="card" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 1.5rem; margin-top: 1.5rem; border-radius: 12px;">
+          <h4 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem;">➕ Monitorar Novo Artigo / Palavra-Chave</h4>
+          <form id="seo-crm-add-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 130px; gap: 1rem; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="crm-select-site" style="font-size: 0.8rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Selecione o Blog *</label>
+              <select id="crm-select-site" required style="padding: 10px; width: 100%; border-radius: 6px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+                <!-- Preenchido dinamicamente -->
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="crm-article-title" style="font-size: 0.8rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Título do Artigo *</label>
+              <input type="text" id="crm-article-title" required placeholder="Ex: Melhores Sofás Retráteis 2026" style="padding: 10px; width: 100%; border-radius: 6px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="crm-article-url" style="font-size: 0.8rem; margin-bottom: 6px; display: block; color: var(--text-muted);">URL do Artigo *</label>
+              <input type="url" id="crm-article-url" required placeholder="Ex: https://etecsr.com.br/melhor-sofa" style="padding: 10px; width: 100%; border-radius: 6px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="crm-keyword" style="font-size: 0.8rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Palavra-Chave *</label>
+              <input type="text" id="crm-keyword" required placeholder="Ex: melhor sofa retratil" style="padding: 10px; width: 100%; border-radius: 6px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="crm-position" style="font-size: 0.8rem; margin-bottom: 6px; display: block; color: var(--text-muted);">Posição Atual *</label>
+              <input type="number" id="crm-position" required min="1" max="100" placeholder="Ex: 15" style="padding: 10px; width: 100%; border-radius: 6px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-color); color: var(--text-main); outline: none;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 10px; height: 42px; width: 100%; font-weight: 600;">Monitorar</button>
+          </form>
+        </div>
+
+        <!-- CRM Opportunities Table -->
+        <div class="card" style="margin-top: 2rem; padding: 0; border: 1px solid var(--border-color); overflow: hidden; border-radius: 12px;">
+          <div class="card-header" style="padding: 1.2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.01);">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Listagem de Oportunidades</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-outline filter-opp-btn active" data-filter="all" style="font-size: 0.8rem; padding: 6px 12px;">Todos</button>
+              <button class="btn btn-sm btn-outline filter-opp-btn" data-filter="strike-zone" style="font-size: 0.8rem; padding: 6px 12px; border-color: #f59e0b; color: #f59e0b; background: rgba(245, 158, 11, 0.02);">🎯 Zona de Impacto (11-30)</button>
+              <button class="btn btn-sm btn-outline filter-opp-btn" data-filter="top10" style="font-size: 0.8rem; padding: 6px 12px; border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.02);">🏆 Top 10</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="blog-table" id="crm-opportunities-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.015);">
+                  <th style="padding: 14px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Artigo / URL</th>
+                  <th style="padding: 14px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Palavra-Chave</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Posição</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Cliques</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Impressões</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">CTR</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Status</th>
+                  <th style="padding: 14px; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="crm-opportunities-tbody">
+                <tr class="empty-state-row">
+                  <td colspan="8" class="empty-state" style="text-align: center; padding: 4rem;">
+                    <div class="empty-icon" style="font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.6;">🎯</div>
+                    <h4 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main);">Nenhuma oportunidade monitorada</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 400px; margin: 0 auto 1.5rem auto;">
+                      Adicione palavras-chave e artigos acima ou clique em Rastrear Rankings para iniciar a varredura do CGO Larry Page.
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
 
     <!-- NOVA SEÇÃO: RESTRUTURAÇÃO SILO (SILO BUILDER) -->
     <section id="view-silo-structure" class="view-section">

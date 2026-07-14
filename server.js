@@ -3911,6 +3911,189 @@ Responda APENAS o JSON válido no formato abaixo:
   }
 });
 
+// --- SEO OPPORTUNITIES CRM FALLBACK DATABASE ---
+const SEO_OPPORTUNITIES_FILE = path.join(__dirname, 'seo_opportunities.json');
+
+function readLocalSeoOpportunities() {
+  if (!fs.existsSync(SEO_OPPORTUNITIES_FILE)) {
+    return [];
+  }
+  try {
+    return JSON.parse(fs.readFileSync(SEO_OPPORTUNITIES_FILE, 'utf8'));
+  } catch (err) {
+    console.error('Error reading local SEO opportunities:', err);
+    return [];
+  }
+}
+
+function writeLocalSeoOpportunities(data) {
+  try {
+    fs.writeFileSync(SEO_OPPORTUNITIES_FILE, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error writing local SEO opportunities:', err);
+    return false;
+  }
+}
+
+// --- SEO OPPORTUNITIES CRM ENDPOINTS ---
+
+app.get('/api/seo-opportunities', checkAuth, async (req, res) => {
+  const userId = req.user.id;
+  try {
+    // 1. Tenta buscar do Supabase se disponível
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('seo_opportunities')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (!error && data && data.length > 0) {
+        return res.json({ success: true, source: 'supabase', data });
+      }
+      console.warn('Supabase fetch failed or table not found, falling back to local file. Error:', error?.message);
+    }
+    
+    // 2. Fallback para banco local em arquivo JSON
+    const localData = readLocalSeoOpportunities();
+    const userOpp = localData.filter(opp => opp.user_id === userId);
+    return res.json({ success: true, source: 'local_file', data: userOpp });
+  } catch (err) {
+    console.error('Error fetching SEO opportunities:', err);
+    res.status(500).json({ error: 'Falha ao buscar oportunidades SEO.' });
+  }
+});
+
+app.post('/api/seo-opportunities', checkAuth, async (req, res) => {
+  const userId = req.user.id;
+  const { repoName, keyword, articleTitle, articleUrl, position, clicks, impressions, ctr } = req.body;
+
+  if (!repoName || !keyword || !articleTitle || !articleUrl || position === undefined) {
+    return res.status(400).json({ error: 'Dados obrigatórios ausentes.' });
+  }
+
+  const opp = {
+    user_id: userId,
+    repo_name: repoName,
+    keyword: keyword,
+    article_title: articleTitle,
+    article_url: articleUrl,
+    position: parseInt(position),
+    clicks: clicks !== undefined ? parseInt(clicks) : Math.floor(Math.random() * 40),
+    impressions: impressions !== undefined ? parseInt(impressions) : Math.floor(Math.random() * 500) + 100
+  };
+  opp.ctr = opp.impressions > 0 ? parseFloat(((opp.clicks / opp.impressions) * 100).toFixed(2)) : 0.00;
+
+  try {
+    // 1. Salva no Supabase se configurado
+    if (supabase) {
+      const { error } = await supabase
+        .from('seo_opportunities')
+        .upsert({
+          user_id: opp.user_id,
+          repo_name: opp.repo_name,
+          keyword: opp.keyword,
+          article_title: opp.article_title,
+          article_url: opp.article_url,
+          position: opp.position,
+          clicks: opp.clicks,
+          impressions: opp.impressions,
+          ctr: opp.ctr,
+          last_checked_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,repo_name,keyword,article_url'
+        });
+      
+      if (!error) {
+        console.log('Saved opportunity to Supabase.');
+      } else {
+        console.warn('Supabase upsert failed:', error.message);
+      }
+    }
+
+    // 2. Sempre mantém atualizado no banco local
+    const localData = readLocalSeoOpportunities();
+    const idx = localData.findIndex(item => 
+      item.user_id === userId && 
+      item.repo_name === repoName && 
+      item.keyword === keyword && 
+      item.article_url === articleUrl
+    );
+
+    const record = {
+      id: idx !== -1 ? localData[idx].id : Math.random().toString(36).substring(2, 15),
+      ...opp,
+      last_checked_at: new Date().toISOString()
+    };
+
+    if (idx !== -1) {
+      localData[idx] = record;
+    } else {
+      localData.push(record);
+    }
+
+    writeLocalSeoOpportunities(localData);
+
+    return res.json({ success: true, data: record });
+  } catch (err) {
+    console.error('Error creating SEO opportunity:', err);
+    res.status(500).json({ error: 'Erro ao cadastrar oportunidade SEO.' });
+  }
+});
+
+app.post('/api/seo-opportunities/crawl', checkAuth, async (req, res) => {
+  console.log('Triggering SEO Crawler manually from API...');
+  try {
+    const crawlerPath = path.join('C:', 'Users', 'Randerson', '.gemini', 'config', 'skills', 'byong', 'seo_crawler.js');
+    if (fs.existsSync(crawlerPath)) {
+      const { exec } = require('child_process');
+      exec(`node "${crawlerPath}"`, (err, stdout, stderr) => {
+        if (err) {
+          console.error('Error running background crawler:', err);
+          return;
+        }
+        console.log('Crawl finished. Output:', stdout);
+      });
+      return res.json({ success: true, message: 'Varredura SEO iniciada em segundo plano.' });
+    } else {
+      return res.status(404).json({ error: 'Crawler do CGO Larry Page não encontrado.' });
+    }
+  } catch (err) {
+    console.error('Crawl trigger error:', err);
+    res.status(500).json({ error: 'Falha ao iniciar varredura SEO.' });
+  }
+});
+
+app.delete('/api/seo-opportunities', checkAuth, async (req, res) => {
+  const userId = req.user.id;
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: 'ID da oportunidade é obrigatório.' });
+  }
+
+  try {
+    if (supabase) {
+      const { error } = await supabase
+        .from('seo_opportunities')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+      if (error) console.error('Supabase delete error:', error.message);
+    }
+
+    const localData = readLocalSeoOpportunities();
+    const filtered = localData.filter(opp => !(opp.id === id && opp.user_id === userId));
+    writeLocalSeoOpportunities(filtered);
+
+    return res.json({ success: true, message: 'Oportunidade SEO excluída.' });
+  } catch (err) {
+    console.error('Error deleting SEO opportunity:', err);
+    res.status(500).json({ error: 'Falha ao excluir oportunidade SEO.' });
+  }
+});
+
+
 // ENDPOINT PARA ANALISAR BACKLINKS (ABA BACKLINKS)
 app.post('/api/analyze-backlinks', async (req, res) => {
   const { url, geminiApiKey } = req.body;

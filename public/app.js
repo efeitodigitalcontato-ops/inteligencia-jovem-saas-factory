@@ -66,7 +66,8 @@ const el = {
     domainConfig: document.getElementById('view-domain-config'),
     netoSalva: document.getElementById('view-neto-salva'),
     payment: document.getElementById('view-payment'),
-    imagesPanel: document.getElementById('view-images-panel')
+    imagesPanel: document.getElementById('view-images-panel'),
+    seoCrm: document.getElementById('view-seo-crm')
   },
 
   // Auth
@@ -266,6 +267,11 @@ function showView(viewName) {
 
   if (viewName === 'netoSalva') {
     populateBackupSites();
+  }
+
+  if (viewName === 'seoCrm') {
+    populateCrmSites();
+    fetchAndRenderCrmOpportunities();
   }
 
   if (viewName === 'niche') {
@@ -578,6 +584,7 @@ document.querySelector('a[href="#new-site"]').addEventListener('click', (e) => {
 document.querySelector('a[href="#multi-generator"]').addEventListener('click', (e) => { e.preventDefault(); showView('multiGenerator'); });
 document.querySelector('a[href="#silo-structure"]').addEventListener('click', (e) => { e.preventDefault(); showView('siloStructure'); });
 document.querySelector('a[href="#site-position"]').addEventListener('click', (e) => { e.preventDefault(); showView('sitePosition'); });
+document.querySelector('a[href="#seo-crm"]').addEventListener('click', (e) => { e.preventDefault(); showView('seoCrm'); });
 document.querySelector('a[href="#backlink-tracker"]').addEventListener('click', (e) => { e.preventDefault(); showView('backlinkTracker'); });
 document.querySelector('a[href="#neto-salva"]').addEventListener('click', (e) => { e.preventDefault(); showView('netoSalva'); });
 document.querySelector('a[href="#images-panel"]').addEventListener('click', (e) => { e.preventDefault(); showView('imagesPanel'); });
@@ -6288,5 +6295,368 @@ document.addEventListener('input', (e) => {
     }
   }
 });
+
+// ==========================================
+// CRM DE OPORTUNIDADES SEO (STRIKE ZONE CRM)
+// ==========================================
+
+let crmOpportunities = [];
+let currentCrmFilter = 'all';
+
+function populateCrmSites() {
+  const select = document.getElementById('crm-select-site');
+  if (!select) return;
+  select.innerHTML = '<option value="" disabled selected>Escolha um blog...</option>';
+  
+  if (State.sites && State.sites.length > 0) {
+    State.sites.forEach(site => {
+      const option = document.createElement('option');
+      option.value = site.repoName;
+      option.textContent = site.theme || site.repoName;
+      option.dataset.deployurl = site.deployUrl || '';
+      select.appendChild(option);
+    });
+  }
+}
+
+// When a site is selected, auto-fill URL input prefix if available
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'crm-select-site') {
+    const selectedOption = e.target.options[e.target.selectedIndex];
+    const deployUrl = selectedOption.dataset.deployurl;
+    const urlInput = document.getElementById('crm-article-url');
+    if (urlInput && deployUrl) {
+      urlInput.value = deployUrl.endsWith('/') ? deployUrl : deployUrl + '/';
+    }
+  }
+});
+
+async function fetchAndRenderCrmOpportunities() {
+  const tbody = document.getElementById('crm-opportunities-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="8" style="text-align: center; padding: 3rem;">
+        <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+        <p style="color: var(--text-muted);">Carregando oportunidades SEO...</p>
+      </td>
+    </tr>
+  `;
+
+  try {
+    const response = await fetch('/api/seo-opportunities', {
+      headers: {
+        'Authorization': `Bearer ${State.token}`
+      }
+    });
+    const resData = await response.json();
+    if (resData.success && Array.isArray(resData.data)) {
+      crmOpportunities = resData.data;
+      renderCrmOpportunitiesTable();
+    } else {
+      throw new Error(resData.error || 'Falha ao buscar dados.');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Erro ao carregar oportunidades de ranking.', 'error');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 3rem; color: #ef4444;">
+          ⚠️ Erro ao carregar dados do servidor.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+function renderCrmOpportunitiesTable() {
+  const tbody = document.getElementById('crm-opportunities-tbody');
+  if (!tbody) return;
+
+  // Filter opportunities
+  let filtered = [...crmOpportunities];
+  if (currentCrmFilter === 'strike-zone') {
+    filtered = filtered.filter(o => o.position >= 11 && o.position <= 30);
+  } else if (currentCrmFilter === 'top10') {
+    filtered = filtered.filter(o => o.position >= 1 && o.position <= 10);
+  }
+
+  // Sort by position ascending
+  filtered.sort((a, b) => a.position - b.position);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr class="empty-state-row">
+        <td colspan="8" class="empty-state" style="text-align: center; padding: 4rem;">
+          <div class="empty-icon" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.6;">🎯</div>
+          <h4 style="color: var(--text-main);">Nenhum artigo encontrado para este filtro</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Adicione um artigo ou mude o filtro para visualizar.
+          </p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  filtered.forEach(opp => {
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--border-color)';
+    tr.style.transition = 'background 0.2s';
+    
+    // Highlight Zona de Impacto
+    const isStrikeZone = opp.position >= 11 && opp.position <= 30;
+    if (isStrikeZone) {
+      tr.style.background = 'rgba(245, 158, 11, 0.015)';
+    }
+
+    // Status Badge
+    let statusBadge = '';
+    if (opp.position <= 3) {
+      statusBadge = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 600;">🏆 Top 3</span>`;
+    } else if (opp.position <= 10) {
+      statusBadge = `<span class="badge" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59,130,246,0.2); font-weight: 600;">🔥 Top 10</span>`;
+    } else if (isStrikeZone) {
+      statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); font-weight: 600;">🎯 Strike Zone</span>`;
+    } else {
+      statusBadge = `<span class="badge" style="background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168,85,247,0.2); font-weight: 600;">Ranqueado</span>`;
+    }
+
+    // Shorten title
+    const shortTitle = opp.article_title.length > 40 ? opp.article_title.substring(0, 37) + '...' : opp.article_title;
+
+    tr.innerHTML = `
+      <td style="padding: 14px; text-align: left;">
+        <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">${shortTitle}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+          <a href="${opp.article_url}" target="_blank" style="color: var(--primary); text-decoration: none;">🔗 ${opp.article_url.replace(/^(https?:\/\/)?(www\.)?/, '')}</a>
+        </div>
+      </td>
+      <td style="padding: 14px; text-align: left; font-weight: 500; color: var(--text-main); font-family: monospace;">
+        ${opp.keyword}
+      </td>
+      <td style="padding: 14px; text-align: center; font-size: 1.15rem; font-weight: 800; color: ${isStrikeZone ? '#f59e0b' : '#3b82f6'};">
+        #${opp.position}
+      </td>
+      <td style="padding: 14px; text-align: center; color: var(--text-main); font-weight: 500;">
+        ${opp.clicks || 0}
+      </td>
+      <td style="padding: 14px; text-align: center; color: var(--text-muted);">
+        ${opp.impressions || 0}
+      </td>
+      <td style="padding: 14px; text-align: center; font-weight: 600; color: #10b981;">
+        ${opp.ctr || '0.00'}%
+      </td>
+      <td style="padding: 14px; text-align: center;">
+        ${statusBadge}
+      </td>
+      <td style="padding: 14px; text-align: center;">
+        <div style="display: flex; gap: 8px; justify-content: center;">
+          <button class="btn btn-sm btn-outline check-instant-btn" data-keyword="${opp.keyword}" data-url="${opp.article_url}" data-repo="${opp.repo_name}" style="padding: 4px 8px; font-size: 0.75rem; border-color: rgba(255,255,255,0.1);">🔄 Rastrear</button>
+          <button class="btn btn-sm btn-outline delete-opp-btn" data-id="${opp.id}" style="padding: 4px 8px; font-size: 0.75rem; border-color: rgba(239, 68, 68, 0.2); color: #ef4444; background: rgba(239, 68, 68, 0.02);">Excluir</button>
+        </div>
+      </td>
+    `;
+    
+    // Add hover effect
+    tr.addEventListener('mouseenter', () => {
+      tr.style.background = 'rgba(255, 255, 255, 0.02)';
+    });
+    tr.addEventListener('mouseleave', () => {
+      tr.style.background = isStrikeZone ? 'rgba(245, 158, 11, 0.015)' : '';
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  // Attach actions event listeners
+  document.querySelectorAll('.check-instant-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const keyword = e.target.dataset.keyword;
+      const url = e.target.dataset.url;
+      const repo = e.target.dataset.repo;
+      
+      e.target.disabled = true;
+      e.target.textContent = '⏱️ Rastreando...';
+
+      try {
+        const response = await fetch('/api/check-google-position', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${State.token}`
+          },
+          body: JSON.stringify({
+            url: url,
+            keyword: keyword,
+            repoName: repo
+          })
+        });
+        const resData = await response.json();
+        if (resData.success) {
+          showToast(`Posição atualizada para #${resData.position}!`, 'success');
+          
+          // Local update and re-render
+          const oppIdx = crmOpportunities.findIndex(o => o.keyword === keyword && o.article_url === url);
+          if (oppIdx !== -1) {
+            crmOpportunities[oppIdx].position = resData.position;
+            // Send back to opportunities endpoint to persist
+            await fetch('/api/seo-opportunities', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${State.token}`
+              },
+              body: JSON.stringify({
+                repoName: repo,
+                keyword: keyword,
+                articleTitle: crmOpportunities[oppIdx].article_title,
+                articleUrl: url,
+                position: resData.position
+              })
+            });
+          }
+          fetchAndRenderCrmOpportunities();
+        } else {
+          throw new Error(resData.error || 'Erro na resposta.');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Erro ao atualizar posição do rank.', 'error');
+      } finally {
+        e.target.disabled = false;
+        e.target.textContent = '🔄 Rastrear';
+      }
+    });
+  });
+
+  document.querySelectorAll('.delete-opp-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.dataset.id;
+      if (!confirm('Deseja realmente remover esta oportunidade do monitoramento?')) return;
+
+      try {
+        const response = await fetch('/api/seo-opportunities', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${State.token}`
+          },
+          body: JSON.stringify({ id })
+        });
+        const resData = await response.json();
+        if (resData.success) {
+          showToast('Oportunidade SEO removida.', 'success');
+          fetchAndRenderCrmOpportunities();
+        } else {
+          throw new Error(resData.error || 'Erro ao remover.');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Erro ao excluir oportunidade.', 'error');
+      }
+    });
+  });
+}
+
+// Add Opportunity Form Submission
+document.addEventListener('submit', async (e) => {
+  if (e.target && e.target.id === 'seo-crm-add-form') {
+    e.preventDefault();
+    const repoName = document.getElementById('crm-select-site').value;
+    const articleTitle = document.getElementById('crm-article-title').value.trim();
+    const articleUrl = document.getElementById('crm-article-url').value.trim();
+    const keyword = document.getElementById('crm-keyword').value.trim();
+    const position = document.getElementById('crm-position').value;
+
+    if (!repoName || !articleTitle || !articleUrl || !keyword || !position) {
+      showToast('Por favor, preencha todos os campos.', 'error');
+      return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Salvando...';
+
+    try {
+      const response = await fetch('/api/seo-opportunities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${State.token}`
+        },
+        body: JSON.stringify({
+          repoName,
+          articleTitle,
+          articleUrl,
+          keyword,
+          position
+        })
+      });
+
+      const resData = await response.json();
+      if (resData.success) {
+        showToast('Oportunidade SEO adicionada com sucesso!', 'success');
+        e.target.reset();
+        populateCrmSites(); // Reset select
+        fetchAndRenderCrmOpportunities();
+      } else {
+        throw new Error(resData.error || 'Erro ao salvar.');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao cadastrar monitoramento SEO.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Monitorar';
+    }
+  }
+});
+
+// Trigger Crawler
+document.addEventListener('click', async (e) => {
+  if (e.target && e.target.id === 'btn-trigger-seo-crawl') {
+    e.target.disabled = true;
+    const oldText = e.target.textContent;
+    e.target.textContent = '⚡ Iniciando Varredura...';
+
+    try {
+      const response = await fetch('/api/seo-opportunities/crawl', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${State.token}`
+        }
+      });
+      const resData = await response.json();
+      if (resData.success) {
+        showToast('Crawler iniciado em segundo plano! Aguarde alguns instantes.', 'success');
+        // Set timer to refresh dashboard after 15 seconds
+        setTimeout(fetchAndRenderCrmOpportunities, 15000);
+      } else {
+        throw new Error(resData.error);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao acionar varredura do CGO.', 'error');
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = oldText;
+    }
+  }
+});
+
+// Filter Tabs Click Listeners
+document.addEventListener('click', (e) => {
+  const filterBtn = e.target.closest('.filter-opp-btn');
+  if (filterBtn) {
+    document.querySelectorAll('.filter-opp-btn').forEach(b => b.classList.remove('active'));
+    filterBtn.classList.add('active');
+    currentCrmFilter = filterBtn.dataset.filter;
+    renderCrmOpportunitiesTable();
+  }
+});
+
 
 
