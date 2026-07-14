@@ -6751,9 +6751,26 @@ window.selectNinjaModalVolume = function(volumeEscolhido) {
   appendNinjaModalMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
   
   setTimeout(() => {
-    appendNinjaModalMessage("⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>Para gerar esta quantidade de graça e sem lentidão, utilizaremos o Google Colab.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie a URL do túnel (trycloudflare.com) gerada no fim do console.<br>3. <strong>Cole a URL do túnel no campo abaixo</strong> para ativarmos a fábrica!");
+    // Código Python pronto para conectar a máquina infinita
+    const colabCode = `!pip install flask-cloudflared flask requests
+import urllib.request
+from flask import Flask
+from flask_cloudflared import run_with_cloudflared
+
+app = Flask(__name__)
+run_with_cloudflared(app)
+
+@app.route("/")
+def home():
+    return "Máquina Infinita Online T4"
+
+if __name__ == "__main__":
+    app.run()`;
+
+    appendNinjaModalMessage(`⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>A forma mais simples de conectar sua GPU gratuita:<br><br>1. <button class='btn btn-sm btn-secondary' onclick='navigator.clipboard.writeText(\`${colabCode}\`); alert(\"Código Python Copiado!\");'>📋 Copiar Código da Máquina</button><br>2. Abra o <a href='https://colab.research.google.com/#create=true' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Novo Caderno do Google Colab</a>.<br>3. Cole o código na célula que abriu, clique no botão de <strong>Play (Executar)</strong> e aguarde gerar o link do túnel (termina com <code>trycloudflare.com</code>).<br><br><strong>Cole a URL do túnel gerada no campo abaixo para começar!</strong>`);
   }, 1000);
 };
+
 
 function appendNinjaModalMessage(htmlContent, isUser = false) {
   const chatBody = document.getElementById('ninja-modal-chat-body');
