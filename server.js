@@ -5659,7 +5659,7 @@ async function sseCountdown(seconds, reason, panelId) {
   log('info', "🚀 Retomando fila de geração!");
 }
 
-async function processAndWriteSseArticle(title, selectedBlog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey) {
+async function processAndWriteSseArticle(title, selectedBlog, keyState, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey, userEmail) {
   const rootDir = path.join(__dirname, '..');
   const blogPath = path.join(rootDir, selectedBlog);
   const isLocal = fs.existsSync(blogPath);
@@ -5873,11 +5873,11 @@ ${bodyText}`;
           content: frontmatter,
           imageName: localImageName,
           title: title,
-          userEmail: 'randerson@inteligenciajovem.com.br'
+          userEmail: userEmail || 'randerson@inteligenciajovem.com.br'
         };
         fs.writeFileSync(path.join(repoQueueDir, `${slug}.json`), JSON.stringify(queueMetadata, null, 2), 'utf8');
         if (githubToken) {
-          fs.writeFileSync(path.join(repoQueueDir, '_config.json'), JSON.stringify({ githubToken }, null, 2), 'utf8');
+          fs.writeFileSync(path.join(repoQueueDir, '_config.json'), JSON.stringify({ githubToken, userEmail }, null, 2), 'utf8');
         }
         sendLog('success', `Artigo gerado com sucesso e enfileirado na Blindagem (Consolidação): ${finalFilename}`);
       }
@@ -6388,7 +6388,7 @@ app.get('/api/logs-poll', (req, res) => {
 // ROTA POST: Iniciar Geração em Lote de Alta Performance (SSE + Multi-Panel)
 app.post('/api/generate-bulk-sse', async (req, res) => {
   try {
-    const { titles, blog, apiKeys, apiKey, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey } = req.body;
+    const { titles, blog, apiKeys, apiKey, category, tone, affiliate, heroImage, authorName, panelId, githubToken, pexelsApiKey, userEmail } = req.body;
 
     let resolvedToken = getValidGithubToken(githubToken);
     if (!resolvedToken || resolvedToken === DEFAULT_GITHUB_TOKEN) {
@@ -6453,7 +6453,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
         // Cascata de 1.5s entre inícios para não bombardear a rede no mesmo milissegundo
         await sseSleep(i * 1500);
         log('status', `🚀 Disparando em paralelo artigo ${i + 1} de ${titles.length}: "${title}"`, { current: i + 1, total: titles.length });
-        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, resolvedToken, pexelsApiKey);
+        const ok = await processAndWriteSseArticle(title, blog, keyState, category, tone, affiliate, heroImage, authorName, panelId, resolvedToken, pexelsApiKey, userEmail);
         
         if (ok && !isLocalMode(blog)) {
           completedCount++;
@@ -6463,6 +6463,8 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
               const res = await consolidateRepoQueue(blog, resolvedToken, userEmail);
               if (res && res.success) {
                 log('success', `✅ Deploy do lote de 25 artigos realizado com sucesso!`);
+                // Trigger deploy on VPS/Vercel
+                triggerVercelDeployForRepo(blog, userEmail);
               }
             } catch (deployErr) {
               log('error', `❌ Falha no deploy automático do lote: ${deployErr.message}`);
@@ -6482,8 +6484,12 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
     if (successCount > 0 && (completedCount % 25 !== 0) && !isLocalMode(blog)) {
       log('info', `🧹 Consolidando os artigos restantes na fila...`);
       try {
-        await consolidateRepoQueue(blog, resolvedToken, userEmail);
-        log('success', `✅ Deploy final dos artigos restantes realizado com sucesso!`);
+        const res = await consolidateRepoQueue(blog, resolvedToken, userEmail);
+        if (res && res.success) {
+          log('success', `✅ Deploy final dos artigos restantes realizado com sucesso!`);
+          // Trigger deploy on VPS/Vercel
+          triggerVercelDeployForRepo(blog, userEmail);
+        }
       } catch (err) {}
     }
 
