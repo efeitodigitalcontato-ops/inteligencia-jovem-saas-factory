@@ -452,21 +452,25 @@ function init() {
 function updateAuthUI(isLoggedIn) {
   const safiraTrigger = document.getElementById('safira-floating-trigger');
   const comeceTrigger = document.getElementById('comece-rapido-trigger');
+  const dynamicPrivateLinks = document.querySelectorAll('.private-only');
+  const dynamicPublicLinks = document.querySelectorAll('.public-only');
+
   if (isLoggedIn) {
-    el.navLinksPrivate.forEach(link => link.classList.remove('hidden'));
-    el.navLinksPublic.forEach(link => link.classList.add('hidden'));
+    dynamicPrivateLinks.forEach(link => link.classList.remove('hidden'));
+    dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
     el.userDisplayEmail.textContent = State.user.email;
     el.dashUserName.textContent = State.user.name || 'Empreendedor';
     if (safiraTrigger) safiraTrigger.classList.remove('hidden');
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
-    el.navLinksPrivate.forEach(link => link.classList.add('hidden'));
-    el.navLinksPublic.forEach(link => link.classList.remove('hidden'));
+    dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
+    dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
     if (safiraTrigger) safiraTrigger.classList.add('hidden');
     if (comeceTrigger) comeceTrigger.classList.add('hidden');
     if (typeof closeSafiraChat === 'function') closeSafiraChat();
   }
 }
+
 
 // Auth Actions
 function logout() {
