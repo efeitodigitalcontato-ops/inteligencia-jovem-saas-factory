@@ -6880,7 +6880,30 @@ print(f'MÁQUINA INFINITA PRONTA! URL: {public_url}')
 print('====================================')
 while True: time.sleep(60)`;
 
-    appendNinjaModalMessage(`⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>A forma mais simples de conectar sua GPU gratuita:<br><br>1. <button class='btn btn-sm btn-secondary' onclick='navigator.clipboard.writeText(\`${colabCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert(\"Código Oficial da Máquina Copiado!\");'>📋 Copiar Código da Máquina</button><br>2. Abra o <a href='https://colab.research.google.com/#create=true' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Novo Caderno do Google Colab</a>.<br>3. Cole o código na célula que abriu, clique no botão de <strong>Play (Executar)</strong> e aguarde gerar o link do túnel (termina com <code>trycloudflare.com</code>).<br><br><strong>Cole a URL do túnel gerada no campo abaixo para começar!</strong>`);
+    appendNinjaModalMessage(`
+      ⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>
+      A forma mais simples de conectar sua GPU gratuita sem poluição visual:<br><br>
+      
+      <!-- Card Minimalista Premium -->
+      <div style="background: rgba(0, 0, 0, 0.3); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.8rem; line-height: 1;">🐍</span>
+          <div>
+            <strong style="font-size: 0.9rem; color: var(--text-main); display: block; margin-bottom: 2px;">maquina_infinita.py</strong>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Código Python Pronto e Validado</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText(\`${colabCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('✓ Código Oficial Copiado!');" style="padding: 8px 16px; font-weight: bold; font-size: 0.82rem; border-radius: 6px;">
+          📋 Copiar Código
+        </button>
+      </div>
+
+      1. Clique em <strong>Copiar Código</strong> acima.<br>
+      2. Abra o <a href="https://colab.research.google.com/#create=true" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Novo Google Colab aqui</a>.<br>
+      3. Cole na célula em branco (Ctrl+V), clique em <strong>Executar (Play)</strong> e aguarde gerar o link final do túnel (trycloudflare.com).<br><br>
+      
+      <strong>Cole o link do túnel gerado no campo abaixo e clique em Enviar!</strong>
+    `);
   }, 1000);
 };
 
