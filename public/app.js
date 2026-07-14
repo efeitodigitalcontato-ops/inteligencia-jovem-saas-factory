@@ -6658,5 +6658,116 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// Dynamic private navigation link visibility correction
+function updateAuthUI(isLoggedIn) {
+  const safiraTrigger = document.getElementById('safira-floating-trigger');
+  const comeceTrigger = document.getElementById('comece-rapido-trigger');
+  const dynamicPrivateLinks = document.querySelectorAll('.private-only');
+  const dynamicPublicLinks = document.querySelectorAll('.public-only');
+  
+  if (isLoggedIn) {
+    dynamicPrivateLinks.forEach(link => link.classList.remove('hidden'));
+    dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
+    el.userDisplayEmail.textContent = State.user.email;
+    el.dashUserName.textContent = State.user.name || 'Empreendedor';
+    if (safiraTrigger) safiraTrigger.classList.remove('hidden');
+    if (comeceTrigger) comeceTrigger.classList.remove('hidden');
+  } else {
+    dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
+    dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
+    if (safiraTrigger) safiraTrigger.classList.add('hidden');
+    if (comeceTrigger) comeceTrigger.classList.add('hidden');
+    if (typeof closeSafiraChat === 'function') closeSafiraChat();
+  }
+}
+
+// ====================================================
+// JORNADA AUTÔNOMA: QUERO QUE O NINJA FAÇA TUDO (SAFIRA)
+// ====================================================
+
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'btn-ninja-do-all') {
+    startNinjaAutoJourney();
+  }
+});
+
+function startNinjaAutoJourney() {
+  if (typeof ASMR !== 'undefined') {
+    ASMR.playSparkleSweep();
+  }
+  
+  // Garantir a abertura do chat da Safira
+  const openSafiraBtn = document.getElementById('open-safira-btn') || document.getElementById('safira-floating-trigger');
+  if (openSafiraBtn) {
+    openSafiraBtn.click();
+  }
+  
+  // Customizar a conversa inicial da Safira para a jornada do Ninja
+  setTimeout(() => {
+    const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
+    if (!chatBody) return;
+
+    chatBody.innerHTML = ''; // Limpar histórico de chat antigo para focar na jornada
+    
+    // 1. Mensagem inicial de Boas-vindas e recomendação de Nicho
+    appendSafiraMessage("🤖 <strong>Agente Ninja (Safira Journey):</strong> Olá! Estou iniciando a Fábrica Autônoma da <strong>Efeito Digital Corp</strong> para você. Vou criar um blog completo de afiliados do zero e otimizá-lo!");
+    
+    setTimeout(() => {
+      appendSafiraMessage("🔎 <strong>Passo 1: Definir o Nicho Lucrativo</strong><br>Analisamos os volumes de busca e CPC atuais em português. Recomendo um dos nichos abaixo:<br><br>1. 🎮 <strong>Cadeiras Gamer</strong> (CPC: R$ 0,85 | Altíssima conversão Magalu/Amazon)<br>2. ☕ <strong>Cafeteiras Expresso</strong> (CPC: R$ 1,20 | Ótimo ticket médio)<br>3. 🧼 <strong>Robôs Aspiradores</strong> (CPC: R$ 0,95 | Baixa concorrência SEO)<br><br>Clique no menu superior <strong>'Nicho'</strong> para detalhar ou digite sua escolha aqui!");
+      
+      // Oferecer botões rápidos de volume de artigos
+      setTimeout(() => {
+        appendSafiraMessage("📦 <strong>Passo 2: Escolha a quantidade de Artigos</strong><br>Para dominar o Google de forma sólida, qual volume de artigos originais deseja produzir na primeira compilação?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaVolume(1000)'>1000 Artigos</button>");
+      }, 1500);
+    }, 1000);
+  }, 350);
+}
+
+function appendSafiraMessage(htmlContent, isUser = false) {
+  const chatBody = document.getElementById('safira-chat-body') || document.getElementById('chat-messages-container');
+  if (!chatBody) return;
+  
+  const msg = document.createElement('div');
+  msg.className = isUser ? 'message user-message' : 'message safira-message';
+  msg.style.padding = '12px';
+  msg.style.borderRadius = '8px';
+  msg.style.marginBottom = '12px';
+  msg.style.background = isUser ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)';
+  msg.style.border = isUser ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid var(--border-color)';
+  msg.style.color = 'var(--text-main)';
+  msg.style.lineHeight = '1.5';
+  msg.innerHTML = htmlContent;
+  
+  chatBody.appendChild(msg);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+window.selectNinjaVolume = function(volume) {
+  if (typeof ASMR !== 'undefined') ASMR.playPop();
+  appendSafiraMessage(`Escolhi produzir <strong>${volume} Artigos</strong>.`, true);
+  
+  setTimeout(() => {
+    appendSafiraMessage(`⚙️ <strong>Passo 3: Conectar a Máquina Infinita</strong><br>Como o volume é alto, utilizaremos a T4 GPU gratuita do Google Colab para não gastar sua cota de API do Gemini.<br><br>1. Abra o <a href='https://colab.research.google.com' target='_blank' style='color: var(--primary); font-weight: bold; text-decoration: underline;'>Google Colab da Máquina Infinita</a> e execute as células.<br>2. Copie o link do túnel (gerado pelo Cloudflare/trycloudflare.com).<br>3. Cole o link no chat abaixo para que a fábrica comece a gerar os artigos!`);
+  }, 1000);
+};
+
+// Capturar colagem de links do túnel do Colab no chat da Safira
+document.addEventListener('submit', (e) => {
+  const chatForm = e.target.closest('#safira-chat-form') || e.target.closest('#chat-input-form');
+  if (chatForm) {
+    const input = chatForm.querySelector('input') || chatForm.querySelector('textarea');
+    if (input && input.value.includes('trycloudflare.com')) {
+      const tunnelUrl = input.value.trim();
+      setTimeout(() => {
+        appendSafiraMessage(`🔗 Link do túnel recebido: <code>${tunnelUrl}</code>. Conectando...`);
+        setTimeout(() => {
+          appendSafiraMessage(`⚡ <strong>Fábrica Ativada!</strong><br>Criando repositório do blog Astro no seu GitHub e iniciando a fila de geração automatizada em background. Acompanhe o progresso na lista de blogs!<br><br>🎯 <strong>Dica de SEO do Larry Page:</strong><br>Ao terminar a geração, acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas da <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie esses links aos poucos para parecerem naturais ao robô do Google e evitar penalizações!`);
+        }, 1200);
+      }, 100);
+    }
+  }
+});
+
+
 
 
