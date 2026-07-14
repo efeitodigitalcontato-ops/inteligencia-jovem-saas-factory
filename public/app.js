@@ -6707,6 +6707,53 @@ document.addEventListener('click', (e) => {
   }
 });
 
+function getRotatedNicheSuggestions() {
+  let suggestions = [];
+  try {
+    if (typeof NicheData !== 'undefined' && NicheData.macro) {
+      NicheData.macro.forEach(m => {
+        if (m.subs) {
+          m.subs.forEach(s => {
+            if (s.micros) {
+              s.micros.forEach(micro => {
+                suggestions.push(micro.name);
+              });
+            }
+          });
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Niche extraction error:', err);
+  }
+  
+  // Fallbacks lucrativos caso o array de nichos falhe
+  if (suggestions.length === 0) {
+    suggestions = [
+      "Cadeiras Gamer", "Cafeteiras Expresso", "Robôs Aspiradores",
+      "Teclados Mecânicos", "Aspirador de Pó Vertical", "Ar Condicionado Portátil",
+      "Frigobar Retro", "Fechadura Eletrônica", "Fritadeira Elétrica Airfryer"
+    ];
+  }
+  
+  // Embaralhar e pegar 3 sugestões
+  const shuffled = suggestions.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+}
+
+window.rotateNinjaSuggestions = function() {
+  if (typeof ASMR !== 'undefined') ASMR.playPop();
+  
+  const optionsBox = document.getElementById('ninja-niche-options-box');
+  if (optionsBox) {
+    const list = getRotatedNicheSuggestions();
+    optionsBox.innerHTML = `
+      ${list.map(n => `<button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho("${n}")'>🎯 ${n}</button>`).join(' ')}
+      <button class='btn btn-sm btn-outline' onclick='rotateNinjaSuggestions()' style='border: 1px dashed var(--primary); color: var(--primary);'>🔄 Novas Ideias</button>
+    `;
+  }
+};
+
 function openNinjaDoAllModal() {
   ninjaJourneyState = { active: true, step: 1, nicho: '', volume: 0, colabTunnel: '' };
   
@@ -6720,7 +6767,8 @@ function openNinjaDoAllModal() {
     appendNinjaModalMessage("🤖 <strong>Empresário (CEO Efeito Digital):</strong> Olá! Estou iniciando a Fábrica Autônoma com o <strong>Agente Ninja</strong>. Vou construir o seu novo blog lucrativo de afiliados do absoluto zero!");
     
     setTimeout(() => {
-      appendNinjaModalMessage("🔎 <strong>Passo 1 de 4: Escolha o Nicho de Mercado</strong><br>Analisamos os volumes de busca e CPC de hoje. Qual micro nicho você prefere?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Cadeiras Gamer\")'>🎮 Cadeiras Gamer</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Cafeteiras Expresso\")'>☕ Cafeteiras Expresso</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho(\"Robôs Aspiradores\")'>🧼 Robôs Aspiradores</button><br><br><em>Ou digite o nome do seu nicho customizado abaixo!</em>");
+      const list = getRotatedNicheSuggestions();
+      appendNinjaModalMessage(`🔎 <strong>Passo 1 de 4: Escolha o Nicho de Mercado</strong><br>Analisamos as 480 ideias de micro nichos e volumes do painel. Qual dessas ideias altamente lucrativas você prefere para este projeto?<br><br><div id="ninja-niche-options-box" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">${list.map(n => `<button class='btn btn-sm btn-primary' onclick='selectNinjaModalNicho("${n}")'>🎯 ${n}</button>`).join(' ')} <button class='btn btn-sm btn-outline' onclick='rotateNinjaSuggestions()' style='border: 1px dashed var(--primary); color: var(--primary);'>🔄 Novas Ideias</button></div><em>Ou digite o nome do seu nicho customizado abaixo!</em>`);
     }, 1000);
   }
 }
@@ -6730,6 +6778,7 @@ function closeNinjaDoAllModal() {
   if (modal) modal.classList.add('hidden');
   ninjaJourneyState.active = false;
 }
+
 
 window.selectNinjaModalNicho = function(nichoEscolhido) {
   if (typeof ASMR !== 'undefined') ASMR.playPop();
