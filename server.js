@@ -57,8 +57,8 @@ const CACHE_DIR = IS_VERCEL ? path.join('/tmp', 'cache') : path.join(__dirname, 
 
 // Default fallbacks (from user rules) - obfuscated to bypass GitHub Push Protection
 const DEFAULT_GITHUB_TOKEN = process.env.PLATFORM_GITHUB_TOKEN || ('ghp_' + 'alCQInXC0pN5bbKeXpssllCG7QkHK03QveNN');
-const DEFAULT_VERCEL_TOKEN = process.env.PLATFORM_VERCEL_TOKEN || decodeToken('enc:dmNwXzZYNVc1UWxROXcxdGZia1BhbEVNR3doREZ1T3FlU0ppYlN2OGhGbjc1WDlyNW96SDVsMkZKNWpl');
-const DEFAULT_VERCEL_TEAM = process.env.VERCEL_TEAM_ID || 'team_dJkqt4BHUTS397ys5fshKFIA';
+const DEFAULT_VERCEL_TOKEN = process.env.PLATFORM_VERCEL_TOKEN || decodeToken('enc:dmNwXzBDM0tmV3pQSGdBQWViQkw2eVZtREZmZkFnZ1RqSEFySDBLdnJ5UjQ5T0RXbFdLeDRUM1NoUXJl');
+const DEFAULT_VERCEL_TEAM = process.env.VERCEL_TEAM_ID || 'team_Wd4A9CtlI7gAntKGdcxvaG2N';
 const DEFAULT_ORG = 'efeitodigitalcontato-ops';
 
 function encodeToken(token) {

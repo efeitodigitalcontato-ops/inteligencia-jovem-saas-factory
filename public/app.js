@@ -7017,7 +7017,7 @@ document.addEventListener('submit', (e) => {
               description: `Blog autônomo sobre ${ninjaJourneyState.nicho} contendo reviews de afiliados.`,
               githubToken: State.credentials.githubToken || State.credentials.gitHubToken || localStorage.getItem('user_github_key') || '',
               vercelToken: State.credentials.vercelToken || localStorage.getItem('user_vercel_key') || '',
-              vercelTeamId: 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
+              vercelTeamId: State.credentials.vercelTeamId || localStorage.getItem('user_vercel_team') || 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
               userEmail: State.user ? State.user.email : null
             })
           });
