@@ -7130,9 +7130,11 @@ app.post('/api/multi-generator/start', async (req, res) => {
           }
 
           const text = await colabRes.text();
+          console.log(`[Fábrica Escala] Resposta bruta do Colab recebida (tamanho: ${text.length} chars)`);
           const lines = text.split('\n');
           let markdownContent = null;
           let postSlug = null;
+          let foundDone = false;
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
@@ -7141,10 +7143,17 @@ app.post('/api/multi-generator/start', async (req, res) => {
                 if (data.type === 'done_article') {
                   markdownContent = data.markdown;
                   postSlug = data.slug;
+                  foundDone = true;
                   break;
                 }
-              } catch (e) {}
+              } catch (e) {
+                console.error(`[Fábrica Escala] Erro de parsing na linha do stream:`, e.message, `Linha cortada: "${line.substring(0, 100)}..."`);
+              }
             }
+          }
+
+          if (!foundDone) {
+            console.warn(`[Fábrica Escala] Alerta: Não foi encontrado o payload 'done_article' no stream do Colab para "${title}"`);
           }
 
           if (markdownContent && postSlug) {
