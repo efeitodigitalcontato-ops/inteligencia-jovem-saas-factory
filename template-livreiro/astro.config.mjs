@@ -3,6 +3,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://inteligenciajovem.com.br',
+  site: 'https://o-livreiro.com',
   integrations: [sitemap()],
 });
