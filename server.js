@@ -1568,7 +1568,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         tokenLength: token ? token.length : 0,
         teamId: teamId
       });
-      console.log('Provisioning Vercel Project...');
+      console.log('Provisioning Vercel Project (Gitless mode)...');
       const createProjectRes = await apiRequest({
         hostname: 'api.vercel.com',
         port: 443,
@@ -1580,12 +1580,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         }
       }, {
         name: finalRepoName,
-        framework: 'astro',
-        gitRepository: {
-          type: 'github',
-          repo: finalOwnerRepo,
-          repoId: repoId
-        }
+        framework: 'astro'
       });
 
       let projectId = null;
@@ -1594,40 +1589,18 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         console.log(`Vercel Project created with ID: ${projectId}`);
       } else {
         console.log('Vercel project creation info:', createProjectRes.body);
-        
-        // Retentativa automática sem vincular o gitRepository (evita repo_no_access)
-        console.log('🔄 [Self-Heal] Tentando criar projeto na Vercel sem vínculo direto com repositório para contornar repo_no_access...');
-        const retryCreateProjectRes = await apiRequest({
+        // Try to fetch existing project if it conflicts
+        const getProjectRes = await apiRequest({
           hostname: 'api.vercel.com',
           port: 443,
-          path: `/v9/projects?teamId=${teamId}`,
-          method: 'POST',
+          path: `/v9/projects/${finalRepoName}?teamId=${teamId}`,
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Authorization': `Bearer ${token}`
           }
-        }, {
-          name: finalRepoName,
-          framework: 'astro'
         });
-        
-        if (retryCreateProjectRes.statusCode === 200 || retryCreateProjectRes.statusCode === 201) {
-          projectId = retryCreateProjectRes.body.id;
-          console.log(`[Self-Heal] Vercel Project created without Git integration. ID: ${projectId}`);
-        } else {
-          // Try to fetch existing project if it conflicts
-          const getProjectRes = await apiRequest({
-            hostname: 'api.vercel.com',
-            port: 443,
-            path: `/v9/projects/${finalRepoName}?teamId=${teamId}`,
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (getProjectRes.statusCode === 200) {
-            projectId = getProjectRes.body.id;
-          }
+        if (getProjectRes.statusCode === 200) {
+          projectId = getProjectRes.body.id;
         }
       }
 

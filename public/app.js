@@ -6987,9 +6987,23 @@ document.addEventListener('submit', (e) => {
       
       setTimeout(() => {
         // Validação de credenciais do usuário logado
-        const hasGithub = State.credentials.githubToken || localStorage.getItem('user_github_key');
-        const hasVercel = State.credentials.vercelToken || localStorage.getItem('user_vercel_key');
-        const hasPexels = State.credentials.pexelsApiKey || localStorage.getItem('user_pexels_key');
+        let localGit = localStorage.getItem('user_github_key') || '';
+        let localVercel = localStorage.getItem('user_vercel_key') || '';
+        let localPexels = localStorage.getItem('user_pexels_key') || '';
+        
+        // Limpar caso sejam valores obsoletos, vazios ou inválidos de fallbacks antigos
+        if (localGit && !localGit.startsWith('ghp_') && !localGit.startsWith('github_pat_')) {
+          localStorage.removeItem('user_github_key');
+          localGit = '';
+        }
+        if (localVercel && (localVercel.length < 20 || localVercel.includes('enc:'))) {
+          localStorage.removeItem('user_vercel_key');
+          localVercel = '';
+        }
+        
+        const hasGithub = State.credentials.githubToken || localGit;
+        const hasVercel = State.credentials.vercelToken || localVercel;
+        const hasPexels = State.credentials.pexelsApiKey || localPexels;
         
         if (!hasGithub || !hasVercel || !hasPexels) {
           ninjaJourneyState.step = 3.5; // Passo intermediário de credenciais
