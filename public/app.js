@@ -6800,8 +6800,20 @@ window.selectNinjaModalVolume = function(volumeEscolhido) {
   appendNinjaModalMessage(`Desejo gerar <strong>${volumeEscolhido} Artigos</strong>.`, true);
   
   setTimeout(() => {
-    // Código oficial da Máquina Infinita com escape correto das aspas e templates
-    const colabCode = `# ============================================================
+    appendNinjaModalMessage(`
+      🛒 <strong>Passo 3 de 5: Configurar Link de Afiliado (Amazon ou Mercado Livre)</strong><br>
+      Para que o blog comece a gerar comissões automáticas para você desde a primeira postagem:<br><br>
+      
+      <em>💡 Como funciona: Sempre que o robô escrever um review ou comparativo de produto, ele inserirá automaticamente botões de compra apontando para o seu link. Quando o leitor comprar, a comissão cai na sua conta!</em><br><br>
+      
+      <strong>Cole seu link de afiliado próprio abaixo e clique em Enviar!</strong>
+    `);
+  }, 1000);
+};
+
+window.showNinjaColabStep = function() {
+  // Código oficial da Máquina Infinita com escape correto das aspas e templates
+  const colabCode = `# ============================================================
 # ♾️ MÁQUINA INFINITA — T4 Free GPU (15GB VRAM)
 # Cloudflare Tunnel — sem conta, sem token, 100% grátis
 # ============================================================
@@ -6880,34 +6892,33 @@ print(f'MÁQUINA INFINITA PRONTA! URL: {public_url}')
 print('====================================')
 while True: time.sleep(60)`;
 
-    // Salvar o código em uma variável global acessível pela função
-    window.cachedColabCode = colabCode;
+  // Salvar o código em uma variável global acessível pela função
+  window.cachedColabCode = colabCode;
 
-    appendNinjaModalMessage(`
-      ⚙️ <strong>Passo 3 de 4: Conectar a Máquina Infinita (T4 GPU)</strong><br>
-      A forma mais simples de conectar sua GPU gratuita sem poluição visual:<br><br>
-      
-      <!-- Card Minimalista Premium -->
-      <div style="background: rgba(0, 0, 0, 0.3); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 1.8rem; line-height: 1;">🐍</span>
-          <div>
-            <strong style="font-size: 0.9rem; color: var(--text-main); display: block; margin-bottom: 2px;">maquina_infinita.py</strong>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Código Python Pronto e Validado</span>
-          </div>
+  appendNinjaModalMessage(`
+    ⚙️ <strong>Passo 4 de 5: Conectar a Máquina Infinita (T4 GPU)</strong><br>
+    A forma mais simples de conectar sua GPU gratuita sem poluição visual:<br><br>
+    
+    <!-- Card Minimalista Premium -->
+    <div style="background: rgba(0, 0, 0, 0.3); border: 1.5px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.8rem; line-height: 1;">🐍</span>
+        <div>
+          <strong style="font-size: 0.9rem; color: var(--text-main); display: block; margin-bottom: 2px;">maquina_infinita.py</strong>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Código Python Pronto e Validado</span>
         </div>
-        <button class="btn btn-sm btn-primary" onclick="copyColabCodeToClipboard()" style="padding: 8px 16px; font-weight: bold; font-size: 0.82rem; border-radius: 6px;">
-          📋 Copiar Código
-        </button>
       </div>
+      <button class="btn btn-sm btn-primary" onclick="copyColabCodeToClipboard()" style="padding: 8px 16px; font-weight: bold; font-size: 0.82rem; border-radius: 6px;">
+        📋 Copiar Código
+      </button>
+    </div>
 
-      1. Clique em <strong>Copiar Código</strong> acima.<br>
-      2. Abra o <a href="https://colab.research.google.com/#create=true" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Novo Google Colab aqui</a>.<br>
-      3. Cole na célula em branco (Ctrl+V), clique em <strong>Executar (Play)</strong> e aguarde gerar o link final do túnel (trycloudflare.com).<br><br>
-      
-      <strong>Cole o link do túnel gerado no campo abaixo e clique em Enviar!</strong>
-    `);
-  }, 1000);
+    1. Clique em <strong>Copiar Código</strong> acima.<br>
+    2. Abra o <a href="https://colab.research.google.com/#create=true" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Novo Google Colab aqui</a>.<br>
+    3. Cole na célula em branco (Ctrl+V), clique em <strong>Executar (Play)</strong> e aguarde gerar o link final do túnel (trycloudflare.com).<br><br>
+    
+    <strong>Cole o link do túnel gerado no campo abaixo e clique em Enviar!</strong>
+  `);
 };
 
 window.copyColabCodeToClipboard = function() {
@@ -6967,15 +6978,28 @@ document.addEventListener('submit', (e) => {
     if (ninjaJourneyState.step === 1) {
       selectNinjaModalNicho(userText);
     }
-    // Se colou o link do Colab no Passo 3
-    else if (ninjaJourneyState.step === 3 && userText.includes('trycloudflare.com')) {
-      ninjaJourneyState.colabTunnel = userText;
+    // Passo 3 (Afiliado): Recebendo o link digitado
+    else if (ninjaJourneyState.step === 3) {
+      const affiliateLink = userText;
+      ninjaJourneyState.affiliateLink = affiliateLink;
       ninjaJourneyState.step = 4;
+      
+      appendNinjaModalMessage(`Link configurado: <code>${affiliateLink}</code>`, true);
+      
+      setTimeout(() => {
+        // Agora exibe o passo do Google Colab (Passo 4 de 5)
+        window.showNinjaColabStep();
+      }, 1000);
+    }
+    // Passo 4 (Colab): Recebendo o túnel do Colab
+    else if (ninjaJourneyState.step === 4 && userText.includes('trycloudflare.com')) {
+      ninjaJourneyState.colabTunnel = userText;
+      ninjaJourneyState.step = 5;
       
       appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
       
       setTimeout(() => {
-        appendNinjaModalMessage("⚡ <strong>Passo 4 de 4: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background...");
+        appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background...");
         
         setTimeout(() => {
           const progressContainerId = `ninja-progress-${Date.now()}`;
@@ -6984,6 +7008,10 @@ document.addEventListener('submit', (e) => {
             🎉 <strong>Fábrica Autônoma Rodando!</strong><br>
             A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> está ativa.
             
+            <div style="background: rgba(45, 212, 191, 0.1); border: 1.5px solid #2dd4bf; border-radius: 8px; padding: 10px; margin-bottom: 12px; color: #99f6e4; font-size: 0.82rem;">
+              ✓ Link de Afiliado ativo: <code>${ninjaJourneyState.affiliateLink}</code> (Os artigos já estão sendo escritos com este redirecionamento).
+            </div>
+
             <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 8px; padding: 10px; margin: 12px 0; color: #fca5a5; font-size: 0.85rem; font-weight: 700;">
               ⚠️ IMPORTANTE: Não feche esta aba do navegador ou o Colab enquanto a geração estiver em andamento para não interromper a Máquina Infinita!
             </div>
@@ -7028,6 +7056,8 @@ document.addEventListener('submit', (e) => {
         }, 1500);
       }, 1000);
     }
+  }
+});
   }
 });
 
