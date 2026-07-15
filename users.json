@@ -3,7 +3,7 @@
     "name": "Randerson",
     "email": "rannet10@gmail.com",
     "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
-    "approved": false,
+    "approved": true,
     "createdAt": "2026-07-02T14:36:38.616Z",
     "sites": [],
     "geminiApiKey": ""
