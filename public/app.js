@@ -7005,7 +7005,7 @@ document.addEventListener('submit', (e) => {
         
         try {
           // 1. Criar o repositório GitHub e site na Vercel de verdade no backend
-          const siteRes = await fetch('/api/sites', {
+          const siteRes = await fetch('/api/generate', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json'
