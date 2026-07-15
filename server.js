@@ -995,11 +995,12 @@ app.post('/api/generate', checkAuth, async (req, res) => {
 
   const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
   let vToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
-  const vTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
+  let vTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
 
-  // Fallback seguro corporativo para a Fábrica Autônoma
-  if (!vToken || vToken.trim() === '') {
+  // Se o GitHub token usado for o corporativo de administrador, forçamos o Vercel token e Team corporativos também
+  if (gToken === DEFAULT_GITHUB_TOKEN) {
     vToken = DEFAULT_VERCEL_TOKEN;
+    vTeam = DEFAULT_VERCEL_TEAM;
   }
 
   if (!vToken || vToken.trim() === '') {
