@@ -1588,26 +1588,46 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         }
       });
 
-      console.log('Vercel project creation status:', createProjectRes.statusCode, 'body:', createProjectRes.body);
-
       let projectId = null;
       if (createProjectRes.statusCode === 200 || createProjectRes.statusCode === 201) {
         projectId = createProjectRes.body.id;
         console.log(`Vercel Project created with ID: ${projectId}`);
       } else {
         console.log('Vercel project creation info:', createProjectRes.body);
-        // Try to fetch existing project if it conflicts
-        const getProjectRes = await apiRequest({
+        
+        // Retentativa automática sem vincular o gitRepository (evita repo_no_access)
+        console.log('🔄 [Self-Heal] Tentando criar projeto na Vercel sem vínculo direto com repositório para contornar repo_no_access...');
+        const retryCreateProjectRes = await apiRequest({
           hostname: 'api.vercel.com',
           port: 443,
-          path: `/v9/projects/${finalRepoName}?teamId=${teamId}`,
-          method: 'GET',
+          path: `/v9/projects?teamId=${teamId}`,
+          method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
+        }, {
+          name: finalRepoName,
+          framework: 'astro'
         });
-        if (getProjectRes.statusCode === 200) {
-          projectId = getProjectRes.body.id;
+        
+        if (retryCreateProjectRes.statusCode === 200 || retryCreateProjectRes.statusCode === 201) {
+          projectId = retryCreateProjectRes.body.id;
+          console.log(`[Self-Heal] Vercel Project created without Git integration. ID: ${projectId}`);
+        } else {
+          // Try to fetch existing project if it conflicts
+          const getProjectRes = await apiRequest({
+            hostname: 'api.vercel.com',
+            port: 443,
+            path: `/v9/projects/${finalRepoName}?teamId=${teamId}`,
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (getProjectRes.statusCode === 200) {
+            projectId = getProjectRes.body.id;
+          }
         }
       }
 
@@ -1637,7 +1657,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
 
       // Trigger Vercel Deployment
       console.log('Triggering Vercel Deployment...');
-      const deployRes = await apiRequest({
+      let deployRes = await apiRequest({
         hostname: 'api.vercel.com',
         port: 443,
         path: `/v13/deployments?teamId=${teamId}`,
@@ -1655,6 +1675,29 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
           ref: 'main'
         }
       });
+
+      // Se falhar com erro de acesso ao repositório, retentamos via importação pública por caminho amigável (sem repoId)
+      if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
+        console.warn('Vercel deployment with repoId failed. Retrying with public repository path import...');
+        deployRes = await apiRequest({
+          hostname: 'api.vercel.com',
+          port: 443,
+          path: `/v13/deployments?teamId=${teamId}`,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }, {
+          name: finalRepoName,
+          target: 'production',
+          gitSource: {
+            type: 'github',
+            repo: finalOwnerRepo,
+            ref: 'main'
+          }
+        });
+      }
 
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
         return { success: false, errorStage: 'deployment', response: deployRes };
