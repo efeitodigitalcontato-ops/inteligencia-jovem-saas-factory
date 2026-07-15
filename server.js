@@ -7130,7 +7130,7 @@ app.post('/api/multi-generator/start', async (req, res) => {
           }
 
           const text = await colabRes.text();
-          console.log(`[Fábrica Escala] Resposta bruta do Colab recebida (tamanho: ${text.length} chars)`);
+          console.log(`[Fábrica Escala] Resposta bruta do Colab recebida (tamanho: ${text.length} chars). Começo: "${text.substring(0, 300).replace(/\n/g, ' ')}"`);
           
           let markdownContent = null;
           let postSlug = null;
