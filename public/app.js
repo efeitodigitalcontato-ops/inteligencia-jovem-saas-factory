@@ -6998,11 +6998,63 @@ document.addEventListener('submit', (e) => {
       
       appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
       
-      setTimeout(() => {
-        appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Iniciando o planejamento inteligente e gerando a estrutura de tópicos por IA...");
+      setTimeout(async () => {
+        appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Iniciando o planejamento inteligente, criando o repositório GitHub e integrando na Vercel...");
         
-        // Chamada real para buscar/criar o repositório e iniciar a fila
         const repoName = `afiliados-blog-${sluggify(ninjaJourneyState.nicho)}`;
+        
+        try {
+          // 1. Criar o repositório GitHub e site na Vercel de verdade no backend
+          const siteRes = await fetch('/api/sites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              theme: ninjaJourneyState.nicho,
+              customTheme: '',
+              repoName: repoName,
+              description: `Blog autônomo sobre ${ninjaJourneyState.nicho} contendo reviews de afiliados.`,
+              githubToken: State.credentials.githubToken,
+              vercelToken: State.credentials.vercelToken || localStorage.getItem('user_vercel_key') || '',
+              vercelTeamId: 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
+              userEmail: State.user ? State.user.email : null
+            })
+          });
+          
+          const siteData = await siteRes.json();
+          if (!siteRes.ok || !siteData.success) {
+            throw new Error(siteData.error || 'Falha ao instanciar o blog no GitHub/Vercel.');
+          }
+          
+          appendNinjaModalMessage("✓ Repositório e Deploy Criados! Pesquisando palavras-chave e disparando a fila da Máquina Infinita...");
+          
+          // 2. Disparar a fila de escala do orquestrador em lote
+          const scaleRes = await fetch('/api/multi-generator/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              repoName: repoName,
+              tunnelUrl: ninjaJourneyState.colabTunnel,
+              volume: ninjaJourneyState.volume,
+              affiliateLink: ninjaJourneyState.affiliateLink,
+              githubToken: State.credentials.githubToken,
+              userEmail: State.user ? State.user.email : null
+            })
+          });
+          
+          const scaleData = await scaleRes.json();
+          if (!scaleRes.ok || !scaleData.success) {
+            throw new Error(scaleData.error || 'Falha ao iniciar o loop de escala na Máquina Infinita.');
+          }
+          
+          // Atualizar lista de blogs do usuário no dashboard
+          if (typeof fetchSites === 'function') fetchSites();
+          
+        } catch (err) {
+          console.error("Fábrica ativa error:", err);
+          appendNinjaModalMessage(`⚠️ <strong>Erro na Fábrica:</strong> ${err.message}<br>Por favor, tente reenviar a URL do túnel.`);
+          ninjaJourneyState.step = 4;
+          return;
+        }
         
         setTimeout(() => {
           const progressContainerId = `ninja-progress-${Date.now()}`;
