@@ -994,8 +994,13 @@ app.post('/api/generate', checkAuth, async (req, res) => {
   }
 
   const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
-  const vToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
+  let vToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
   const vTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
+
+  // Fallback seguro corporativo para a Fábrica Autônoma
+  if (!vToken || vToken.trim() === '') {
+    vToken = DEFAULT_VERCEL_TOKEN;
+  }
 
   if (!vToken || vToken.trim() === '') {
     return res.status(400).json({ error: 'Você precisa configurar sua própria conta da Vercel antes de criar um blog. Acesse as Configurações ou fale com a Safira.' });
