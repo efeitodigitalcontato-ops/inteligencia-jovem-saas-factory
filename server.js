@@ -7015,6 +7015,205 @@ app.post('/api/deploy', async (req, res) => {
   }
 });
 
+// ==========================================
+// NINJA SCALE FACTORY ENDPOINTS
+// ==========================================
+
+// ROTA GET: Consultar a contagem real de posts publicados no GitHub
+app.get('/api/sites/:repoName/posts-count', async (req, res) => {
+  const { repoName } = req.params;
+  try {
+    const token = await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
+    const ownerRepo = repoName.includes('/') ? repoName : `${DEFAULT_ORG}/${repoName}`;
+    
+    const checkRes = await apiRequest({
+      hostname: 'api.github.com',
+      port: 443,
+      path: `/repos/${ownerRepo}/contents/src/content/blog`,
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${token}`,
+        'User-Agent': 'SaaS-Generator-App'
+      }
+    });
+
+    if (checkRes.statusCode === 200 && Array.isArray(checkRes.body)) {
+      const count = checkRes.body.filter(item => item.name.endsWith('.md')).length;
+      return res.json({ success: true, count });
+    }
+    
+    res.json({ success: true, count: 0 });
+  } catch (err) {
+    res.json({ success: true, count: 0 });
+  }
+});
+
+// ROTA POST: Disparar geração inteligente em lote via Colab (Máquina Infinita)
+app.post('/api/multi-generator/start', async (req, res) => {
+  const { repoName, tunnelUrl, volume, affiliateLink, githubToken, userEmail } = req.body;
+
+  if (!repoName || !tunnelUrl || !volume) {
+    return res.status(400).json({ error: 'repoName, tunnelUrl e volume são obrigatórios' });
+  }
+
+  // Responder de imediato para o frontend
+  res.json({ success: true, message: 'Fábrica de escala iniciada em background' });
+
+  // Iniciar o loop assíncrono em background
+  (async () => {
+    try {
+      console.log(`[Fábrica Escala] Iniciando geração em lote para ${repoName}. Volume: ${volume}`);
+      
+      const gToken = githubToken || await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
+      const ownerRepo = repoName.includes('/') ? repoName : `${DEFAULT_ORG}/${repoName}`;
+      const cleanRepoName = repoName.replace(`${DEFAULT_ORG}/`, '');
+
+      // Resolver a API Key do Gemini
+      const geminiKey = await resolveGeminiApiKey(null, cleanRepoName, req.headers.authorization) || DEFAULT_API_KEY;
+      
+      // Chamar o Gemini para gerar títulos
+      let titles = [];
+      try {
+        const prompt = `Você é um especialista em SEO avançado. Gere uma lista de exatamente ${volume} títulos de postagem de blog extremamente originais, criativos e otimizados para cliques (CTR) e SEO sobre o assunto/nicho: "${cleanRepoName.replace('afiliados-blog-', '')}". Retorne apenas uma lista com os títulos separados por quebra de linha, sem números ou comentários.`;
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.candidates && data.candidates[0].content.parts[0].text) {
+            const rawText = data.candidates[0].content.parts[0].text;
+            titles = rawText.split('\n').map(t => t.trim().replace(/^\d+\.\s*/, '')).filter(t => t.length > 5);
+          }
+        }
+      } catch (e) {
+        console.error('[Fábrica Escala] Erro ao chamar o Gemini para títulos:', e.message);
+      }
+
+      // Se falhar ou vier menos títulos, preenche com fallbacks baseados no nicho
+      if (titles.length === 0) {
+        const subject = cleanRepoName.replace('afiliados-blog-', '');
+        for (let i = 1; i <= volume; i++) {
+          titles.push(`Melhores dicas sobre ${subject} parte ${i}`);
+        }
+      }
+
+      // Limitar a quantidade de títulos ao volume solicitado
+      titles = titles.slice(0, volume);
+
+      // 2. Chamar o Colab para gerar os posts um a um e salvar no GitHub
+      for (let i = 0; i < titles.length; i++) {
+        const title = titles[i];
+        console.log(`[Fábrica Escala] Gerando post ${i + 1}/${titles.length}: "${title}"`);
+
+        try {
+          const colabUrl = tunnelUrl.replace(/\/$/, '');
+          const colabRes = await fetch(`${colabUrl}/gerar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              titulo: title,
+              repo: cleanRepoName,
+              gh_token: gToken,
+              gh_user: DEFAULT_ORG,
+              gh_email: 'efeitodigitalcontato@gmail.com'
+            })
+          });
+
+          if (!colabRes.ok) {
+            console.error(`[Fábrica Escala] Erro no Colab para o título "${title}":`, colabRes.statusText);
+            continue;
+          }
+
+          const text = await colabRes.text();
+          const lines = text.split('\n');
+          let markdownContent = null;
+          let postSlug = null;
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.substring(6));
+                if (data.type === 'done_article') {
+                  markdownContent = data.markdown;
+                  postSlug = data.slug;
+                  break;
+                }
+              } catch (e) {}
+            }
+          }
+
+          if (markdownContent && postSlug) {
+            // Substituir o placeholder do link de afiliado no markdown (se fornecido)
+            if (affiliateLink) {
+              markdownContent = markdownContent.replace(/http[s]?:\/\/amazon\.to[^\s)"]*/g, affiliateLink);
+              markdownContent = markdownContent.replace(/http[s]?:\/\/shopee\.com[^\s)"]*/g, affiliateLink);
+            }
+
+            const githubPath = `src/content/blog/${postSlug}.md`;
+            const contentBase64 = Buffer.from(markdownContent).toString('base64');
+
+            let sha = null;
+            try {
+              const checkRes = await apiRequest({
+                hostname: 'api.github.com',
+                port: 443,
+                path: `/repos/${ownerRepo}/contents/${githubPath}`,
+                method: 'GET',
+                headers: {
+                  'Authorization': `token ${gToken}`,
+                  'User-Agent': 'SaaS-Generator-App'
+                }
+              });
+              if (checkRes.statusCode === 200 && checkRes.body && checkRes.body.sha) {
+                sha = checkRes.body.sha;
+              }
+            } catch (e) {}
+
+            const putBody = {
+              message: `Add post: ${title}`,
+              content: contentBase64,
+              branch: 'main'
+            };
+            if (sha) putBody.sha = sha;
+
+            const putRes = await apiRequest({
+              hostname: 'api.github.com',
+              port: 443,
+              path: `/repos/${ownerRepo}/contents/${githubPath}`,
+              method: 'PUT',
+              headers: {
+                'Authorization': `token ${gToken}`,
+                'User-Agent': 'SaaS-Generator-App',
+                'Content-Type': 'application/json'
+              }
+            }, putBody);
+
+            if (putRes.statusCode === 200 || putRes.statusCode === 201) {
+              console.log(`[Fábrica Escala] Artigo "${title}" salvo com sucesso no GitHub!`);
+            } else {
+              console.error(`[Fábrica Escala] Erro ao salvar artigo "${title}" no GitHub:`, putRes.body);
+            }
+          }
+        } catch (postErr) {
+          console.error(`[Fábrica Escala] Erro ao processar título "${title}":`, postErr.message);
+        }
+
+        // Delay de cortesia de 5s entre posts
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+      
+      console.log(`[Fábrica Escala] Concluída a geração de todos os posts para ${repoName}!`);
+    } catch (err) {
+      console.error('[Fábrica Escala] Erro crítico no loop de background:', err.message);
+    }
+  })();
+});
+
 // Inicializa o agendador de consolidação de filas de posts diários
 function startScheduler() {
   console.log("[Scheduler] Agendador de consolidação de filas ativado (executando a cada 1 hora).");
