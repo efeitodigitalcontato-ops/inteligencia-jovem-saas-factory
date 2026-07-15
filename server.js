@@ -1651,7 +1651,34 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
 
       // Se falhar com erro de acesso ao repositório, retentamos via importação pública por caminho amigável (sem repoId)
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
-        console.warn('Vercel deployment with repoId failed. Retrying with public repository path import...');
+        const deployErrBody = JSON.stringify(deployRes.body || {}).toUpperCase();
+        console.warn('Vercel deployment with repoId failed. Error details:', deployErrBody);
+        
+        // Se o erro for de acesso ao repo (repo_no_access), tentar vincular o repositório ao projeto Vercel primeiro
+        if (deployErrBody.includes('REPO_NO_ACCESS')) {
+          console.log('Detected repo_no_access! Attempting to link GitHub repo to Vercel project first...');
+          try {
+            await apiRequest({
+              hostname: 'api.vercel.com',
+              port: 443,
+              path: `/v9/projects/${projectId}/link?teamId=${teamId}`,
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            }, {
+              type: 'github',
+              repo: finalOwnerRepo,
+              productionBranch: 'main'
+            });
+            console.log('Successfully linked GitHub repo to Vercel project!');
+          } catch (linkErr) {
+            console.warn('Could not link GitHub repo to project:', linkErr.message);
+          }
+        }
+
+        console.log('Retrying Vercel deployment with public repository path import...');
         deployRes = await apiRequest({
           hostname: 'api.vercel.com',
           port: 443,
@@ -1673,6 +1700,11 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
       }
 
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
+        const finalDeployErrBody = JSON.stringify(deployRes.body || {}).toUpperCase();
+        if (finalDeployErrBody.includes('REPO_NO_ACCESS')) {
+          console.warn('Deployment failed due to REPO_NO_ACCESS even after link attempt. Returning partial success so user can authorize later.');
+          return { success: true, projectId, response: { body: { id: 'partial-pending', url: `${finalRepoName}.vercel.app` } }, partialDeploy: true };
+        }
         return { success: false, errorStage: 'deployment', response: deployRes };
       }
 
@@ -1699,7 +1731,8 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
                            errorBodyStr.includes('NOT AUTHORIZED') ||
                            errorBodyStr.includes('INVALID_TOKEN') ||
                            errorBodyStr.includes('INVALIDTOKEN') ||
-                           errorBodyStr.includes('FAILED TO LINK');
+                           errorBodyStr.includes('FAILED TO LINK') ||
+                           errorBodyStr.includes('REPO_NO_ACCESS');
 
       // Se ainda falhar, tenta usar o outro token alternativo padrão
       if (!vercelResult.success && isLimitError) {

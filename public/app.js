@@ -7012,6 +7012,12 @@ document.addEventListener('submit', (e) => {
             🔑 <strong>Configuração de Credenciais da sua Conta</strong><br>
             Para que os blogs com imagens sejam criados no seu GitHub e Vercel sem erros de permissão, preencha as chaves abaixo:<br><br>
             
+            <div style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid #ef4444; border-radius: 8px; padding: 10px; margin-bottom: 12px; color: #fca5a5; font-size: 0.8rem; font-weight: 700; line-height: 1.45;">
+              ⚠️ OBRIGATÓRIO: Instale a integração oficial da Vercel no seu GitHub acessando: 
+              <a href="https://github.com/apps/vercel" target="_blank" style="color: #60a5fa; text-decoration: underline; font-weight: bold;">github.com/apps/vercel</a>. 
+              Sem essa permissão, a Vercel não poderá ler seu repositório de blogs (Erro repo_no_access).
+            </div>
+
             <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;">
               <div>
                 <label style="display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: var(--text-main);">
