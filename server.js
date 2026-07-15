@@ -7131,29 +7131,43 @@ app.post('/api/multi-generator/start', async (req, res) => {
 
           const text = await colabRes.text();
           console.log(`[Fábrica Escala] Resposta bruta do Colab recebida (tamanho: ${text.length} chars)`);
-          const lines = text.split('\n');
+          
           let markdownContent = null;
           let postSlug = null;
           let foundDone = false;
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.substring(6));
-                if (data.type === 'done_article') {
-                  markdownContent = data.markdown;
-                  postSlug = data.slug;
-                  foundDone = true;
-                  break;
-                }
-              } catch (e) {
-                console.error(`[Fábrica Escala] Erro de parsing na linha do stream:`, e.message, `Linha cortada: "${line.substring(0, 100)}..."`);
-              }
+          // Buscar o objeto JSON done_article no stream completo via Regex (robusto contra chunks e quebras de linha)
+          const match = text.match(/data:\s*(\{"type"\s*:\s*"done_article"[\s\S]*?\})(?=\r?\n\r?\n|\r?\n*$|$)/);
+          if (match && match[1]) {
+            try {
+              const data = JSON.parse(match[1]);
+              markdownContent = data.markdown;
+              postSlug = data.slug;
+              foundDone = true;
+              console.log(`[Fábrica Escala] Sucesso: Payload 'done_article' extraído e parseado via Regex para o slug: "${postSlug}"`);
+            } catch (e) {
+              console.error(`[Fábrica Escala] Erro de parsing no JSON capturado via Regex:`, e.message);
+              console.error(`[Fábrica Escala] JSON que falhou:`, match[1].substring(0, 500) + '...');
             }
           }
 
           if (!foundDone) {
-            console.warn(`[Fábrica Escala] Alerta: Não foi encontrado o payload 'done_article' no stream do Colab para "${title}"`);
+            console.warn(`[Fábrica Escala] Alerta: Não foi encontrado o payload 'done_article' via Regex. Tentando fallback por linha para "${title}"...`);
+            const lines = text.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.substring(6));
+                  if (data.type === 'done_article') {
+                    markdownContent = data.markdown;
+                    postSlug = data.slug;
+                    foundDone = true;
+                    console.log(`[Fábrica Escala] Fallback: Payload 'done_article' resolvido via parser por linha para o slug: "${postSlug}"`);
+                    break;
+                  }
+                } catch (e) {}
+              }
+            }
           }
 
           if (markdownContent && postSlug) {
