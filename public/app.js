@@ -7058,8 +7058,6 @@ document.addEventListener('submit', (e) => {
     }
   }
 });
-  }
-});
 
 
 
