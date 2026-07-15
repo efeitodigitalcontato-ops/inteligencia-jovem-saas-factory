@@ -1685,30 +1685,111 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
                            errorBodyStr.includes('INVALIDTOKEN') ||
                            errorBodyStr.includes('FAILED TO LINK');
 
-      if (isLimitError) {
-        // Switch to the fallback account depending on which one we initially used
-        let nextToken = ALT_VERCEL_TOKEN_1;
-        let nextTeam = ALT_VERCEL_TEAM_1;
+      if (!vercelResult.success) {
+        console.warn(`Vercel deployment failed during stage "${vercelResult.errorStage}" with status ${vercelResult.response.statusCode}.`);
+        const errorBodyStr = JSON.stringify(vercelResult.response.body || {}).toUpperCase();
         
-        if (currentVToken === ALT_VERCEL_TOKEN_1) {
-          nextToken = ALT_VERCEL_TOKEN_2;
-          nextTeam = ALT_VERCEL_TEAM_2;
+        // Se for erro de acesso ao repositório (repo_no_access) e o usuário usou credenciais customizadas
+        const isRepoAccessError = errorBodyStr.includes('REPO_NO_ACCESS') || errorBodyStr.includes('ACCESS');
+        
+        if (isRepoAccessError && gToken !== DEFAULT_GITHUB_TOKEN) {
+          console.log('🔄 [Self-Heal] Erro repo_no_access detectado! Tentando recuperar criando na Org do Administrador...');
+          
+          // 1. Recria o repositório na Org corporativa com o token do admin
+          let adminRepoName = `${finalRepoName}-admin`;
+          let adminOwnerRepo = `${DEFAULT_ORG}/${adminRepoName}`;
+          
+          console.log(`[Self-Heal] Criando repositório corporativo: ${adminOwnerRepo}`);
+          const adminRepoRes = await apiRequest({
+            hostname: 'api.github.com',
+            port: 443,
+            path: `/orgs/${DEFAULT_ORG}/repos`,
+            method: 'POST',
+            headers: {
+              'Authorization': `token ${DEFAULT_GITHUB_TOKEN}`,
+              'User-Agent': 'SaaS-Generator-App',
+              'Content-Type': 'application/json'
+            }
+          }, {
+            name: adminRepoName,
+            description: `Blog Admin: ${theme}. Recuperado automaticamente por falha de integracao Git.`,
+            private: false
+          });
+          
+          if (adminRepoRes.statusCode === 201 && adminRepoRes.body && adminRepoRes.body.id) {
+            let adminRepoId = adminRepoRes.body.id;
+            console.log(`[Self-Heal] Repositório corporativo criado com sucesso! ID: ${adminRepoId}`);
+            
+            // 2. Git push para o novo repositório
+            const tempDirAdmin = path.join(os.tmpdir(), `builder-admin-${Date.now()}`);
+            copyFolderSync(path.join(__dirname, (theme.toLowerCase().trim() === 'multicategorias' || theme.toLowerCase().trim() === 'analisamelhor') ? 'template-multicategorias' : 'template-produtos'), tempDirAdmin);
+            
+            await git.init({ fs, dir: tempDirAdmin, defaultBranch: 'main' });
+            async function addAllFilesAdmin(currentDir, baseDir = '') {
+              const files = fs.readdirSync(currentDir);
+              for (const file of files) {
+                const fullPath = path.join(currentDir, file);
+                const relativePath = path.join(baseDir, file).replace(/\\/g, '/');
+                if (file === '.git' || file === 'node_modules' || file === '.vercel' || file === '.astro' || file.startsWith('.env')) continue;
+                if (fs.lstatSync(fullPath).isDirectory()) {
+                  await addAllFilesAdmin(fullPath, relativePath);
+                } else {
+                  await git.add({ fs, dir: tempDirAdmin, filepath: relativePath });
+                }
+              }
+            }
+            await addAllFilesAdmin(tempDirAdmin);
+            await git.commit({
+              fs,
+              dir: tempDirAdmin,
+              author: { name: 'SaaS Builder Admin', email: 'builder@saas.com' },
+              message: `Initial commit of admin fallback blog`
+            });
+            await git.push({
+              fs,
+              http: gitHttp,
+              dir: tempDirAdmin,
+              url: `https://github.com/${adminOwnerRepo}.git`,
+              onAuth: () => ({ username: DEFAULT_GITHUB_TOKEN }),
+              force: true,
+              ref: 'main'
+            });
+            
+            console.log('[Self-Heal] Código enviado para repositório do administrador. Retentando fluxo Vercel com chaves do admin...');
+            
+            // Sobrescrever variáveis locais para a retentativa usar as credenciais do admin
+            finalRepoName = adminRepoName;
+            finalOwnerRepo = adminOwnerRepo;
+            repoId = adminRepoId;
+            currentVToken = DEFAULT_VERCEL_TOKEN;
+            currentVTeam = DEFAULT_VERCEL_TEAM;
+            
+            // Re-executa o deploy da Vercel
+            vercelResult = await executeVercelFlow(currentVToken, currentVTeam);
+          }
         }
         
-        console.log(`Limit or quota restriction detected on current Vercel token! Retrying flow with alternative Vercel account...`);
-        currentVToken = nextToken;
-        currentVTeam = nextTeam;
-        
-        vercelResult = await executeVercelFlow(currentVToken, currentVTeam);
+        // Se ainda falhar, tenta usar o outro token alternativo padrão
+        if (!vercelResult.success && isLimitError) {
+          let nextToken = ALT_VERCEL_TOKEN_1;
+          let nextTeam = ALT_VERCEL_TEAM_1;
+          if (currentVToken === ALT_VERCEL_TOKEN_1) {
+            nextToken = ALT_VERCEL_TOKEN_2;
+            nextTeam = ALT_VERCEL_TEAM_2;
+          }
+          console.log(`Limit or quota restriction detected on current Vercel token! Retrying flow with alternative Vercel account...`);
+          currentVToken = nextToken;
+          currentVTeam = nextTeam;
+          vercelResult = await executeVercelFlow(currentVToken, currentVTeam);
+        }
       }
-    }
-
-    if (!vercelResult.success) {
-      return res.status(400).json({ 
-        error: vercelResult.errorStage === 'project_creation' ? 'Não foi possível configurar o projeto na Vercel' : 'Erro ao iniciar build na Vercel', 
-        details: vercelResult.response.body 
-      });
-    }
+  
+      if (!vercelResult.success) {
+        return res.status(400).json({ 
+          error: vercelResult.errorStage === 'project_creation' ? 'Não foi possível configurar o projeto na Vercel' : 'Erro ao iniciar build na Vercel', 
+          details: vercelResult.response.body 
+        });
+      }
 
     let deployUrl = `https://${finalRepoName}.vercel.app`;
     if (vercelResult.response && vercelResult.response.body) {
