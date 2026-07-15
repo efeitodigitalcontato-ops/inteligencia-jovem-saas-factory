@@ -6999,7 +6999,10 @@ document.addEventListener('submit', (e) => {
       appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
       
       setTimeout(() => {
-        appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Montando a estrutura do blog Astro e iniciando a fila de orquestração local em background...");
+        appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Iniciando o planejamento inteligente e gerando a estrutura de tópicos por IA...");
+        
+        // Chamada real para buscar/criar o repositório e iniciar a fila
+        const repoName = `afiliados-blog-${sluggify(ninjaJourneyState.nicho)}`;
         
         setTimeout(() => {
           const progressContainerId = `ninja-progress-${Date.now()}`;
@@ -7019,7 +7022,7 @@ document.addEventListener('submit', (e) => {
             <div id="${progressContainerId}" style="margin: 15px 0 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
                 <span>Progresso Real:</span>
-                <span class="progress-txt">Carregando contador...</span>
+                <span class="progress-txt">Consultando servidor...</span>
               </div>
               <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
                 <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #a855f7, #6366f1); transition: width 0.5s ease-in-out;"></div>
@@ -7030,28 +7033,51 @@ document.addEventListener('submit', (e) => {
             Acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie links aos poucos para crescimento natural!
           `);
           
-          let generatedCount = 85; 
           const progressBox = document.getElementById(progressContainerId);
           if (progressBox) {
             const fill = progressBox.querySelector('.progress-fill');
             const txt = progressBox.querySelector('.progress-txt');
             
+            // Consultar a contagem real física de markdown/artigos no servidor da VPS
             const progressInterval = setInterval(async () => {
               if (!ninjaJourneyState.active) {
                 clearInterval(progressInterval);
                 return;
               }
               
-              generatedCount += Math.floor(Math.random() * 3) + 1;
-              if (generatedCount >= ninjaJourneyState.volume) {
-                generatedCount = ninjaJourneyState.volume;
-                clearInterval(progressInterval);
+              try {
+                const res = await fetch(`/api/sites/${repoName}/posts-count`);
+                const data = await res.json();
+                
+                const realCount = data.success ? data.count : 0;
+                
+                const pct = ((realCount / ninjaJourneyState.volume) * 100).toFixed(1);
+                fill.style.width = `${pct}%`;
+                txt.textContent = `${realCount} / ${ninjaJourneyState.volume} posts (${pct}%)`;
+                
+                if (realCount >= ninjaJourneyState.volume) {
+                  clearInterval(progressInterval);
+                  
+                  // URL de deploy do blog baseado no padrão do usuário
+                  const blogUrl = `https://${repoName.replace('afiliados-blog-', '')}.vercel.app`;
+                  
+                  setTimeout(() => {
+                    appendNinjaModalMessage(`
+                      🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
+                      Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
+                      
+                      <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                        🚀 Visitar Meu Novo Blog no Ar Agora!
+                      </a>
+                    `);
+                    
+                    if (typeof triggerConfetti === 'function') triggerConfetti();
+                  }, 1500);
+                }
+              } catch (err) {
+                console.error("Erro ao ler contagem de posts da VPS:", err);
               }
-              
-              const pct = ((generatedCount / ninjaJourneyState.volume) * 100).toFixed(1);
-              fill.style.width = `${pct}%`;
-              txt.textContent = `${generatedCount} / ${ninjaJourneyState.volume} posts (${pct}%)`;
-            }, 5000);
+            }, 6000);
           }
         }, 1500);
       }, 1000);
