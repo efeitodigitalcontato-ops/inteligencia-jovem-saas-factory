@@ -7007,7 +7007,10 @@ document.addEventListener('submit', (e) => {
           // 1. Criar o repositório GitHub e site na Vercel de verdade no backend
           const siteRes = await fetch('/api/sites', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+            },
             body: JSON.stringify({
               theme: ninjaJourneyState.nicho,
               customTheme: '',
@@ -7030,7 +7033,10 @@ document.addEventListener('submit', (e) => {
           // 2. Disparar a fila de escala do orquestrador em lote
           const scaleRes = await fetch('/api/multi-generator/start', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+            },
             body: JSON.stringify({
               repoName: repoName,
               tunnelUrl: ninjaJourneyState.colabTunnel,
