@@ -7068,7 +7068,7 @@ document.addEventListener('submit', (e) => {
       setTimeout(async () => {
         appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Iniciando o planejamento inteligente, criando o repositório GitHub e integrando na Vercel...");
         
-        const repoName = `afiliados-blog-${sluggify(ninjaJourneyState.nicho)}`;
+        let repoName = `afiliados-blog-${sluggify(ninjaJourneyState.nicho)}`;
         
         try {
           // 1. Criar o repositório GitHub e site na Vercel de verdade no backend
@@ -7099,7 +7099,9 @@ document.addEventListener('submit', (e) => {
             throw new Error(siteData.error || 'Falha ao instanciar o blog no GitHub/Vercel.');
           }
           
-          const finalRepoName = siteData.repoName || repoName;
+          if (siteData.repoName) {
+            repoName = siteData.repoName;
+          }
           
           appendNinjaModalMessage("✓ Repositório e Deploy Criados! Pesquisando palavras-chave e disparando a fila da Máquina Infinita...");
           
@@ -7110,7 +7112,7 @@ document.addEventListener('submit', (e) => {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              repoName: finalRepoName,
+              repoName: repoName,
               tunnelUrl: ninjaJourneyState.colabTunnel,
               volume: ninjaJourneyState.volume,
               affiliateLink: ninjaJourneyState.affiliateLink,
@@ -7132,95 +7134,83 @@ document.addEventListener('submit', (e) => {
           // Atualizar lista de blogs do usuário no dashboard
           if (typeof fetchSites === 'function') fetchSites();
           
-          setTimeout(() => {
-            const progressContainerId = `ninja-progress-${Date.now()}`;
-            
-            appendNinjaModalMessage(`
-              🎉 <strong>Fábrica Autônoma Rodando!</strong><br>
-              A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> está ativa.
-              
-              <div style="background: rgba(45, 212, 191, 0.1); border: 1.5px solid #2dd4bf; border-radius: 8px; padding: 10px; margin-bottom: 12px; color: #99f6e4; font-size: 0.82rem;">
-                ✓ Link de Afiliado ativo: <code>${ninjaJourneyState.affiliateLink}</code> (Os artigos já estão sendo escritos com este redirecionamento).
-              </div>
-  
-              <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 8px; padding: 10px; margin: 12px 0; color: #fca5a5; font-size: 0.85rem; font-weight: 700;">
-                ⚠️ IMPORTANTE: Não feche esta aba do navegador ou o Colab enquanto a geração estiver em andamento para não interromper a Máquina Infinita!
-              </div>
-  
-              <div id="${progressContainerId}" style="margin: 15px 0 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
-                  <span>Progresso Real:</span>
-                  <span class="progress-txt">Consultando servidor...</span>
-                </div>
-                <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
-                  <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #a855f7, #6366f1); transition: width 0.5s ease-in-out;"></div>
-                </div>
-              </div>
-  
-              🎯 <strong>Dica de SEO do Larry Page:</strong><br>
-              Acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie links aos poucos para crescimento natural!
-            `);
-            
-            const progressBox = document.getElementById(progressContainerId);
-            if (progressBox) {
-              const fill = progressBox.querySelector('.progress-fill');
-              const txt = progressBox.querySelector('.progress-txt');
-              
-              // Consultar a contagem real física de markdown/artigos no servidor da VPS
-              const progressInterval = setInterval(async () => {
-                if (!ninjaJourneyState.active) {
-                  clearInterval(progressInterval);
-                  return;
-                }
-                
-                try {
-                  const res = await fetch(`/api/sites/${finalRepoName}/posts-count`);
-                  if (!res.ok) {
-                    fill.style.width = `0%`;
-                    txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
-                    return;
-                  }
-                  
-                  const data = await res.json();
-                  const realCount = data.success ? data.count : 0;
-                  
-                  const pct = ((realCount / ninjaJourneyState.volume) * 100).toFixed(1);
-                  fill.style.width = `${pct}%`;
-                  txt.textContent = `${realCount} / ${ninjaJourneyState.volume} posts (${pct}%)`;
-                  
-                  if (realCount >= ninjaJourneyState.volume) {
-                    clearInterval(progressInterval);
-                    
-                    const blogUrl = `https://${finalRepoName.replace('afiliados-blog-', '')}.vercel.app`;
-                    
-                    setTimeout(() => {
-                      appendNinjaModalMessage(`
-                        🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
-                        Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
-                        
-                        <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
-                          🚀 Visitar Meu Novo Blog no Ar Agora!
-                        </a>
-                      `);
-                      
-                      if (typeof triggerConfetti === 'function') triggerConfetti();
-                    }, 1500);
-                  }
-                } catch (err) {
-                  console.error("Erro ao ler contagem de posts da VPS:", err);
-                  fill.style.width = `0%`;
-                  txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
-                }
-              }, 4000);
-            }
-          }, 1000);
-          
         } catch (err) {
           console.error("Fábrica ativa error:", err);
           appendNinjaModalMessage(`⚠️ <strong>Erro na Fábrica:</strong> ${err.message}<br>Por favor, tente reenviar a URL do túnel.`);
           ninjaJourneyState.step = 4;
           return;
         }
+        
+        setTimeout(() => {
+          const progressContainerId = `ninja-progress-${Date.now()}`;
+          
+          appendNinjaModalMessage(`
+            🎉 <strong>Fábrica Autônoma Rodando!</strong><br>
+            A geração contínua de <strong>${ninjaJourneyState.volume} posts</strong> sobre <strong>${ninjaJourneyState.nicho}</strong> está ativa.
+            
+            <div style="background: rgba(45, 212, 191, 0.1); border: 1.5px solid #2dd4bf; border-radius: 8px; padding: 10px; margin-bottom: 12px; color: #99f6e4; font-size: 0.82rem;">
+              ✓ Link de Afiliado ativo: <code>${ninjaJourneyState.affiliateLink}</code> (Os artigos já estão sendo escritos com este redirecionamento).
+            </div>
+
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1.5px solid #ef4444; border-radius: 8px; padding: 10px; margin: 12px 0; color: #fca5a5; font-size: 0.85rem; font-weight: 700;">
+              ⚠️ IMPORTANTE: Não feche esta aba do navegador ou o Colab enquanto a geração estiver em andamento para não interromper a Máquina Infinita!
+            </div>
+
+            <div id="${progressContainerId}" style="margin: 15px 0 10px 0; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
+                <span>Progresso Real:</span>
+                <span class="progress-txt">Consultando servidor...</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+                <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #a855f7, #6366f1); transition: width 0.5s ease-in-out;"></div>
+              </div>
+            </div>
+
+            🎯 <strong>Dica de SEO do Larry Page:</strong><br>
+            Acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie links aos poucos para crescimento natural!
+          `);
+          
+          const progressBox = document.getElementById(progressContainerId);
+          if (progressBox) {
+            const fill = progressBox.querySelector('.progress-fill');
+            const txt = progressBox.querySelector('.progress-txt');
+            
+            // Consultar a contagem real física de markdown/artigos no servidor da VPS
+            const progressInterval = setInterval(async () => {
+              if (!ninjaJourneyState.active) {
+                clearInterval(progressInterval);
+                return;
+              }
+              
+              try {
+                const res = await fetch(`/api/sites/${repoName}/posts-count`);
+                if (!res.ok) {
+                  // Se o site ainda não foi montado fisicamente na pasta, exibe 0 posts sem quebrar
+                  fill.style.width = `0%`;
+                  txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
+                  return;
+                }
+                
+                const data = await res.json();
+                const realCount = data.success ? data.count : 0;
+                
+                const pct = ((realCount / ninjaJourneyState.volume) * 100).toFixed(1);
+                fill.style.width = `${pct}%`;
+                txt.textContent = `${realCount} / ${ninjaJourneyState.volume} posts (${pct}%)`;
+                
+                if (realCount >= ninjaJourneyState.volume) {
+                  clearInterval(progressInterval);
+                  
+                  const blogUrl = `https://${repoName.replace('afiliados-blog-', '')}.vercel.app`;
+                  
+                  setTimeout(() => {
+                    appendNinjaModalMessage(`
+                      🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
+                      Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
+                      
+                      <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                        🚀 Visitar Meu Novo Blog no Ar Agora!
+                      </a>
                     `);
                     
                     if (typeof triggerConfetti === 'function') triggerConfetti();
