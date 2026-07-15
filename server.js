@@ -9,7 +9,7 @@ const https = require('https');
 const http = require('http');
 const git = require('isomorphic-git');
 const gitHttp = require('isomorphic-git/http/node');
-const sharp = require('sharp');
+// const sharp = require('sharp'); // Removed global import to prevent startup crashes if sharp native dependency fails to load
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -6037,10 +6037,16 @@ No comecinho do texto, adicione uma linha curta assim para me ajudar a extrair a
               const imgRes = await fetch(imageUrl);
               const arrayBuffer = await imgRes.arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
-              await sharp(buffer)
-                .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 80 })
-                .toFile(imgPath);
+              try {
+                const sharp = require('sharp');
+                await sharp(buffer)
+                  .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
+                  .jpeg({ quality: 80 })
+                  .toFile(imgPath);
+              } catch (sharpErr) {
+                console.warn('Sharp module failed to load/resize image, falling back to writing original file:', sharpErr.message);
+                fs.writeFileSync(imgPath, buffer);
+              }
               localImageName = `images/posts/${imgName}`;
               finalHeroImage = `/${localImageName}`;
               logFn('success', `✅ [Pexels] Imagem configurada: ${finalHeroImage}`);
@@ -6308,10 +6314,16 @@ app.post('/api/update-article-image', checkAuth, async (req, res) => {
     const imgRes = await fetch(imageUrl);
     const arrayBuffer = await imgRes.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    await sharp(buffer)
-      .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 80 })
-      .toFile(tempImgPath);
+    try {
+      const sharp = require('sharp');
+      await sharp(buffer)
+        .resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 80 })
+        .toFile(tempImgPath);
+    } catch (sharpErr) {
+      console.warn('Sharp module failed to load/resize image, falling back to writing original file:', sharpErr.message);
+      fs.writeFileSync(tempImgPath, buffer);
+    }
 
     if (isLocal) {
       const publicImagesDir = path.join(blogPath, 'public', 'images', 'posts');
