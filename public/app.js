@@ -6993,29 +6993,39 @@ document.addEventListener('submit', (e) => {
         
         if (!hasGithub || !hasVercel || !hasPexels) {
           ninjaJourneyState.step = 3.5; // Passo intermediário de credenciais
+          
           appendNinjaModalMessage(`
-            🔑 <strong>Configuração de Credenciais Pessoais</strong><br>
-            Preciso que você adicione as chaves da sua própria conta para que os blogs sejam criados diretamente sob o seu perfil pessoal no GitHub e na Vercel com imagens reais do Pexels, evitando qualquer erro de acesso!<br><br>
+            🔑 <strong>Configuração de Credenciais da sua Conta</strong><br>
+            Para que os blogs com imagens sejam criados no seu GitHub e Vercel sem erros de permissão, preencha as chaves abaixo:<br><br>
             
-            ${!hasGithub ? `
-              <strong>1. Token do GitHub:</strong><br>
-              • <a href="https://github.com/settings/tokens/new?description=GeradorNinja&scopes=repo,workflow" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar o token GitHub</a>.<br>
-              • Dica: Dê autorização para <strong>repo</strong> e <strong>workflow</strong>, crie o token, copie-o e cole aqui abaixo!
-            ` : ''}
-            
-            ${!hasVercel ? `
-              <br><strong>2. Token da Vercel:</strong><br>
-              • <a href="https://vercel.com/account/tokens" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar o token Vercel</a>.<br>
-              • Dica: Crie com escopo <strong>Global</strong>, copie-o e cole aqui abaixo!
-            ` : ''}
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: var(--text-main);">
+                  1. Token do GitHub (<a href="https://github.com/settings/tokens/new?description=GeradorNinja&scopes=repo,workflow" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar Token</a>)
+                </label>
+                <input type="password" id="modal-field-github" placeholder="ghp_..." value="${hasGithub || ''}" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-size: 0.85rem;">
+              </div>
+              
+              <div>
+                <label style="display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: var(--text-main);">
+                  2. Token da Vercel (<a href="https://vercel.com/account/tokens" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar Token</a>)
+                </label>
+                <input type="password" id="modal-field-vercel" placeholder="Cole o token Vercel" value="${hasVercel || ''}" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-size: 0.85rem;">
+              </div>
 
-            ${!hasPexels ? `
-              <br><strong>3. API Key do Pexels (Imagens dos Artigos):</strong><br>
-              • <a href="https://www.pexels.com/api/new/" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar a chave no Pexels</a>.<br>
-              • Dica: Faça login rápido, solicite uma API Key de Desenvolvedor gratuita, copie e cole abaixo!
-            ` : ''}
+              <div>
+                <label style="display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: var(--text-main);">
+                  3. API Key do Pexels (<a href="https://www.pexels.com/api/new/" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar Chave</a>)
+                </label>
+                <input type="password" id="modal-field-pexels" placeholder="Cole a chave Pexels" value="${hasPexels || ''}" style="width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-size: 0.85rem;">
+              </div>
+
+              <button type="button" class="btn btn-sm btn-primary" onclick="window.saveModalOnboardingCredentials()" style="width: 100%; font-weight: bold; padding: 10px; border-radius: 6px; background: linear-gradient(135deg, var(--primary), #4f46e5); border: none;">
+                💾 Salvar Chaves e Continuar
+              </button>
+            </div>
             
-            <br><em>Cole o token solicitado no campo de texto abaixo e envie!</em>
+            <em>Preencha as chaves nos campos acima e clique no botão para continuar!</em>
           `);
         } else {
           ninjaJourneyState.step = 4;
@@ -7023,23 +7033,34 @@ document.addEventListener('submit', (e) => {
         }
       }, 1000);
     }
-    // Recebendo credenciais pendentes no passo 3.5
+    // Lógica antiga do passo 3.5 removida e isolada em função global no window
     else if (ninjaJourneyState.step === 3.5) {
-      const tokenDigitado = userText;
+      appendNinjaModalMessage("⚠️ Por favor, use o formulário de chaves acima para preencher e clique no botão para salvar!");
+    }
+
+    // Função de persistência das credenciais do onboarding
+    window.saveModalOnboardingCredentials = function() {
+      if (typeof ASMR !== 'undefined') ASMR.playPop();
       
-      if (tokenDigitado.startsWith('ghp_') || tokenDigitado.startsWith('github_pat_')) {
-        State.credentials.githubToken = tokenDigitado;
-        localStorage.setItem('user_github_key', tokenDigitado);
-        appendNinjaModalMessage("✓ Token do GitHub salvo com sucesso localmente!", false);
-      } else if (tokenDigitado.length > 40) { // Tokens da Vercel geralmente são mais longos
-        State.credentials.vercelToken = tokenDigitado;
-        localStorage.setItem('user_vercel_key', tokenDigitado);
-        appendNinjaModalMessage("✓ Token da Vercel salvo com sucesso localmente!", false);
-      } else { // Chave de API do Pexels ou outra menor
-        State.credentials.pexelsApiKey = tokenDigitado;
-        localStorage.setItem('user_pexels_key', tokenDigitado);
-        appendNinjaModalMessage("✓ Chave da API do Pexels salva com sucesso localmente!", false);
+      const githubVal = document.getElementById('modal-field-github').value.trim();
+      const vercelVal = document.getElementById('modal-field-vercel').value.trim();
+      const pexelsVal = document.getElementById('modal-field-pexels').value.trim();
+      
+      if (!githubVal || !vercelVal || !pexelsVal) {
+        alert('Por favor, preencha todas as chaves (GitHub, Vercel e Pexels) para prosseguir!');
+        return;
       }
+      
+      // Salvar no local e memória do State
+      State.credentials.githubToken = githubVal;
+      State.credentials.vercelToken = vercelVal;
+      State.credentials.pexelsApiKey = pexelsVal;
+      
+      localStorage.setItem('user_github_key', githubVal);
+      localStorage.setItem('user_vercel_key', vercelVal);
+      localStorage.setItem('user_pexels_key', pexelsVal);
+      
+      appendNinjaModalMessage("Credenciais salvas: <code>GitHub Token</code>, <code>Vercel Token</code> e <code>Chave Pexels</code> configurados com sucesso!", true);
       
       // Salvar credenciais no Supabase em background se o usuário estiver logado
       if (State.user && State.user.email) {
@@ -7050,34 +7071,20 @@ document.addEventListener('submit', (e) => {
             'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
           },
           body: JSON.stringify({
-            githubToken: State.credentials.githubToken || '',
-            vercelToken: State.credentials.vercelToken || '',
+            githubToken: githubVal,
+            vercelToken: vercelVal,
             vercelTeamId: State.credentials.vercelTeamId || 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
             geminiApiKey: State.credentials.geminiApiKey || '',
-            pexelsApiKey: State.credentials.pexelsApiKey || ''
+            pexelsApiKey: pexelsVal
           })
         }).catch(err => console.error("Error saving creds to DB:", err));
       }
       
-      // Validar novamente se alguma chave ainda está faltando
       setTimeout(() => {
-        const hasGithub = State.credentials.githubToken || localStorage.getItem('user_github_key');
-        const hasVercel = State.credentials.vercelToken || localStorage.getItem('user_vercel_key');
-        const hasPexels = State.credentials.pexelsApiKey || localStorage.getItem('user_pexels_key');
-        
-        if (!hasGithub || !hasVercel || !hasPexels) {
-          appendNinjaModalMessage(`
-            Falta configurar mais credenciais! Cole a restante abaixo:<br><br>
-            ${!hasGithub ? `• <strong>Token do GitHub restante</strong> (<a href="https://github.com/settings/tokens/new?description=GeradorNinja&scopes=repo,workflow" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
-            ${!hasVercel ? `• <strong>Token da Vercel restante</strong> (<a href="https://vercel.com/account/tokens" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
-            ${!hasPexels ? `• <strong>Chave do Pexels restante</strong> (<a href="https://www.pexels.com/api/new/" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
-          `);
-        } else {
-          ninjaJourneyState.step = 4;
-          window.showNinjaColabStep();
-        }
+        ninjaJourneyState.step = 4;
+        window.showNinjaColabStep();
       }, 1500);
-    }
+    };
     // Passo 4 (Colab): Recebendo o túnel do Colab
     else if (ninjaJourneyState.step === 4 && userText.includes('trycloudflare.com')) {
       ninjaJourneyState.colabTunnel = userText;
