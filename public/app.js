@@ -7047,8 +7047,14 @@ document.addEventListener('submit', (e) => {
               
               try {
                 const res = await fetch(`/api/sites/${repoName}/posts-count`);
-                const data = await res.json();
+                if (!res.ok) {
+                  // Se o site ainda não foi montado fisicamente na pasta, exibe 0 posts sem quebrar
+                  fill.style.width = `0%`;
+                  txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
+                  return;
+                }
                 
+                const data = await res.json();
                 const realCount = data.success ? data.count : 0;
                 
                 const pct = ((realCount / ninjaJourneyState.volume) * 100).toFixed(1);
@@ -7058,7 +7064,6 @@ document.addEventListener('submit', (e) => {
                 if (realCount >= ninjaJourneyState.volume) {
                   clearInterval(progressInterval);
                   
-                  // URL de deploy do blog baseado no padrão do usuário
                   const blogUrl = `https://${repoName.replace('afiliados-blog-', '')}.vercel.app`;
                   
                   setTimeout(() => {
@@ -7076,6 +7081,9 @@ document.addEventListener('submit', (e) => {
                 }
               } catch (err) {
                 console.error("Erro ao ler contagem de posts da VPS:", err);
+                // Fallback seguro em caso de rede ou atraso do deploy
+                fill.style.width = `0%`;
+                txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
               }
             }, 6000);
           }
