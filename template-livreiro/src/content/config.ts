@@ -9,7 +9,7 @@ const blog = defineCollection({
 		updatedDate: z.coerce.date().optional(),
 		heroImage: z.string().optional(),
 		category: z.string().optional(),
-		author: z.string().default('Equipe Melhores Colchões'),
+		author: z.string().default('Equipe O-Livreiro'),
 	}),
 });
 
