@@ -1031,42 +1031,11 @@ app.post('/api/generate', checkAuth, async (req, res) => {
       .slice(0, 150)
       .trim();
 
-    let createRepoRes = { statusCode: 400 };
     let repoId = null;
     let finalOwnerRepo = `${DEFAULT_ORG}/${finalRepoName}`;
 
-    // Só tenta criar na Org corporativa se o token do GitHub for o padrão do administrador
-    if (gToken === DEFAULT_GITHUB_TOKEN) {
-      console.log('Using admin token, creating repository in corporate org...');
-      createRepoRes = await apiRequest({
-        hostname: 'api.github.com',
-        port: 443,
-        path: `/orgs/${DEFAULT_ORG}/repos`,
-        method: 'POST',
-        headers: {
-          'Authorization': `token ${gToken}`,
-          'User-Agent': 'SaaS-Generator-App',
-          'Content-Type': 'application/json'
-        }
-      }, {
-        name: finalRepoName,
-        description: `Blog: ${theme}. ${githubSafeDescription}`,
-        private: false,
-        has_issues: true,
-        has_projects: true,
-        has_wiki: true
-      });
-
-      if (createRepoRes.statusCode === 201 && createRepoRes.body && createRepoRes.body.id) {
-        repoId = createRepoRes.body.id;
-        finalOwnerRepo = createRepoRes.body.full_name;
-        console.log(`Repository created in org! ID: ${repoId}, Full Name: ${finalOwnerRepo}`);
-      }
-    }
-
-    if (!repoId) {
-      // Try as user repo if org fails or if using user personal token
-      console.log('Creating repository in user personal account...');
+    // Criar sempre na conta pessoal associada ao token para evitar bloqueios de Org (repo_no_access)
+    console.log('Creating repository in user personal account...');
       let createPersonalRes = await apiRequest({
         hostname: 'api.github.com',
         port: 443,
@@ -1128,7 +1097,7 @@ app.post('/api/generate', checkAuth, async (req, res) => {
         repoInfoRes = await apiRequest({
           hostname: 'api.github.com',
           port: 443,
-          path: `/repos/${DEFAULT_ORG}/${finalRepoName}`,
+          path: `/repos/${finalOwnerRepo}`,
           method: 'GET',
           headers: {
             'Authorization': `token ${gToken}`,
