@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://inteligenciajovem.com.br/sitemap-index.xml

@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sobre Nós | O Livreiro" description="Conheça a história e proposta editorial do blog literário O Livreiro, nosso espaço de paixão por livros, resenhas e educação.">
+  <div class="about-page">
+    <h1 class="page-title">Sobre O Livreiro</h1>
+    
+    <div class="about-content">
+      <p class="lead-text">Seja muito bem-vindo ao <strong>O Livreiro</strong>! Este é o nosso espaço digital dedicado aos livros, resenhas literárias, cultura e educação. Nascemos com a proposta de ser mais do que um blog: queremos ser a sua livraria de bairro favorita na internet.</p>
+
+      <h2>Nossa Proposta</h2>
+      <p>Acreditamos que a leitura não deve ser vista como uma tarefa árdua ou elitista. Por isso, construímos análises e resenhas com uma voz calorosa, culta mas inteiramente acessível e com um toque levemente informal. Nosso tom é o de uma conversa amigável entre pessoas que genuinamente amam a literatura e querem indicar o próximo livro ideal.</p>
+
+      <h2>O Que Você Encontra Aqui?</h2>
+      <ul>
+        <li><strong>Resenhas Sinceras:</strong> Análises completas, honestas e sempre com um resumo sem spoilers logo no início para você saber se a obra é o que procura.</li>
+        <li><strong>Guias de Leitura e Dicas:</strong> Compilações temáticas, dicas para estruturar clubes de leitura e orientações para ajudar estudantes e educadores.</li>
+        <li><strong>Cultura Editorial:</strong> Novidades sobre o mercado de livros, entrevistas, adaptações para o cinema e prêmios literários.</li>
+        <li><strong>Espaço de Discussão:</strong> Acreditamos em comunidades ativas. A caixa de comentários de cada postagem e nossa newsletter são abertas a todos os leitores.</li>
+      </ul>
+
+      <h2>Nossos Valores</h2>
+      <p>Buscamos fomentar o hábito da leitura, conectar a literatura ao desenvolvimento educacional e oferecer curadoria atenta. Seja você um leitor ávido devorando um livro por semana, um estudante buscando material de apoio, ou alguém querendo iniciar a jornada literária — há sempre um lugar para você ao redor de nossa estante.</p>
+
+      <blockquote class="about-quote">
+        "O livro é uma extensão da memória e da imaginação." — Jorge Luis Borges
+      </blockquote>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .about-page {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  @media (min-width: 768px) {
+    .about-page {
+      padding: 3rem;
+    }
+  }
+
+  .page-title {
+    font-size: 2.25rem;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    font-family: var(--font-serif);
+  }
+
+  .about-content {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .lead-text {
+    font-size: 1.15rem;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+    font-family: var(--font-serif);
+  }
+
+  .about-content h2 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-serif);
+  }
+
+  .about-content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .about-content ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .about-content li {
+    margin-bottom: 0.5rem;
+  }
+
+  .about-quote {
+    font-family: var(--font-serif);
+    font-style: italic;
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1.5rem;
+    margin: 2.5rem 0 1rem 0;
+    color: var(--text-main);
+    font-size: 1.15rem;
+  }
+</style>

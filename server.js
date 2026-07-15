@@ -1134,7 +1134,7 @@ app.post('/api/generate', checkAuth, async (req, res) => {
     const themeLower = theme.toLowerCase().trim();
     const templateFolder = (themeLower === 'multicategorias' || themeLower === 'analisamelhor') 
       ? 'template-multicategorias' 
-      : (themeLower === 'inteligencia' ? 'template-inteligencia' : 'template-produtos');
+      : (themeLower === 'inteligencia' ? 'template-inteligencia' : (themeLower === 'livreiro' ? 'template-livreiro' : 'template-produtos'));
     const templateDir = path.join(__dirname, templateFolder);
 
     console.log(`Copying template from ${templateDir} to temp folder ${tempDir}...`);

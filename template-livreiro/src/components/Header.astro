@@ -1,0 +1,168 @@
+---
+---
+
+<header class="site-header">
+  <div class="header-container">
+    <a href="/" class="logo-area" title="O Livreiro">
+      <div class="logo-icon">
+        <!-- Ícone elegante de Livro Aberto -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21C12 21 8.5 17.5 3 17.5V4.5C8.5 4.5 12 8 12 8M12 21C12 21 15.5 17.5 21 17.5V4.5C15.5 4.5 12 8 12 8M12 8V21" stroke="var(--primary-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">O Livreiro</span>
+        <span class="logo-subtitle">literatura e cultura</span>
+      </div>
+    </a>
+    
+    <nav class="main-nav" aria-label="Menu principal">
+      <ul class="nav-list">
+        <li><a href="/" class="nav-link active">Início</a></li>
+        <li><a href="/?category=resenhas" class="nav-link">Resenhas</a></li>
+        <li><a href="/?category=cultura" class="nav-link">Cultura</a></li>
+        <li><a href="/?category=educacao" class="nav-link">Educação</a></li>
+        <li><a href="/?category=colunas" class="nav-link">Colunas/Ensaios</a></li>
+        <li><a href="/sobre" class="nav-link">Sobre</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-cta-box">
+      <a href="#newsletter" class="btn header-newsletter-btn">Newsletter</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none !important;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background-color: #f5f0e6;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    transition: transform 0.3s ease;
+  }
+
+  .logo-area:hover .logo-icon {
+    transform: rotate(-3deg) scale(1.05);
+  }
+
+  .logo-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-family: var(--font-serif);
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--text-main);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .logo-subtitle {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Menu Principal */
+  .main-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-list {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none !important;
+    padding: 0.5rem 0.25rem;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    color: var(--primary-color);
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0.25rem;
+    right: 0.25rem;
+    height: 2px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+  }
+
+  .header-newsletter-btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+  }
+
+  @media (max-width: 991px) {
+    .main-nav {
+      display: none; /* Em mobile, simplificamos ou colapsamos */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: row;
+      align-items: center;
+      padding: 1rem;
+    }
+    .header-cta-box {
+      display: none;
+    }
+  }
+</style>

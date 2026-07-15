@@ -1,0 +1,604 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await getCollection('blog');
+  // Ordenar por data de publicação (mais recentes primeiro)
+  const sortedPosts = posts.sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+  return paginate(sortedPosts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+const isFirstPage = page.currentPage === 1;
+---
+
+<Layout title={`O Livreiro - Página ${page.currentPage}`} description="Seu espaço acolhedor de resenhas literárias, guias de leitura, dicas de educação e discussões apaixonadas sobre livros de todos os gêneros.">
+  <div class="home-container">
+    {isFirstPage && (
+      <>
+        <!-- 1. Hero Section (Estilo Wander) -->
+        <section class="wander-hero">
+          <div class="hero-bg-overlay"></div>
+          <div class="hero-content">
+            <h1 class="hero-main-title">O LIVREIRO</h1>
+            <p class="hero-subtitle">Descubra, compreenda e apaixone-se por grandes histórias. Sua próxima leitura ideal está aqui.</p>
+            <div class="hero-actions">
+              <a href="#destinos" class="hero-btn primary">Explorar Resenhas</a>
+              <a href="/sobre" class="hero-btn secondary">Sobre o Projeto</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Features Grid Section (Estilo Wander) -->
+        <section class="wander-features">
+          <div class="features-left">
+            <h2 class="features-main-title">Por que milhares de leitores acompanham as resenhas do O Livreiro</h2>
+            <p class="features-desc">Oferecemos curadoria atenta e independente. Guiamos você pelas páginas dos clássicos e dos novos lançamentos sem jargões acadêmicos ou elitismo literário.</p>
+            
+            <div class="stats-row">
+              <div class="stat-card">
+                <span class="stat-value">12k</span>
+                <span class="stat-label">Leitores fiéis</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">10 Anos</span>
+                <span class="stat-label">De análises honestas</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">500+</span>
+                <span class="stat-label">Livros lidos e resenhados</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="features-right">
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              </div>
+              <div class="pillar-text">
+                <h4>Opinião Autoral</h4>
+                <p>Curadoria humana sincera, com resenhas completas escritas por quem ama literatura.</p>
+              </div>
+            </div>
+
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+              </div>
+              <div class="pillar-text">
+                <h4>Comunidade de Leitores</h4>
+                <p>Espaço acolhedor para discussões saudáveis nas seções de comentários e newsletter.</p>
+              </div>
+            </div>
+
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" /></svg>
+              </div>
+              <div class="pillar-text">
+                <h4>Apoio Educacional</h4>
+                <p>Guias de leitura, resumos estruturados e recursos didáticos para professores e alunos.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    <!-- 3. Cards Grid Section (Estilo "Top Destinations" de Wander) -->
+    <section class="wander-posts-section" id="destinos">
+      <div class="section-header">
+        <h2 class="section-title">Resenhas em Destaque</h2>
+        <p class="section-subtitle">Dos grandes clássicos às últimas novidades do mercado, explore nossas análises mais recentes.</p>
+      </div>
+
+      {page.data.length > 0 ? (
+        <div class="posts-layout">
+          <div class="wander-posts-grid">
+            {page.data.map(post => (
+              <article class="wander-post-card">
+                <div class="card-img-box">
+                  <img src={post.data.heroImage || '/favicon.svg'} alt={post.data.title} loading="lazy" width="280" height="380" decoding="async" />
+                  <div class="card-overlay-gradient"></div>
+                  <div class="card-overlay-content">
+                    <span class="card-category">{post.data.category || 'literatura'}</span>
+                    <h3 class="card-title">
+                      <a href={`/${post.slug}`}>{post.data.title}</a>
+                    </h3>
+                    <div class="card-meta">
+                      <span>Por {post.data.author || 'O Livreiro'}</span>
+                      <span class="meta-separator">&bull;</span>
+                      <span>
+                        {new Date(post.data.pubDate).toLocaleDateString('pt-BR', {
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <!-- Controles de Paginação -->
+          {(page.url.prev || page.url.next) && (
+            <nav class="pagination-nav" aria-label="Navegação de páginas">
+              {page.url.prev ? (
+                <a href={page.url.prev} class="pagination-btn prev-btn">&larr; Anterior</a>
+              ) : (
+                <span class="pagination-btn disabled">&larr; Anterior</span>
+              )}
+              
+              <span class="pagination-indicator">
+                Página <strong>{page.currentPage}</strong> de <strong>{page.lastPage}</strong>
+              </span>
+              
+              {page.url.next ? (
+                <a href={page.url.next} class="pagination-btn next-btn">Próximo &rarr;</a>
+              ) : (
+                <span class="pagination-btn disabled">Próximo &rarr;</span>
+              )}
+            </nav>
+          )}
+        </div>
+      ) : (
+        <div class="no-posts">
+          <p>Nenhum artigo encontrado.</p>
+          <a href="/" class="btn">Voltar para a Home</a>
+        </div>
+      )}
+    </section>
+
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        if (category) {
+          // Ocultar seções extras da home
+          const hero = document.querySelector('.wander-hero');
+          if (hero) hero.style.display = 'none';
+          const features = document.querySelector('.wander-features');
+          if (features) features.style.display = 'none';
+
+          // Filtrar grid de posts
+          const cards = document.querySelectorAll('.wander-post-card');
+          let visibleCount = 0;
+          cards.forEach(card => {
+            const catBadge = card.querySelector('.card-category');
+            if (catBadge) {
+              const postCat = catBadge.textContent.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              const targetCat = category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              if (postCat === targetCat || postCat.includes(targetCat)) {
+                card.style.display = 'block';
+                visibleCount++;
+              } else {
+                card.style.display = 'none';
+              }
+            }
+          });
+
+          if (visibleCount === 0) {
+            const grid = document.querySelector('.wander-posts-grid');
+            if (grid) {
+              const noMsg = document.createElement('div');
+              noMsg.className = 'no-posts';
+              noMsg.innerHTML = `<p>Nenhum artigo encontrado na categoria "${category}".</p><a href="/" class="btn">Limpar Filtro</a>`;
+              grid.parentNode.insertBefore(noMsg, grid);
+              grid.style.display = 'none';
+              const pag = document.querySelector('.pagination-nav');
+              if (pag) pag.style.display = 'none';
+            }
+          }
+
+          // Marcar link ativo no Header
+          const navLinks = document.querySelectorAll('.nav-link');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(`category=${category}`)) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    </script>
+  </div>
+</Layout>
+
+<style>
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+
+  /* ── Wander Hero ── */
+  .wander-hero {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    background-image: url('https://images.pexels.com/photos/159711/books-bookcase-library-read-159711.jpeg?auto=compress&cs=tinysrgb&w=1200');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+  }
+
+  .hero-bg-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(45, 36, 33, 0.4) 0%, rgba(45, 36, 33, 0.75) 100%);
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 700px;
+    padding: 0 1.5rem;
+    color: #ffffff;
+  }
+
+  .hero-main-title {
+    font-family: var(--font-serif);
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: #f5f0e6;
+    font-weight: 400;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+  }
+
+  .hero-btn.primary {
+    background-color: #ffffff;
+    color: var(--text-main) !important;
+  }
+  .hero-btn.primary:hover {
+    background-color: #f5f0e6;
+    transform: translateY(-2px);
+  }
+
+  .hero-btn.secondary {
+    background-color: transparent;
+    color: #ffffff !important;
+    border: 1.5px solid #ffffff;
+  }
+  .hero-btn.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* ── Wander Features Grid ── */
+  .wander-features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  @media (min-width: 992px) {
+    .wander-features {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+
+  .features-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .features-main-title {
+    font-family: var(--font-serif);
+    font-size: 1.85rem;
+    color: var(--text-main);
+    line-height: 1.35;
+  }
+
+  .features-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-color);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .features-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .pillar-card {
+    background-color: #faf8f5;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    transition: transform 0.2s ease;
+  }
+  .pillar-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .pillar-icon {
+    width: 48px;
+    height: 48px;
+    background-color: #f5f0e6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--primary-color);
+  }
+  .pillar-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .pillar-text h4 {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    color: var(--text-main);
+    margin-bottom: 0.15rem;
+  }
+
+  .pillar-text p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ── Wander Cards Grid (Top Destinations) ── */
+  .wander-posts-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .section-header {
+    max-width: 600px;
+  }
+
+  .section-header h2 {
+    font-family: var(--font-serif);
+    font-size: 1.85rem;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .posts-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .wander-posts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 576px) {
+    .wander-posts-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 992px) {
+    .wander-posts-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .wander-post-card {
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-subtle);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .wander-post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .wander-post-card .card-img-box {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    overflow: hidden;
+  }
+
+  .wander-post-card .card-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .wander-post-card:hover .card-img-box img {
+    transform: scale(1.05);
+  }
+
+  .card-overlay-gradient {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(45, 36, 33, 0.1) 0%, rgba(45, 36, 33, 0.5) 60%, rgba(45, 36, 33, 0.9) 100%);
+    z-index: 1;
+  }
+
+  .card-overlay-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1.5rem;
+    z-index: 2;
+    color: #ffffff;
+  }
+
+  .card-category {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    color: #ffffff;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+
+  .card-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title a {
+    color: #ffffff !important;
+    text-decoration: none !important;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: #e0dcd5;
+  }
+
+  .meta-separator {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Paginação */
+  .pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+  }
+
+  .pagination-btn:hover:not(.disabled) {
+    color: #ffffff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .pagination-btn.disabled {
+    color: var(--text-muted);
+    background-color: #f1f5f9;
+    border-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .pagination-indicator {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .no-posts {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    padding: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+</style>

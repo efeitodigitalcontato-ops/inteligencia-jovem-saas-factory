@@ -1,0 +1,13 @@
+{
+  "theme": "Inteligência Jovem",
+  "categories": [
+    { "value": "colchoes", "label": "Colchões" },
+    { "value": "dicas", "label": "Dicas" },
+    { "value": "camas", "label": "Camas" }
+  ],
+  "images": [
+    { "value": "/recommended-emma.jpg", "label": "Colchão Emma (Destaque)" },
+    { "value": "/recommended-castor.jpg", "label": "Colchão Castor (Destaque)" },
+    { "value": "/recommended-luiza.jpg", "label": "Colchão Luiza (Destaque)" }
+  ]
+}

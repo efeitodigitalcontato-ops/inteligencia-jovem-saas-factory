@@ -5,8 +5,19 @@
     "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
     "approved": true,
     "createdAt": "2026-07-02T14:36:38.616Z",
-    "sites": [],
-    "geminiApiKey": ""
+    "sites": [
+      {
+        "repoName": "afiliados-blog-olivreiro",
+        "repoUrl": "https://github.com/rannet10-ux/afiliados-blog-olivreiro",
+        "deployUrl": "https://o-livreiro.com",
+        "theme": "O Livreiro"
+      }
+    ],
+    "geminiApiKey": "enc:QVEuQWI4Uk42Smd3S2x0bV9KZEV6cDV3RnhjeUtfSFlnV1JERzVCVEtqNEhhMmJ1cGtjMGc=",
+    "vercelToken": "enc:dmNwXzZ1SFo0QlRmSThrcG5WTzE4dGFVMWl0c3pJbklQS3dSRTRBelpQU2hhZXE5WmQxSkExM0N4NU5t",
+    "githubToken": "rev:UXVjMFoybkFRaVhzOXVHZVpobWdGaU5oRmQxYkJTQ2VBcFhZX3BoZw==",
+    "vercelTeamId": "team_Wd4A9CtlI7gAntKGdcxvaG2N",
+    "twoFactorEnabled": true
   },
   {
     "name": "Randerson",

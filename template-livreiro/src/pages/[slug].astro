@@ -1,0 +1,199 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout title={`${post.data.title} | O Livreiro`} description={post.data.description} preloadImage={post.data.heroImage}>
+  <article class="blog-post">
+    <!-- Categoria -->
+    {post.data.category && (
+      <span class="post-cat-badge">{post.data.category}</span>
+    )}
+    
+    <!-- Título Principal -->
+    <h1 class="post-main-title">{post.data.title}</h1>
+    
+    <!-- Meta Dados -->
+    <div class="post-meta-row">
+      <span class="meta-item author-name">Por {post.data.author || 'Redação O Livreiro'}</span>
+      <span class="meta-divider">&bull;</span>
+      <span class="meta-item publish-date">
+        Publicado em {new Date(post.data.pubDate).toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        })}
+      </span>
+    </div>
+
+    <!-- Imagem de Destaque -->
+    {post.data.heroImage && (
+      <div class="post-hero-image">
+        <img src={post.data.heroImage} alt={post.data.title} width="800" height="450" fetchpriority="high" loading="eager" decoding="async" />
+      </div>
+    )}
+
+    <!-- Introdução / Corpo Superior do Markdown -->
+    <div class="blog-post-content animate-html" id="blog-content">
+      <Content />
+    </div>
+
+    <hr class="post-divider" />
+
+    <!-- Área de Discussão / Comentários dos Leitores (Simulado) -->
+    <div class="comments-section">
+      <h3 class="comments-title">Comentários (0)</h3>
+      <p class="comments-hint">Seja o primeiro a compartilhar sua opinião sobre este texto! Deixe seu comentário abaixo.</p>
+      <form class="comment-form" onsubmit="event.preventDefault(); alert('Seu comentário foi enviado para aprovação da moderação.'); this.reset();">
+        <div class="form-row">
+          <input type="text" placeholder="Seu nome..." required class="comment-input" />
+          <input type="email" placeholder="Seu e-mail..." required class="comment-input" />
+        </div>
+        <textarea placeholder="Participe da conversa..." required class="comment-textarea" rows="4"></textarea>
+        <button type="submit" class="btn comment-submit-btn">Enviar Comentário</button>
+      </form>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .blog-post {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  @media (min-width: 768px) {
+    .blog-post {
+      padding: 3rem;
+    }
+  }
+
+  .post-cat-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: #f5f0e6;
+    color: var(--primary-color);
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  .post-main-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.25;
+    margin-bottom: 1rem;
+    font-family: var(--font-serif);
+  }
+
+  .post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .post-hero-image {
+    width: 100%;
+    margin-bottom: 2rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .post-hero-image img {
+    width: 100%;
+    height: auto;
+    max-height: 450px;
+    object-fit: cover;
+  }
+
+  .blog-post-content {
+    margin-bottom: 2.5rem;
+  }
+
+  .post-divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 2.5rem 0;
+  }
+
+  /* Comentários */
+  .comments-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .comments-title {
+    font-family: var(--font-serif);
+    font-size: 1.35rem;
+    color: var(--text-main);
+  }
+
+  .comments-hint {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 576px) {
+    .form-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .comment-input, .comment-textarea {
+    background-color: #fdfbf7;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .comment-input:focus, .comment-textarea:focus {
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(63, 98, 18, 0.1);
+  }
+
+  .comment-submit-btn {
+    align-self: flex-start;
+    border-radius: 6px !important;
+  }
+</style>

@@ -1,0 +1,205 @@
+---
+import { getCollection } from 'astro:content';
+
+let posts = [];
+try {
+  posts = await getCollection('blog');
+} catch (e) {
+  // Caso a coleção ainda não esteja pronta ou vazia
+}
+
+const recentPosts = posts
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime())
+  .slice(0, 7);
+
+const categories = [
+  { name: 'Ficção', slug: 'ficcao' },
+  { name: 'Não-ficção', slug: 'nao-ficcao' },
+  { name: 'Fantasia', slug: 'fantasia' },
+  { name: 'Clássicos', slug: 'classicos' },
+  { name: 'Poesia', slug: 'poesia' },
+  { name: 'Biografias', slug: 'biografias' },
+];
+---
+
+<div class="sidebar-container">
+  <!-- Navegação de Páginas -->
+  <section class="sidebar-section pages-nav-section">
+    <h3 class="section-title">O Livreiro</h3>
+    <ul class="nav-pages-list">
+      <li>
+        <a href="/">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Página Inicial</span>
+        </a>
+      </li>
+      <li>
+        <a href="/sobre">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Sobre o Projeto</span>
+        </a>
+      </li>
+      <li>
+        <a href="/contato">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>Fale Conosco</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Posts Recentes -->
+  <section class="sidebar-section">
+    <h3 class="section-title">Últimas Resenhas</h3>
+    <ul class="recent-posts-list">
+      {recentPosts.length > 0 ? (
+        recentPosts.map(post => (
+          <li>
+            <a href={`/${post.slug}`} title={post.data.title}>{post.data.title}</a>
+          </li>
+        ))
+      ) : (
+        <li><a href="/">Resenha: Dom Casmurro e a Dúvida Eterna de Bentinho</a></li>
+        <li><a href="/">5 Livros para Começar no Universo da Ficção Científica</a></li>
+        <li><a href="/">Guia de Leitura: Como Ler os Clássicos sem Medo</a></li>
+      )}
+    </ul>
+  </section>
+
+  <!-- Categorias -->
+  <section class="sidebar-section">
+    <h3 class="section-title">Gêneros</h3>
+    <ul class="categories-list">
+      {categories.map(cat => (
+        <li>
+          <a href={`/?category=${cat.slug}`}>{cat.name}</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</div>
+
+<style>
+  .sidebar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .sidebar-section {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--text-main);
+    display: inline-block;
+  }
+
+  /* Menu de Navegação Lateral */
+  .pages-nav-section {
+    background-color: var(--card-bg);
+  }
+
+  .nav-pages-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nav-pages-list a {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .nav-pages-list a:hover {
+    color: var(--primary-color);
+    background-color: var(--bg-color);
+    text-decoration: none;
+  }
+
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .nav-pages-list a:hover .nav-icon {
+    transform: scale(1.1);
+  }
+
+  /* Listas Recentes e Categorias */
+  .recent-posts-list, .categories-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .recent-posts-list a {
+    font-family: var(--font-serif);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    display: block;
+    text-decoration: none !important;
+  }
+
+  .recent-posts-list a:hover {
+    color: var(--primary-color);
+  }
+
+  .recent-posts-list li {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+  }
+
+  .recent-posts-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .categories-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .categories-list a {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    background-color: #fcfbfa;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    text-align: center;
+    display: block;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+  }
+
+  .categories-list a:hover {
+    background-color: var(--bg-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+</style>
