@@ -7008,8 +7008,7 @@ document.addEventListener('submit', (e) => {
           const siteRes = await fetch('/api/sites', {
             method: 'POST',
             headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               theme: ninjaJourneyState.nicho,
@@ -7039,8 +7038,7 @@ document.addEventListener('submit', (e) => {
           const scaleRes = await fetch('/api/multi-generator/start', {
             method: 'POST',
             headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({
               repoName: repoName,
