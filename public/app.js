@@ -7034,57 +7034,10 @@ document.addEventListener('submit', (e) => {
       }, 1000);
     }
     // Lógica antiga do passo 3.5 removida e isolada em função global no window
+    // Recebendo credenciais pendentes no passo 3.5
     else if (ninjaJourneyState.step === 3.5) {
       appendNinjaModalMessage("⚠️ Por favor, use o formulário de chaves acima para preencher e clique no botão para salvar!");
     }
-
-    // Função de persistência das credenciais do onboarding
-    window.saveModalOnboardingCredentials = function() {
-      if (typeof ASMR !== 'undefined') ASMR.playPop();
-      
-      const githubVal = document.getElementById('modal-field-github').value.trim();
-      const vercelVal = document.getElementById('modal-field-vercel').value.trim();
-      const pexelsVal = document.getElementById('modal-field-pexels').value.trim();
-      
-      if (!githubVal || !vercelVal || !pexelsVal) {
-        alert('Por favor, preencha todas as chaves (GitHub, Vercel e Pexels) para prosseguir!');
-        return;
-      }
-      
-      // Salvar no local e memória do State
-      State.credentials.githubToken = githubVal;
-      State.credentials.vercelToken = vercelVal;
-      State.credentials.pexelsApiKey = pexelsVal;
-      
-      localStorage.setItem('user_github_key', githubVal);
-      localStorage.setItem('user_vercel_key', vercelVal);
-      localStorage.setItem('user_pexels_key', pexelsVal);
-      
-      appendNinjaModalMessage("Credenciais salvas: <code>GitHub Token</code>, <code>Vercel Token</code> e <code>Chave Pexels</code> configurados com sucesso!", true);
-      
-      // Salvar credenciais no Supabase em background se o usuário estiver logado
-      if (State.user && State.user.email) {
-        fetch('/api/settings', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
-          },
-          body: JSON.stringify({
-            githubToken: githubVal,
-            vercelToken: vercelVal,
-            vercelTeamId: State.credentials.vercelTeamId || 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
-            geminiApiKey: State.credentials.geminiApiKey || '',
-            pexelsApiKey: pexelsVal
-          })
-        }).catch(err => console.error("Error saving creds to DB:", err));
-      }
-      
-      setTimeout(() => {
-        ninjaJourneyState.step = 4;
-        window.showNinjaColabStep();
-      }, 1500);
-    };
     // Passo 4 (Colab): Recebendo o túnel do Colab
     else if (ninjaJourneyState.step === 4 && userText.includes('trycloudflare.com')) {
       ninjaJourneyState.colabTunnel = userText;
@@ -7252,6 +7205,54 @@ document.addEventListener('submit', (e) => {
     }
   }
 });
+
+// Função de persistência das credenciais do onboarding (declarada de forma isolada na raiz global)
+window.saveModalOnboardingCredentials = function() {
+  if (typeof ASMR !== 'undefined') ASMR.playPop();
+  
+  const githubVal = document.getElementById('modal-field-github').value.trim();
+  const vercelVal = document.getElementById('modal-field-vercel').value.trim();
+  const pexelsVal = document.getElementById('modal-field-pexels').value.trim();
+  
+  if (!githubVal || !vercelVal || !pexelsVal) {
+    alert('Por favor, preencha todas as chaves (GitHub, Vercel e Pexels) para prosseguir!');
+    return;
+  }
+  
+  // Salvar no local e memória do State
+  State.credentials.githubToken = githubVal;
+  State.credentials.vercelToken = vercelVal;
+  State.credentials.pexelsApiKey = pexelsVal;
+  
+  localStorage.setItem('user_github_key', githubVal);
+  localStorage.setItem('user_vercel_key', vercelVal);
+  localStorage.setItem('user_pexels_key', pexelsVal);
+  
+  appendNinjaModalMessage("Credenciais salvas: <code>GitHub Token</code>, <code>Vercel Token</code> e <code>Chave Pexels</code> configurados com sucesso!", true);
+  
+  // Salvar credenciais no Supabase em background se o usuário estiver logado
+  if (State.user && State.user.email) {
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+      },
+      body: JSON.stringify({
+        githubToken: githubVal,
+        vercelToken: vercelVal,
+        vercelTeamId: State.credentials.vercelTeamId || 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
+        geminiApiKey: State.credentials.geminiApiKey || '',
+        pexelsApiKey: pexelsVal
+      })
+    }).catch(err => console.error("Error saving creds to DB:", err));
+  }
+  
+  setTimeout(() => {
+    ninjaJourneyState.step = 4;
+    window.showNinjaColabStep();
+  }, 1500);
+};
 
 
 
