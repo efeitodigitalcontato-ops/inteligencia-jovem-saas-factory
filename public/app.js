@@ -7023,8 +7023,13 @@ document.addEventListener('submit', (e) => {
             })
           });
           
+          if (!siteRes.ok) {
+            const errText = await siteRes.text();
+            throw new Error(`Servidor respondeu com erro ${siteRes.status}: ${errText.substring(0, 120)}`);
+          }
+          
           const siteData = await siteRes.json();
-          if (!siteRes.ok || !siteData.success) {
+          if (!siteData.success) {
             throw new Error(siteData.error || 'Falha ao instanciar o blog no GitHub/Vercel.');
           }
           
@@ -7047,8 +7052,13 @@ document.addEventListener('submit', (e) => {
             })
           });
           
+          if (!scaleRes.ok) {
+            const errText = await scaleRes.text();
+            throw new Error(`Orquestrador respondeu com erro ${scaleRes.status}: ${errText.substring(0, 120)}`);
+          }
+          
           const scaleData = await scaleRes.json();
-          if (!scaleRes.ok || !scaleData.success) {
+          if (!scaleData.success) {
             throw new Error(scaleData.error || 'Falha ao iniciar o loop de escala na Máquina Infinita.');
           }
           
