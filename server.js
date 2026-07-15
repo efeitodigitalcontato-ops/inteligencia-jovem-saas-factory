@@ -1093,7 +1093,6 @@ app.post('/api/generate', checkAuth, async (req, res) => {
           details: createPersonalRes.body || createRepoRes.body
         });
       }
-    }
 
     // Get repo metadata with retry logic (resolves replication delays) only as fallback if not obtained yet
     if (!repoId) {
