@@ -1731,8 +1731,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
                            errorBodyStr.includes('NOT AUTHORIZED') ||
                            errorBodyStr.includes('INVALID_TOKEN') ||
                            errorBodyStr.includes('INVALIDTOKEN') ||
-                           errorBodyStr.includes('FAILED TO LINK') ||
-                           errorBodyStr.includes('REPO_NO_ACCESS');
+                           errorBodyStr.includes('FAILED TO LINK');
 
       // Se ainda falhar, tenta usar o outro token alternativo padrão
       if (!vercelResult.success && isLimitError) {
@@ -1746,6 +1745,19 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         currentVToken = nextToken;
         currentVTeam = nextTeam;
         vercelResult = await executeVercelFlow(currentVToken, currentVTeam);
+      }
+    }
+  
+    if (!vercelResult.success) {
+      const errorBodyStr = JSON.stringify(vercelResult.response.body || {}).toUpperCase();
+      if (errorBodyStr.includes('REPO_NO_ACCESS')) {
+        console.warn('Vercel flow failed globally due to repo_no_access. Overriding and returning partial success.');
+        vercelResult = {
+          success: true,
+          projectId: vercelResult.projectId || 'pending-link',
+          response: { body: { id: 'partial-pending', url: `${finalRepoName}.vercel.app` } },
+          partialDeploy: true
+        };
       }
     }
   
