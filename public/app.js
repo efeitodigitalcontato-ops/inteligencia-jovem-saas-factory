@@ -7016,7 +7016,7 @@ document.addEventListener('submit', (e) => {
               customTheme: '',
               repoName: repoName,
               description: `Blog autônomo sobre ${ninjaJourneyState.nicho} contendo reviews de afiliados.`,
-              githubToken: State.credentials.githubToken,
+              githubToken: State.credentials.githubToken || State.credentials.gitHubToken || localStorage.getItem('user_github_key') || '',
               vercelToken: State.credentials.vercelToken || localStorage.getItem('user_vercel_key') || '',
               vercelTeamId: 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
               userEmail: State.user ? State.user.email : null
@@ -7042,7 +7042,7 @@ document.addEventListener('submit', (e) => {
               tunnelUrl: ninjaJourneyState.colabTunnel,
               volume: ninjaJourneyState.volume,
               affiliateLink: ninjaJourneyState.affiliateLink,
-              githubToken: State.credentials.githubToken,
+              githubToken: State.credentials.githubToken || State.credentials.gitHubToken || localStorage.getItem('user_github_key') || '',
               userEmail: State.user ? State.user.email : null
             })
           });
