@@ -993,15 +993,21 @@ app.post('/api/generate', checkAuth, async (req, res) => {
     console.warn("Could not fetch user's saved credentials from Supabase:", e.message);
   }
 
-  const gToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken) || DEFAULT_GITHUB_TOKEN;
-  let vToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
-  let vTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
+  let finalGToken = getValidGithubToken(githubToken) || getValidGithubToken(userGithubToken);
+  let finalVToken = (!vercelToken || vercelToken === 'undefined' || vercelToken === 'null' || vercelToken.trim() === '') ? userVercelToken : vercelToken;
+  let finalVTeam = (!vercelTeamId || vercelTeamId === 'undefined' || vercelTeamId === 'null' || vercelTeamId.trim() === '') ? userVercelTeamId : vercelTeamId;
 
-  // Se o GitHub token usado for o corporativo de administrador, forçamos o Vercel token e Team corporativos também
-  if (gToken === DEFAULT_GITHUB_TOKEN) {
-    vToken = DEFAULT_VERCEL_TOKEN;
-    vTeam = DEFAULT_VERCEL_TEAM;
+  // Se o usuário não tiver configurado o token do GitHub OU o token da Vercel dele, forçamos o par corporativo de administrador alinhado
+  if (!finalGToken || !finalVToken || finalVToken.trim() === '') {
+    console.log('[Token Aligner] Usando credenciais corporativas do administrador (GitHub + Vercel) por padrão.');
+    finalGToken = DEFAULT_GITHUB_TOKEN;
+    finalVToken = DEFAULT_VERCEL_TOKEN;
+    finalVTeam = DEFAULT_VERCEL_TEAM;
   }
+
+  const gToken = finalGToken;
+  const vToken = finalVToken;
+  const vTeam = finalVTeam;
 
   if (!vToken || vToken.trim() === '') {
     return res.status(400).json({ error: 'Você precisa configurar sua própria conta da Vercel antes de criar um blog. Acesse as Configurações ou fale com a Safira.' });

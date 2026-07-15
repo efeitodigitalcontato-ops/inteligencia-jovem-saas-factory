@@ -6982,14 +6982,101 @@ document.addEventListener('submit', (e) => {
     else if (ninjaJourneyState.step === 3) {
       const affiliateLink = userText;
       ninjaJourneyState.affiliateLink = affiliateLink;
-      ninjaJourneyState.step = 4;
       
       appendNinjaModalMessage(`Link configurado: <code>${affiliateLink}</code>`, true);
       
       setTimeout(() => {
-        // Agora exibe o passo do Google Colab (Passo 4 de 5)
-        window.showNinjaColabStep();
+        // Validação de credenciais do usuário logado
+        const hasGithub = State.credentials.githubToken || localStorage.getItem('user_github_key');
+        const hasVercel = State.credentials.vercelToken || localStorage.getItem('user_vercel_key');
+        const hasPexels = State.credentials.pexelsApiKey || localStorage.getItem('user_pexels_key');
+        
+        if (!hasGithub || !hasVercel || !hasPexels) {
+          ninjaJourneyState.step = 3.5; // Passo intermediário de credenciais
+          appendNinjaModalMessage(`
+            🔑 <strong>Configuração de Credenciais Pessoais</strong><br>
+            Preciso que você adicione as chaves da sua própria conta para que os blogs sejam criados diretamente sob o seu perfil pessoal no GitHub e na Vercel com imagens reais do Pexels, evitando qualquer erro de acesso!<br><br>
+            
+            ${!hasGithub ? `
+              <strong>1. Token do GitHub:</strong><br>
+              • <a href="https://github.com/settings/tokens/new?description=GeradorNinja&scopes=repo,workflow" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar o token GitHub</a>.<br>
+              • Dica: Dê autorização para <strong>repo</strong> e <strong>workflow</strong>, crie o token, copie-o e cole aqui abaixo!
+            ` : ''}
+            
+            ${!hasVercel ? `
+              <br><strong>2. Token da Vercel:</strong><br>
+              • <a href="https://vercel.com/account/tokens" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar o token Vercel</a>.<br>
+              • Dica: Crie com escopo <strong>Global</strong>, copie-o e cole aqui abaixo!
+            ` : ''}
+
+            ${!hasPexels ? `
+              <br><strong>3. API Key do Pexels (Imagens dos Artigos):</strong><br>
+              • <a href="https://www.pexels.com/api/new/" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: underline;">Clique aqui para gerar a chave no Pexels</a>.<br>
+              • Dica: Faça login rápido, solicite uma API Key de Desenvolvedor gratuita, copie e cole abaixo!
+            ` : ''}
+            
+            <br><em>Cole o token solicitado no campo de texto abaixo e envie!</em>
+          `);
+        } else {
+          ninjaJourneyState.step = 4;
+          window.showNinjaColabStep();
+        }
       }, 1000);
+    }
+    // Recebendo credenciais pendentes no passo 3.5
+    else if (ninjaJourneyState.step === 3.5) {
+      const tokenDigitado = userText;
+      
+      if (tokenDigitado.startsWith('ghp_') || tokenDigitado.startsWith('github_pat_')) {
+        State.credentials.githubToken = tokenDigitado;
+        localStorage.setItem('user_github_key', tokenDigitado);
+        appendNinjaModalMessage("✓ Token do GitHub salvo com sucesso localmente!", false);
+      } else if (tokenDigitado.length > 40) { // Tokens da Vercel geralmente são mais longos
+        State.credentials.vercelToken = tokenDigitado;
+        localStorage.setItem('user_vercel_key', tokenDigitado);
+        appendNinjaModalMessage("✓ Token da Vercel salvo com sucesso localmente!", false);
+      } else { // Chave de API do Pexels ou outra menor
+        State.credentials.pexelsApiKey = tokenDigitado;
+        localStorage.setItem('user_pexels_key', tokenDigitado);
+        appendNinjaModalMessage("✓ Chave da API do Pexels salva com sucesso localmente!", false);
+      }
+      
+      // Salvar credenciais no Supabase em background se o usuário estiver logado
+      if (State.user && State.user.email) {
+        fetch('/api/settings', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            githubToken: State.credentials.githubToken || '',
+            vercelToken: State.credentials.vercelToken || '',
+            vercelTeamId: State.credentials.vercelTeamId || 'team_Wd4A9CtlI7gAntKGdcxvaG2N',
+            geminiApiKey: State.credentials.geminiApiKey || '',
+            pexelsApiKey: State.credentials.pexelsApiKey || ''
+          })
+        }).catch(err => console.error("Error saving creds to DB:", err));
+      }
+      
+      // Validar novamente se alguma chave ainda está faltando
+      setTimeout(() => {
+        const hasGithub = State.credentials.githubToken || localStorage.getItem('user_github_key');
+        const hasVercel = State.credentials.vercelToken || localStorage.getItem('user_vercel_key');
+        const hasPexels = State.credentials.pexelsApiKey || localStorage.getItem('user_pexels_key');
+        
+        if (!hasGithub || !hasVercel || !hasPexels) {
+          appendNinjaModalMessage(`
+            Falta configurar mais credenciais! Cole a restante abaixo:<br><br>
+            ${!hasGithub ? `• <strong>Token do GitHub restante</strong> (<a href="https://github.com/settings/tokens/new?description=GeradorNinja&scopes=repo,workflow" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
+            ${!hasVercel ? `• <strong>Token da Vercel restante</strong> (<a href="https://vercel.com/account/tokens" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
+            ${!hasPexels ? `• <strong>Chave do Pexels restante</strong> (<a href="https://www.pexels.com/api/new/" target="_blank" style="color: var(--primary); text-decoration: underline;">Gerar aqui</a>)` : ''}
+          `);
+        } else {
+          ninjaJourneyState.step = 4;
+          window.showNinjaColabStep();
+        }
+      }, 1500);
     }
     // Passo 4 (Colab): Recebendo o túnel do Colab
     else if (ninjaJourneyState.step === 4 && userText.includes('trycloudflare.com')) {
