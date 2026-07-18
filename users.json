@@ -211,5 +211,13 @@
     "createdAt": "2026-07-09T18:21:57.072Z",
     "sites": [],
     "geminiApiKey": ""
+  },
+  {
+    "name": "Niterói 450 Anos",
+    "email": "niteroi450anos@gmail.com",
+    "password": "226f648b1dca1d4c4182da4de6065ec00614a231067d1b926f7fa75cdcd595d6",
+    "approved": true,
+    "createdAt": "2026-07-18T11:23:22.495Z",
+    "sites": []
   }
 ]
