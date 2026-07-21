@@ -59,15 +59,13 @@ const el = {
     newSite: document.getElementById('view-new-site'),
     niche: document.getElementById('view-niche'),
     multiGenerator: document.getElementById('view-multi-generator'),
-    sitePosition: document.getElementById('view-site-position'),
     backlinkTracker: document.getElementById('view-backlink-tracker'),
     siloStructure: document.getElementById('view-silo-structure'),
     settings: document.getElementById('view-settings'),
     domainConfig: document.getElementById('view-domain-config'),
     netoSalva: document.getElementById('view-neto-salva'),
     payment: document.getElementById('view-payment'),
-    imagesPanel: document.getElementById('view-images-panel'),
-    seoCrm: document.getElementById('view-seo-crm')
+    imagesPanel: document.getElementById('view-images-panel')
   },
 
   // Auth
@@ -587,8 +585,6 @@ document.querySelector('a[href="#niche"]').addEventListener('click', (e) => { e.
 document.querySelector('a[href="#new-site"]').addEventListener('click', (e) => { e.preventDefault(); showView('newSite'); });
 document.querySelector('a[href="#multi-generator"]').addEventListener('click', (e) => { e.preventDefault(); showView('multiGenerator'); });
 document.querySelector('a[href="#silo-structure"]').addEventListener('click', (e) => { e.preventDefault(); showView('siloStructure'); });
-document.querySelector('a[href="#site-position"]').addEventListener('click', (e) => { e.preventDefault(); showView('sitePosition'); });
-document.querySelector('a[href="#seo-crm"]').addEventListener('click', (e) => { e.preventDefault(); showView('seoCrm'); });
 document.querySelector('a[href="#backlink-tracker"]').addEventListener('click', (e) => { e.preventDefault(); showView('backlinkTracker'); });
 document.querySelector('a[href="#neto-salva"]').addEventListener('click', (e) => { e.preventDefault(); showView('netoSalva'); });
 document.querySelector('a[href="#images-panel"]').addEventListener('click', (e) => { e.preventDefault(); showView('imagesPanel'); });
