@@ -7137,7 +7137,7 @@ app.post('/api/multi-generator/start', async (req, res) => {
           let foundDone = false;
 
           // Buscar o objeto JSON done_article no stream completo via Regex (robusto contra chunks e quebras de linha)
-          const match = text.match(/data:\s*(\{"type"\s*:\s*"done_article"[\s\S]*?\})(?=\r?\n\r?\n|\r?\n*$|$)/);
+          const match = text.match(/data:\s*(\{"type"\s*:\s*"done_article"[\s\S]*?\})/);
           if (match && match[1]) {
             try {
               const data = JSON.parse(match[1]);
@@ -7167,6 +7167,50 @@ app.post('/api/multi-generator/start', async (req, res) => {
                   }
                 } catch (e) {}
               }
+            }
+          }
+
+          // Fallback 2: Se a resposta for o Markdown puro
+          if (!foundDone && (text.includes('title:') || text.includes('##'))) {
+            if (!text.includes('data: {"type":')) {
+              markdownContent = text;
+              let slug = title
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+              if (slug.length > 80) slug = slug.substring(0, 80).replace(/-$/, '');
+              postSlug = slug;
+              foundDone = true;
+              console.log(`[Fábrica Escala] Fallback Raw: Markdown bruto detectado diretamente para o slug: "${postSlug}"`);
+            }
+          }
+
+          // Fallback 3: Reconstruir o post a partir de tokens individuais caso falhe o done_article
+          if (!foundDone) {
+            console.log(`[Fábrica Escala] Tentando reconstruir artigo a partir de tokens individuais...`);
+            const tokenRegex = /data:\s*(\{"type"\s*:\s*"token"[\s\S]*?\})(?=\s*data:|\s*$)/g;
+            let reconstructed = '';
+            let matchToken;
+            while ((matchToken = tokenRegex.exec(text)) !== null) {
+              try {
+                const data = JSON.parse(matchToken[1]);
+                if (data.token) reconstructed += data.token;
+              } catch(e) {}
+            }
+            if (reconstructed.length > 100) {
+              markdownContent = reconstructed;
+              let slug = title
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+              if (slug.length > 80) slug = slug.substring(0, 80).replace(/-$/, '');
+              postSlug = slug;
+              foundDone = true;
+              console.log(`[Fábrica Escala] Sucesso: Artigo de ${reconstructed.length} caracteres reconstruído com sucesso via tokens!`);
             }
           }
 
