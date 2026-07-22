@@ -7055,11 +7055,22 @@ document.addEventListener('submit', (e) => {
       appendNinjaModalMessage("⚠️ Por favor, use o formulário de chaves acima para preencher e clique no botão para salvar!");
     }
     // Passo 4 (Colab): Recebendo o túnel do Colab
-    else if (ninjaJourneyState.step === 4 && userText.includes('trycloudflare.com')) {
-      ninjaJourneyState.colabTunnel = userText;
+    else if (ninjaJourneyState.step === 4) {
+      let tunnelUrl = userText.trim();
+      if (!tunnelUrl.startsWith('http://') && !tunnelUrl.startsWith('https://')) {
+        tunnelUrl = 'https://' + tunnelUrl;
+      }
+      tunnelUrl = tunnelUrl.replace(/\/+$/, '');
+
+      if (!tunnelUrl.includes('trycloudflare.com') && !tunnelUrl.includes('loca.lt') && !tunnelUrl.includes('ngrok') && !tunnelUrl.includes('.')) {
+        appendNinjaModalMessage("⚠️ <strong>Link do Colab inválido!</strong><br>Por favor, cole o link do túnel gerado no Google Colab (ex: <code>https://xxxxx.trycloudflare.com</code>).", false);
+        return;
+      }
+
+      ninjaJourneyState.colabTunnel = tunnelUrl;
       ninjaJourneyState.step = 5;
       
-      appendNinjaModalMessage(`Link do Colab enviado: <code>${userText}</code>`, true);
+      appendNinjaModalMessage(`Link do Colab enviado: <code>${tunnelUrl}</code>`, true);
       
       setTimeout(async () => {
         appendNinjaModalMessage("⚡ <strong>Passo 5 de 5: Fábrica de Escala Ativada!</strong><br>Iniciando o planejamento inteligente, criando o repositório GitHub e integrando na Vercel...");
@@ -7097,6 +7108,12 @@ document.addEventListener('submit', (e) => {
           
           if (siteData.repoName) {
             repoName = siteData.repoName;
+          }
+          if (siteData.deployUrl) {
+            ninjaJourneyState.deployUrl = siteData.deployUrl;
+          }
+          if (siteData.repoUrl) {
+            ninjaJourneyState.repoUrl = siteData.repoUrl;
           }
           
           appendNinjaModalMessage("✓ Repositório e Deploy Criados! Pesquisando palavras-chave e disparando a fila da Máquina Infinita...");
@@ -7161,9 +7178,6 @@ document.addEventListener('submit', (e) => {
                 <div class="progress-fill" style="width: 0%; height: 100%; background: linear-gradient(135deg, #a855f7, #6366f1); transition: width 0.5s ease-in-out;"></div>
               </div>
             </div>
-
-            🎯 <strong>Dica de SEO do Larry Page:</strong><br>
-            Acesse a aba <strong>CRM SEO</strong>. Foque na criação de backlinks apenas para as páginas que estiverem na <strong>Zona de Impacto (Posições 11 a 30)</strong>. Crie links aos poucos para crescimento natural!
           `);
           
           const progressBox = document.getElementById(progressContainerId);
@@ -7171,7 +7185,7 @@ document.addEventListener('submit', (e) => {
             const fill = progressBox.querySelector('.progress-fill');
             const txt = progressBox.querySelector('.progress-txt');
             
-            // Consultar a contagem real física de markdown/artigos no servidor da VPS
+            // Consultar a contagem real física de markdown/artigos no servidor
             const progressInterval = setInterval(async () => {
               if (!ninjaJourneyState.active) {
                 clearInterval(progressInterval);
@@ -7181,7 +7195,6 @@ document.addEventListener('submit', (e) => {
               try {
                 const res = await fetch(`/api/sites/${repoName}/posts-count`);
                 if (!res.ok) {
-                  // Se o site ainda não foi montado fisicamente na pasta, exibe 0 posts sem quebrar
                   fill.style.width = `0%`;
                   txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
                   return;
@@ -7197,24 +7210,37 @@ document.addEventListener('submit', (e) => {
                 if (realCount >= ninjaJourneyState.volume) {
                   clearInterval(progressInterval);
                   
-                  const blogUrl = `https://${repoName.replace('afiliados-blog-', '')}.vercel.app`;
+                  const cleanDomainName = repoName.replace(/^afiliados-blog-/, '');
+                  const blogUrl = ninjaJourneyState.deployUrl || `https://${cleanDomainName}.vercel.app`;
+                  const repoUrl = ninjaJourneyState.repoUrl || `https://github.com/efeitodigitalcontato-ops/${repoName}`;
                   
                   setTimeout(() => {
                     appendNinjaModalMessage(`
                       🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
                       Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
                       
-                      <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
-                        🚀 Visitar Meu Novo Blog no Ar Agora!
-                      </a>
+                      <div style="background: rgba(16, 185, 129, 0.12); border: 1.5px solid #10b981; border-radius: 10px; padding: 16px; margin: 12px 0; text-align: center;">
+                        <div style="font-size: 0.88rem; color: #a7f3d0; margin-bottom: 12px; font-weight: 600;">
+                          ✨ <strong>Seu Blog de Afiliados está no Ar:</strong><br>
+                          <a href="${blogUrl}" target="_blank" style="color: #34d399; font-size: 1.05rem; font-weight: bold; word-break: break-all; text-decoration: underline;">${blogUrl}</a>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
+                          <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 6px;">
+                            🚀 Visitar Blog no Ar
+                          </a>
+                          <a href="${repoUrl}" target="_blank" class="btn btn-secondary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--text-main); display: inline-flex; align-items: center; gap: 6px;">
+                            💻 Repositório GitHub
+                          </a>
+                        </div>
+                      </div>
                     `);
                     
                     if (typeof triggerConfetti === 'function') triggerConfetti();
                   }, 1500);
                 }
               } catch (err) {
-                console.error("Erro ao ler contagem de posts da VPS:", err);
-                // Fallback seguro em caso de rede ou atraso do deploy
+                console.error("Erro ao ler contagem de posts:", err);
                 fill.style.width = `0%`;
                 txt.textContent = `0 / ${ninjaJourneyState.volume} posts (0.0%)`;
               }

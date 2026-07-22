@@ -1567,7 +1567,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         tokenLength: token ? token.length : 0,
         teamId: teamId
       });
-      console.log('Provisioning Vercel Project (Gitless mode)...');
+      console.log('Provisioning Vercel Project (Git-linked mode)...');
       const createProjectRes = await apiRequest({
         hostname: 'api.vercel.com',
         port: 443,
@@ -1579,7 +1579,11 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         }
       }, {
         name: finalRepoName,
-        framework: 'astro'
+        framework: 'astro',
+        gitRepository: {
+          type: 'github',
+          repo: finalOwnerRepo
+        }
       });
 
       let projectId = null;
@@ -1605,6 +1609,28 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
 
       if (!projectId) {
         return { success: false, errorStage: 'project_creation', response: createProjectRes };
+      }
+
+      // Link GitHub repo to Vercel project explicitly
+      try {
+        console.log(`Linking GitHub repo ${finalOwnerRepo} to Vercel project ${projectId}...`);
+        await apiRequest({
+          hostname: 'api.vercel.com',
+          port: 443,
+          path: `/v9/projects/${projectId}/link?teamId=${teamId}`,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }, {
+          type: 'github',
+          repo: finalOwnerRepo,
+          productionBranch: 'main'
+        });
+        console.log('Successfully linked GitHub repo to Vercel project!');
+      } catch (linkErr) {
+        console.warn('Could not link GitHub repo to project:', linkErr.message);
       }
 
       // Ensure Vercel Authentication (SSO / Deployment Protection) is disabled so the site is immediately public
@@ -1640,62 +1666,41 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         }
       }, {
         name: finalRepoName,
+        project: projectId,
         target: 'production',
         gitSource: {
           type: 'github',
-          repoId: repoId,
+          repo: finalOwnerRepo,
           ref: 'main'
         }
       });
 
-      // Se falhar com erro de acesso ao repositório, retentamos via importação pública por caminho amigável (sem repoId)
+      // Se falhar com erro de acesso ao repositório, retentamos via importação por repoId
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
         const deployErrBody = JSON.stringify(deployRes.body || {}).toUpperCase();
-        console.warn('Vercel deployment with repoId failed. Error details:', deployErrBody);
-        
-        // Se o erro for de acesso ao repo (repo_no_access), tentar vincular o repositório ao projeto Vercel primeiro
-        if (deployErrBody.includes('REPO_NO_ACCESS')) {
-          console.log('Detected repo_no_access! Attempting to link GitHub repo to Vercel project first...');
-          try {
-            await apiRequest({
-              hostname: 'api.vercel.com',
-              port: 443,
-              path: `/v9/projects/${projectId}/link?teamId=${teamId}`,
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            }, {
-              type: 'github',
-              repo: finalOwnerRepo,
-              productionBranch: 'main'
-            });
-            console.log('Successfully linked GitHub repo to Vercel project!');
-          } catch (linkErr) {
-            console.warn('Could not link GitHub repo to project:', linkErr.message);
-          }
-        }
+        console.warn('Vercel deployment with repo name failed. Retrying with repoId if available... Details:', deployErrBody);
 
-        console.log('Retrying Vercel deployment with public repository path import...');
-        deployRes = await apiRequest({
-          hostname: 'api.vercel.com',
-          port: 443,
-          path: `/v13/deployments?teamId=${teamId}`,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }, {
-          name: finalRepoName,
-          target: 'production',
-          gitSource: {
-            type: 'github',
-            repo: finalOwnerRepo,
-            ref: 'main'
-          }
-        });
+        if (repoId) {
+          deployRes = await apiRequest({
+            hostname: 'api.vercel.com',
+            port: 443,
+            path: `/v13/deployments?teamId=${teamId}`,
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }, {
+            name: finalRepoName,
+            project: projectId,
+            target: 'production',
+            gitSource: {
+              type: 'github',
+              repoId: repoId,
+              ref: 'main'
+            }
+          });
+        }
       }
 
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
@@ -4085,7 +4090,7 @@ app.post('/api/seo-opportunities', checkAuth, async (req, res) => {
 });
 
 app.post('/api/seo-opportunities/crawl', checkAuth, async (req, res) => {
-  console.log('Triggering SEO Crawler manually from API...');
+  console.log('Iniciando análise de oportunidades de SEO...');
   try {
     const crawlerPath = path.join('C:', 'Users', 'Randerson', '.gemini', 'config', 'skills', 'byong', 'seo_crawler.js');
     if (fs.existsSync(crawlerPath)) {
@@ -4099,7 +4104,7 @@ app.post('/api/seo-opportunities/crawl', checkAuth, async (req, res) => {
       });
       return res.json({ success: true, message: 'Varredura SEO iniciada em segundo plano.' });
     } else {
-      return res.status(404).json({ error: 'Crawler do CGO Larry Page não encontrado.' });
+      return res.status(404).json({ error: 'Crawler de SEO não encontrado.' });
     }
   } catch (err) {
     console.error('Crawl trigger error:', err);
@@ -7024,7 +7029,28 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
   const { repoName } = req.params;
   try {
     const token = await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
-    const ownerRepo = repoName.includes('/') ? repoName : `${DEFAULT_ORG}/${repoName}`;
+    let ownerRepo = repoName;
+    if (!ownerRepo.includes('/')) {
+      let ghUser = DEFAULT_ORG;
+      if (token) {
+        try {
+          const uRes = await apiRequest({
+            hostname: 'api.github.com',
+            port: 443,
+            path: '/user',
+            method: 'GET',
+            headers: {
+              'Authorization': `token ${token}`,
+              'User-Agent': 'SaaS-Generator-App'
+            }
+          });
+          if (uRes.statusCode === 200 && uRes.body && uRes.body.login) {
+            ghUser = uRes.body.login;
+          }
+        } catch (e) {}
+      }
+      ownerRepo = `${ghUser}/${repoName}`;
+    }
     
     const checkRes = await apiRequest({
       hostname: 'api.github.com',
@@ -7038,7 +7064,7 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
     });
 
     if (checkRes.statusCode === 200 && Array.isArray(checkRes.body)) {
-      const count = checkRes.body.filter(item => item.name.endsWith('.md')).length;
+      const count = checkRes.body.filter(item => item.name.endsWith('.md') || item.name.endsWith('.mdx')).length;
       return res.json({ success: true, count });
     }
     
@@ -7065,8 +7091,31 @@ app.post('/api/multi-generator/start', async (req, res) => {
       console.log(`[Fábrica Escala] Iniciando geração em lote para ${repoName}. Volume: ${volume}`);
       
       const gToken = githubToken || await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
-      const ownerRepo = repoName.includes('/') ? repoName : `${DEFAULT_ORG}/${repoName}`;
-      const cleanRepoName = repoName.replace(`${DEFAULT_ORG}/`, '');
+      let ghUser = DEFAULT_ORG;
+      if (repoName.includes('/')) {
+        ghUser = repoName.split('/')[0];
+      } else if (gToken) {
+        try {
+          const userRes = await apiRequest({
+            hostname: 'api.github.com',
+            port: 443,
+            path: '/user',
+            method: 'GET',
+            headers: {
+              'Authorization': `token ${gToken}`,
+              'User-Agent': 'SaaS-Generator-App'
+            }
+          });
+          if (userRes.statusCode === 200 && userRes.body && userRes.body.login) {
+            ghUser = userRes.body.login;
+          }
+        } catch (e) {
+          console.warn('[Fábrica Escala] Could not fetch ghUser from token, falling back to DEFAULT_ORG:', e.message);
+        }
+      }
+
+      const cleanRepoName = repoName.includes('/') ? repoName.split('/')[1] : repoName;
+      const ownerRepo = `${ghUser}/${cleanRepoName}`;
 
       // Resolver a API Key do Gemini
       const geminiKey = await resolveGeminiApiKey(null, cleanRepoName, req.headers.authorization) || DEFAULT_API_KEY;
@@ -7119,7 +7168,7 @@ app.post('/api/multi-generator/start', async (req, res) => {
               titulo: title,
               repo: cleanRepoName,
               gh_token: gToken,
-              gh_user: DEFAULT_ORG,
+              gh_user: ghUser,
               gh_email: 'efeitodigitalcontato@gmail.com'
             })
           });
