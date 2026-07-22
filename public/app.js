@@ -2874,14 +2874,20 @@ window.deleteProCreatedArticle = function(index) {
 };
 
 // 4. MEUS SITES COMUNS VIEW (RECEBER LINKS)
-function renderProPartnerSites() {
+async function renderProPartnerSites() {
   const tbody = document.getElementById('pro-partner-sites-tbody');
   if (!tbody) return;
 
   let partners = [];
   try {
-    partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
-  } catch(e) { partners = []; }
+    const res = await fetch('/api/network-blogs');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.blogs && Array.isArray(data.blogs)) {
+        partners = data.blogs;
+      }
+    }
+  } catch(e) { console.error(e); }
 
   if (partners.length === 0) {
     tbody.innerHTML = `
@@ -2895,13 +2901,15 @@ function renderProPartnerSites() {
   }
 
   tbody.innerHTML = '';
-  partners.forEach((item, idx) => {
+  partners.forEach((item) => {
     const row = document.createElement('tr');
+    const dateFormatted = item.addedAt ? new Date(item.addedAt).toLocaleDateString('pt-BR') : 'Permanente';
+    
     row.innerHTML = `
-      <td><strong style="color:#fff;">${item.domain}</strong></td>
-      <td>${new Date(item.addedAt).toLocaleDateString('pt-BR')}</td>
+      <td><strong>${item.domain}</strong> <span style="font-size:0.75rem; color:var(--text-muted); margin-left:8px;">(${item.theme || 'Geral'})</span></td>
+      <td>${dateFormatted}</td>
       <td style="text-align: center;">
-        <button type="button" class="btn btn-sm btn-outline" onclick="deleteProPartnerSite(${idx})" style="color:#ef4444; border-color:rgba(239,68,68,0.2); padding: 4px 8px; font-size:11px;">Remover</button>
+        <button type="button" class="btn btn-sm btn-outline" style="color:#f43f5e; border-color:rgba(244,63,94,0.3); padding:4px 8px;" onclick="deleteProPartnerSite('${item.domain}')">🗑️ Excluir</button>
       </td>
     `;
     tbody.appendChild(row);
@@ -2909,44 +2917,62 @@ function renderProPartnerSites() {
 }
 
 const partnerForm = document.getElementById('pro-partner-site-form');
-if (partnerForm) {
-  partnerForm.addEventListener('submit', (e) => {
+if (partnerForm && !partnerForm.dataset.wired) {
+  partnerForm.dataset.wired = 'true';
+  partnerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const urlInput = document.getElementById('pro-partner-site-url');
     let url = urlInput.value.trim();
     if (!url) return;
 
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-
-    let partners = [];
     try {
-      partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
-    } catch(err) {}
+      const userEmail = State.user ? State.user.email : 'randersoncontato@gmail.com';
+      const response = await fetch('/api/network-blogs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: url,
+          theme: 'Geral',
+          userEmail: userEmail
+        })
+      });
 
-    partners.push({ domain: url, addedAt: new Date().toISOString() });
-    localStorage.setItem('saas_partner_sites', JSON.stringify(partners));
-    
-    urlInput.value = '';
-    renderProPartnerSites();
-    showToast('Site parceiro adicionado com sucesso!', 'success');
+      const data = await response.json();
+      if (response.ok) {
+        urlInput.value = '';
+        await renderProPartnerSites();
+        await populateProHostBlogs();
+        showToast('Site cadastrado e salvo de forma permanente!', 'success');
+      } else {
+        showToast(data.error || 'Erro ao cadastrar site.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('Erro de conexão ao cadastrar site.', 'error');
+    }
   });
 }
 
-window.deleteProPartnerSite = function(index) {
-  let partners = [];
+window.deleteProPartnerSite = async function(domain) {
+  if (!confirm(`Deseja realmente excluir o site ${domain} permanentemente da rede?`)) return;
+
   try {
-    partners = JSON.parse(localStorage.getItem('saas_partner_sites')) || [];
-  } catch(e) {}
-  
-  partners.splice(index, 1);
-  localStorage.setItem('saas_partner_sites', JSON.stringify(partners));
-  renderProPartnerSites();
-  showToast('Site removido com sucesso.', 'success');
+    const response = await fetch(`/api/network-blogs/${encodeURIComponent(domain)}`, {
+      method: 'DELETE'
+    });
+    if (response.ok) {
+      await renderProPartnerSites();
+      await populateProHostBlogs();
+      showToast(`Site ${domain} removido com sucesso.`, 'success');
+    } else {
+      showToast('Erro ao remover site.', 'error');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Erro de conexão ao remover site.', 'error');
+  }
 };
 
-// 5. CADASTRAR BLOGS NA REDE (DELEGADOS E ADMIN)
 function renderProNetworkBlogs() {
   const tbody = document.getElementById('pro-network-blogs-tbody');
   if (!tbody) return;
