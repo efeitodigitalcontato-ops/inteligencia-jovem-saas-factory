@@ -6784,7 +6784,7 @@ window.selectNinjaModalNicho = function(nichoEscolhido) {
   appendNinjaModalMessage(`Escolhi o nicho: <strong>${nichoEscolhido}</strong>.`, true);
   
   setTimeout(() => {
-    appendNinjaModalMessage("📦 <strong>Passo 2 de 4: Volume de Artigos</strong><br>Quantos artigos originais gerados por IA você deseja que a máquina produza para cobrir todo o sitemap deste nicho?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(1000)'>1000 Artigos</button>");
+    appendNinjaModalMessage("📦 <strong>Passo 2 de 4: Volume de Artigos</strong><br>Quantos artigos originais gerados por IA você deseja que a máquina produza para cobrir todo o sitemap deste nicho?<br><br><button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(10)'>⚡ 10 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(100)'>100 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(200)'>200 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(400)'>400 Artigos</button> <button class='btn btn-sm btn-primary' onclick='selectNinjaModalVolume(1000)'>1000 Artigos</button>");
   }, 1000);
 };
 
