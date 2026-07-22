@@ -37,7 +37,6 @@
         <a href="#niche" class="nav-link private-only hidden">Nicho</a>
         <a href="#new-site" class="nav-link private-only hidden">Criar Blog</a>
         <a href="#multi-generator" class="nav-link private-only hidden">Artigos em Lote</a>
-        <a href="#images-panel" class="nav-link private-only hidden">Imagens</a>
         <a href="#silo-structure" class="nav-link private-only hidden">Estrutura SILO</a>
         <a href="#backlink-tracker" class="nav-link private-only hidden">Backlinks</a>
         <a href="#neto-salva" class="nav-link private-only hidden">Backup</a>
@@ -1156,6 +1155,18 @@
             <!-- Token oculto (preenchido automaticamente pelo servidor) -->
             <input type="hidden" id="cn-gh-token">
 
+            <!-- Link de Afiliado Customizado -->
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; font-size:0.75rem; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">🔗 Link de Afiliado Customizado (Opcional)</label>
+              <input type="url" id="cn-affiliate-link"
+                placeholder="https://shope.ee/... ou https://amzn.to/... (Inserido nos botões de compra dos artigos)"
+                style="width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.7rem 1rem; color:#f3f4f6; font-family:inherit; font-size:0.85rem; transition:border-color 0.3s;"
+                onfocus="this.style.borderColor='rgba(99,102,241,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+              <div style="margin-top:0.3rem; font-size:0.72rem; color:#9ca3af;">
+                💡 Se preenchido, todos os artigos gerados terão botões de compra direcionando para este link de afiliado.
+              </div>
+            </div>
+
             <!-- Área de temas -->
             <div style="margin-bottom:1rem;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
@@ -1168,6 +1179,20 @@
                 oninput="cnCountTopics()" onfocus="this.style.borderColor='rgba(99,102,241,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
             </div>
 
+            <!-- Status das Imagens Pexels -->
+            <div style="margin-bottom:0.85rem; display:flex; align-items:center; justify-content:space-between; background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.3); border-radius:10px; padding:0.65rem 1rem;">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span style="font-size:1.2rem;">🖼️</span>
+                <div>
+                  <div style="font-size:0.83rem; font-weight:700; color:#c084fc;">Imagens Pexels Automáticas no Deploy</div>
+                  <div style="font-size:0.72rem; color:#9ca3af;">O servidor pesquisa, comprime (.jpg PageSpeed) e publica imagens Pexels reais para cada artigo ao fazer Deploy</div>
+                </div>
+              </div>
+              <span style="background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3); font-size:0.72rem; font-weight:700; padding:0.25rem 0.7rem; border-radius:20px; white-space:nowrap;">
+                ✅ ATIVADO
+              </span>
+            </div>
+
             <!-- Botões de ação -->
             <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
               <button id="cn-gen-btn" onclick="cnStartGeneration()"
@@ -1178,6 +1203,11 @@
               <button id="cn-stop-btn" onclick="cnStopGeneration()"
                 style="display:none; padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(239,68,68,0.35); background:rgba(239,68,68,0.1); color:#fca5a5; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer;">
                 ⏹ Parar
+              </button>
+              <button onclick="cnEnrichPexels()" id="cn-pexels-btn"
+                style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(168,85,247,0.35); background:rgba(168,85,247,0.1); color:#c084fc; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.3s;"
+                onmouseover="this.style.background='rgba(168,85,247,0.2)'" onmouseout="this.style.background='rgba(168,85,247,0.1)'">
+                🖼️ Buscar Imagens Pexels
               </button>
               <button onclick="cnTriggerDeploy()"
                 style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.08); color:#6ee7b7; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.3s;"
@@ -2646,6 +2676,8 @@ except KeyboardInterrupt:
     // ── Init ───────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
       var saved_url = localStorage.getItem('cnUrl') || '';
+      var saved_aff = localStorage.getItem('cnAffiliateLink') || '';
+      if (document.getElementById('cn-affiliate-link') && saved_aff) { document.getElementById('cn-affiliate-link').value = saved_aff; }
       var el_url    = document.getElementById('cn-ngrok-url');
       var el_code   = document.getElementById('cn-cell3-code');
 
@@ -2815,6 +2847,8 @@ except KeyboardInterrupt:
     };
 
     // ── Salvar URL ─────────────────────────────────────────────────
+    
+    window.cnOnImageModeChange = function() { var mode = document.getElementById('cn-image-mode').value; var customIn = document.getElementById('cn-custom-image-url'); if (customIn) customIn.style.display = (mode === 'custom') ? 'block' : 'none'; };
     window.cnSaveUrl = function() {
       var v = (document.getElementById('cn-ngrok-url').value || '').trim().replace(/\/$/, '');
       localStorage.setItem('cnUrl', v);
@@ -3109,17 +3143,33 @@ except KeyboardInterrupt:
       cnLog('⏹ Parada solicitada...', 'info');
     };
 
+    function applyAffiliateLinkToMarkdown(markdown, affLink) {
+      if (!affLink || !affLink.trim()) return markdown;
+      affLink = affLink.trim();
+      if (markdown.includes(affLink)) return markdown;
+
+      var ctaBlock = '\n\n---\n### 🛒 Onde Comprar pelo Melhor Preço\nAproveite a oferta oficial com desconto exclusivo, garantia e frete rápido:\n\n👉 [**Ver Oferta Especial na Loja Oficial**](' + affLink + ')\n---\n';
+
+      if (/##\s*(Perguntas Frequentes|FAQ)/i.test(markdown)) {
+        markdown = markdown.replace(/(##\s*(Perguntas Frequentes|FAQ))/i, ctaBlock + '\n\n$1');
+      } else {
+        markdown += ctaBlock;
+      }
+      return markdown;
+    }
+
     // ── Gerar 1 artigo via SSE ─────────────────────────────────────
     function cnGenerateOne(titulo, repo, ghToken) {
       return new Promise(function(resolve) {
         cnClearLog();
         var prog = document.getElementById('cn-prog-status');
         if (prog) prog.textContent = '🧠 ' + titulo.substring(0, 50) + '...';
+        var affLink = (document.getElementById('cn-affiliate-link') || {}).value || '';
 
         fetch(cn_base + '/gerar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ titulo: titulo, repo: repo, gh_token: ghToken, gh_email: 'efeitodigitalcontato@gmail.com' })
+          body: JSON.stringify({ titulo: titulo, repo: repo, gh_token: ghToken, gh_email: 'efeitodigitalcontato@gmail.com', link_afiliado: affLink })
         })
         .then(function(res) {
           if (!res.ok) { cnLog('❌ Erro HTTP ' + res.status, 'err'); return resolve(false); }
@@ -3147,6 +3197,10 @@ except KeyboardInterrupt:
                   } else if (d.type === 'done_article') {
                     cnLog('\n' + (d.msg || '📥 Salvando na fila local...'), 'info');
                     
+                    if (affLink && affLink.trim()) {
+                      d.markdown = applyAffiliateLinkToMarkdown(d.markdown, affLink);
+                    }
+
                     // Salvar no localStorage
                     var queueKey = 'ninja_queue_' + repo;
                     var localQueue = [];
@@ -3373,6 +3427,92 @@ except KeyboardInterrupt:
       })
       .catch(function(e) { cnToast('❌ Erro de conexão: ' + e.message); });
     };
+    function fetchPexelsImage(title, repo) {
+      return new Promise(function(resolve) {
+        var PEXELS_KEY = 'W4XVC9DsnNzVuyk2h0LMJ09GIFIL0iCbz4iZ7XVb1MAMXddRqC5KTP61';
+        var defaultUrl = 'https://images.pexels.com/photos/3993444/pexels-photo-3993444.jpeg?auto=compress&cs=tinysrgb&w=800';
+
+        var nicheKeyword = (repo || '').replace('afiliados-blog-', '').replace(/-inteligencia-jovem$/, '').replace(/-/g, ' ');
+        if (!nicheKeyword || nicheKeyword === 'colchoes') nicheKeyword = 'colchao';
+
+        var cleanTitle = (title || '').replace(/^\d+[\.\)]\s*/, '').replace(/[^a-zA-Z0-9áàãâéêíóõôúçÁÀÃÂÉÊÍÓÕÔÚÇ\s]/g, '').trim();
+        var words = cleanTitle.split(/\s+/).filter(function(w){ return w.length > 3; });
+        var shortQuery = words.slice(0, 3).join(' ');
+
+        var queries = [cleanTitle, shortQuery, nicheKeyword, 'lifestyle'];
+        var idx = 0;
+
+        function tryNext() {
+          if (idx >= queries.length) return resolve(defaultUrl);
+          var q = queries[idx++];
+          if (!q) return tryNext();
+
+          fetch('https://api.pexels.com/v1/search?query=' + encodeURIComponent(q) + '&per_page=15&locale=pt-BR', {
+            headers: { Authorization: PEXELS_KEY }
+          })
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(data) {
+            if (data && data.photos && data.photos.length > 0) {
+              var rPhoto = data.photos[Math.floor(Math.random() * data.photos.length)];
+              var url = rPhoto.src.large || rPhoto.src.original;
+              if (url) return resolve(url);
+            }
+            tryNext();
+          })
+          .catch(function(){ tryNext(); });
+        }
+
+        tryNext();
+      });
+    }
+
+    window.cnEnrichPexels = function() {
+      var repo = (document.getElementById('cn-blog-select') || {}).value || '';
+      if (!repo) return;
+      var queueKey = 'ninja_queue_' + repo;
+      var localQueue = [];
+      try { localQueue = JSON.parse(localStorage.getItem(queueKey) || '[]'); } catch(e) {}
+
+      if (localQueue.length === 0) {
+        cnToast('Nenhum artigo na fila local do navegador para buscar imagens.');
+        return;
+      }
+
+      var btn = document.getElementById('cn-pexels-btn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '🔍 Buscando Pexels...'; }
+      cnToast('🖼️ Buscando imagens Pexels para ' + localQueue.length + ' artigos...');
+      cnLog('\n🖼️ [PEXELS] Buscando imagens Pexels para ' + localQueue.length + ' artigos...', 'info');
+
+      var enriched = 0;
+
+      var promises = localQueue.map(function(item, idx) {
+        var content = item.content || '';
+        var title = item.fileName.replace(/\.md$/, '').replace(/-/g, ' ');
+        var titleMatch = content.match(/title:\s*["']?(.*?)["']?\s*$/m);
+        if (titleMatch && titleMatch[1]) title = titleMatch[1].trim();
+
+        return fetchPexelsImage(title, repo).then(function(pexelsUrl) {
+          if (pexelsUrl) {
+            if (content.includes('heroImage:')) {
+              content = content.replace(/heroImage:\s*["']?(.*?)["']?\s*$/m, 'heroImage: "' + pexelsUrl + '"');
+            } else {
+              content = content.replace(/^---\s*\n/, '---\nheroImage: "' + pexelsUrl + '"\n');
+            }
+            item.content = content;
+            enriched++;
+            cnLog('  ✅ [' + (idx+1) + '/' + localQueue.length + '] Imagem Pexels atribuída: ' + title, 'ok');
+          }
+        });
+      });
+
+      Promise.all(promises).then(function() {
+        localStorage.setItem(queueKey, JSON.stringify(localQueue));
+        cnToast('✅ ' + enriched + ' artigos com imagem Pexels!');
+        cnLog('\n🎉 [PEXELS CONCLUÍDO] ' + enriched + ' de ' + localQueue.length + ' artigos com imagem Pexels.', 'ok');
+        if (btn) { btn.disabled = false; btn.innerHTML = '🖼️ Buscar Imagens Pexels'; }
+      });
+    };
+
     window.cnClearLocalQueue = function() {
       var repo = (document.getElementById('cn-blog-select') || {}).value || '';
       if (!repo) return;

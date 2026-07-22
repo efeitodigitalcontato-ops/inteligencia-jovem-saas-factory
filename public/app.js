@@ -582,15 +582,24 @@ setTimeout(() => {
 el.navLogo.addEventListener('click', () => showView(State.user ? 'dashboard' : 'landing'));
 document.querySelector('a[href="#dashboard"]').addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); });
 document.querySelector('a[href="#niche"]').addEventListener('click', (e) => { e.preventDefault(); showView('niche'); });
-document.querySelector('a[href="#new-site"]').addEventListener('click', (e) => { e.preventDefault(); showView('newSite'); });
-document.querySelector('a[href="#multi-generator"]').addEventListener('click', (e) => { e.preventDefault(); showView('multiGenerator'); });
-document.querySelector('a[href="#silo-structure"]').addEventListener('click', (e) => { e.preventDefault(); showView('siloStructure'); });
-document.querySelector('a[href="#backlink-tracker"]').addEventListener('click', (e) => { e.preventDefault(); showView('backlinkTracker'); });
-document.querySelector('a[href="#neto-salva"]').addEventListener('click', (e) => { e.preventDefault(); showView('netoSalva'); });
-document.querySelector('a[href="#images-panel"]').addEventListener('click', (e) => { e.preventDefault(); showView('imagesPanel'); });
-document.querySelector('a[href="#settings"]').addEventListener('click', (e) => { e.preventDefault(); showView('settings'); });
+const navViewMap = {
+  '#new-site': 'newSite',
+  '#multi-generator': 'multiGenerator',
+  '#silo-structure': 'siloStructure',
+  '#backlink-tracker': 'backlinkTracker',
+  '#neto-salva': 'netoSalva',
+  '#images-panel': 'imagesPanel',
+  '#settings': 'settings'
+};
 
-el.loginNavBtn.addEventListener('click', () => { showView('auth'); el.tabLoginBtn.click(); });
+Object.keys(navViewMap).forEach(href => {
+  const link = document.querySelector(`a[href="${href}"]`);
+  if (link) {
+    link.addEventListener('click', (e) => { e.preventDefault(); showView(navViewMap[href]); });
+  }
+});
+
+if (el.loginNavBtn) el.loginNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabLoginBtn) el.tabLoginBtn.click(); });
 el.registerNavBtn.addEventListener('click', () => { showView('auth'); el.tabRegisterBtn.click(); });
 el.heroCtaBtn.addEventListener('click', () => { showView('auth'); el.tabRegisterBtn.click(); });
 el.logoutBtn.addEventListener('click', logout);
@@ -951,19 +960,32 @@ el.settingsForm.addEventListener('submit', async (e) => {
   const pexelsApiKey = el.setPexelsKey ? el.setPexelsKey.value.trim() : '';
 
   try {
-    if (pexelsApiKey && geminiApiKey) {
-      geminiApiKey = geminiApiKey + '|||' + pexelsApiKey;
+    if (pexelsApiKey) {
+      if (geminiApiKey) {
+        if (!geminiApiKey.includes('|||')) {
+          geminiApiKey = geminiApiKey + '|||' + pexelsApiKey;
+        } else {
+          const parts = geminiApiKey.split('|||');
+          geminiApiKey = parts[0] + '|||' + pexelsApiKey;
+        }
+      } else {
+        geminiApiKey = '|||' + pexelsApiKey;
+      }
     }
 
     const response = await fetch('/api/save-settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${State.token || localStorage.getItem('token') || ''}`
+      },
       body: JSON.stringify({
         userEmail: State.user.email,
         githubToken,
         vercelToken,
         vercelTeamId,
-        geminiApiKey
+        geminiApiKey,
+        pexelsApiKey
       })
     });
 
@@ -7210,34 +7232,49 @@ document.addEventListener('submit', (e) => {
                 if (realCount >= ninjaJourneyState.volume) {
                   clearInterval(progressInterval);
                   
+                  fill.style.width = `100%`;
+                  txt.textContent = `⚡ Aguardando a Vercel finalizar a publicação no ar...`;
+
                   const cleanDomainName = repoName.replace(/^afiliados-blog-/, '');
                   const blogUrl = ninjaJourneyState.deployUrl || `https://${cleanDomainName}.vercel.app`;
                   const repoUrl = ninjaJourneyState.repoUrl || `https://github.com/efeitodigitalcontato-ops/${repoName}`;
                   
-                  setTimeout(() => {
-                    appendNinjaModalMessage(`
-                      🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
-                      Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
-                      
-                      <div style="background: rgba(16, 185, 129, 0.12); border: 1.5px solid #10b981; border-radius: 10px; padding: 16px; margin: 12px 0; text-align: center;">
-                        <div style="font-size: 0.88rem; color: #a7f3d0; margin-bottom: 12px; font-weight: 600;">
-                          ✨ <strong>Seu Blog de Afiliados está no Ar:</strong><br>
-                          <a href="${blogUrl}" target="_blank" style="color: #34d399; font-size: 1.05rem; font-weight: bold; word-break: break-all; text-decoration: underline;">${blogUrl}</a>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
-                          <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 6px;">
-                            🚀 Visitar Blog no Ar
-                          </a>
-                          <a href="${repoUrl}" target="_blank" class="btn btn-secondary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--text-main); display: inline-flex; align-items: center; gap: 6px;">
-                            💻 Repositório GitHub
-                          </a>
-                        </div>
-                      </div>
-                    `);
-                    
-                    if (typeof triggerConfetti === 'function') triggerConfetti();
-                  }, 1500);
+                  let deployChecks = 0;
+                  const checkDeployInterval = setInterval(async () => {
+                    deployChecks++;
+                    try {
+                      const dRes = await fetch(`/api/sites/${repoName}/deploy-status`);
+                      const dData = await dRes.json();
+                      if (dData.ready || deployChecks >= 24) { // Máximo 2 minutos de espera
+                        clearInterval(checkDeployInterval);
+                        appendNinjaModalMessage(`
+                          🎉 <strong>Fábrica Autônoma Concluída com Sucesso!</strong><br>
+                          Todos os <strong>${ninjaJourneyState.volume} artigos</strong> com imagens reais e links de afiliados foram publicados no ar no seu blog!<br><br>
+                          
+                          <div style="background: rgba(16, 185, 129, 0.12); border: 1.5px solid #10b981; border-radius: 10px; padding: 16px; margin: 12px 0; text-align: center;">
+                            <div style="font-size: 0.88rem; color: #a7f3d0; margin-bottom: 12px; font-weight: 600;">
+                              ✨ <strong>Seu Blog de Afiliados está no Ar:</strong><br>
+                              <a href="${blogUrl}" target="_blank" style="color: #34d399; font-size: 1.05rem; font-weight: bold; word-break: break-all; text-decoration: underline;">${blogUrl}</a>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
+                              <a href="${blogUrl}" target="_blank" class="btn btn-success" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-flex; align-items: center; gap: 6px;">
+                                🚀 Visitar Blog no Ar
+                              </a>
+                              <a href="${repoUrl}" target="_blank" class="btn btn-secondary" style="background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); font-weight: bold; padding: 10px 20px; border-radius: 8px; text-decoration: none; color: var(--text-main); display: inline-flex; align-items: center; gap: 6px;">
+                                💻 Repositório GitHub
+                              </a>
+                            </div>
+                          </div>
+                        `);
+                        if (typeof triggerConfetti === 'function') triggerConfetti();
+                      } else {
+                        txt.textContent = `⚡ Compilando e publicando no ar... (${deployChecks * 5}s)`;
+                      }
+                    } catch (e) {
+                      clearInterval(checkDeployInterval);
+                    }
+                  }, 5000);
                 }
               } catch (err) {
                 console.error("Erro ao ler contagem de posts:", err);
@@ -7278,7 +7315,7 @@ window.saveModalOnboardingCredentials = function() {
   
   // Salvar credenciais no Supabase em background se o usuário estiver logado
   if (State.user && State.user.email) {
-    fetch('/api/settings', {
+    fetch('/api/save-settings', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
