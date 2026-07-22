@@ -1543,16 +1543,41 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
     } catch (gitErr) {
       console.error('Git execution failed:', gitErr);
       return res.status(500).json({ error: 'Erro ao enviar arquivos para o GitHub', details: gitErr.message });
-    } finally {
-      // Clean up temp dir
-      try {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-      } catch (rmErr) {
-        console.warn('Could not remove temp folder:', rmErr.message);
-      }
     }
 
-    // 6. Provision Vercel Project & Deployment Flow with fallback retry
+    // Helper to read clean source files for Vercel deployment payload (excluding node_modules/git/etc)
+    function getVercelSourceFiles(dir, baseDir = '') {
+      const fileList = [];
+      const items = fs.readdirSync(dir);
+      const binaryExts = ['.jpg', '.jpeg', '.png', '.gif', '.ico', '.webp', '.woff', '.woff2', '.ttf', '.eot', '.gz', '.zip'];
+
+      for (const item of items) {
+        if (item === '.git' || item === 'node_modules' || item === '.vercel' || item === '.astro' || item === 'dist' || item.startsWith('.env')) continue;
+        const fullPath = path.join(dir, item);
+        const relPath = path.join(baseDir, item).replace(/\\/g, '/');
+        if (fs.statSync(fullPath).isDirectory()) {
+          fileList.push(...getVercelSourceFiles(fullPath, relPath));
+        } else {
+          const ext = path.extname(item).toLowerCase();
+          const buf = fs.readFileSync(fullPath);
+          if (binaryExts.includes(ext)) {
+            fileList.push({
+              file: relPath,
+              data: buf.toString('base64'),
+              encoding: 'base64'
+            });
+          } else {
+            fileList.push({
+              file: relPath,
+              data: buf.toString('utf8')
+            });
+          }
+        }
+      }
+      return fileList;
+    }
+
+    // 6. Provision Vercel Project & Deployment Flow with direct source file payload
     let currentVToken = vToken;
     let currentVTeam = vTeam;
 
@@ -1567,7 +1592,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         tokenLength: token ? token.length : 0,
         teamId: teamId
       });
-      console.log('Provisioning Vercel Project (Git-linked mode)...');
+      console.log('Provisioning Vercel Project (Direct Payload mode)...');
       const createProjectRes = await apiRequest({
         hostname: 'api.vercel.com',
         port: 443,
@@ -1579,11 +1604,7 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         }
       }, {
         name: finalRepoName,
-        framework: 'astro',
-        gitRepository: {
-          type: 'github',
-          repo: finalOwnerRepo
-        }
+        framework: 'astro'
       });
 
       let projectId = null;
@@ -1592,7 +1613,6 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         console.log(`Vercel Project created with ID: ${projectId}`);
       } else {
         console.log('Vercel project creation info:', createProjectRes.body);
-        // Try to fetch existing project if it conflicts
         const getProjectRes = await apiRequest({
           hostname: 'api.vercel.com',
           port: 443,
@@ -1609,28 +1629,6 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
 
       if (!projectId) {
         return { success: false, errorStage: 'project_creation', response: createProjectRes };
-      }
-
-      // Link GitHub repo to Vercel project explicitly
-      try {
-        console.log(`Linking GitHub repo ${finalOwnerRepo} to Vercel project ${projectId}...`);
-        await apiRequest({
-          hostname: 'api.vercel.com',
-          port: 443,
-          path: `/v9/projects/${projectId}/link?teamId=${teamId}`,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }, {
-          type: 'github',
-          repo: finalOwnerRepo,
-          productionBranch: 'main'
-        });
-        console.log('Successfully linked GitHub repo to Vercel project!');
-      } catch (linkErr) {
-        console.warn('Could not link GitHub repo to project:', linkErr.message);
       }
 
       // Ensure Vercel Authentication (SSO / Deployment Protection) is disabled so the site is immediately public
@@ -1653,8 +1651,13 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         console.warn('Warning: Could not disable Vercel SSO Protection:', patchErr.message);
       }
 
-      // Trigger Vercel Deployment
-      console.log('Triggering Vercel Deployment...');
+      // Read clean source files from tempDir for direct deployment
+      console.log('Reading source files from tempDir for Vercel cloud compilation...');
+      const vercelFiles = getVercelSourceFiles(tempDir);
+      console.log(`Prepared ${vercelFiles.length} files for direct Vercel deployment.`);
+
+      // Trigger Vercel Deployment with files payload
+      console.log('Triggering Vercel Deployment with direct source files...');
       let deployRes = await apiRequest({
         hostname: 'api.vercel.com',
         port: 443,
@@ -1668,50 +1671,15 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
         name: finalRepoName,
         project: projectId,
         target: 'production',
-        gitSource: {
-          type: 'github',
-          repo: finalOwnerRepo,
-          ref: 'main'
-        }
+        files: vercelFiles
       });
 
-      // Se falhar com erro de acesso ao repositório, retentamos via importação por repoId
       if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
-        const deployErrBody = JSON.stringify(deployRes.body || {}).toUpperCase();
-        console.warn('Vercel deployment with repo name failed. Retrying with repoId if available... Details:', deployErrBody);
-
-        if (repoId) {
-          deployRes = await apiRequest({
-            hostname: 'api.vercel.com',
-            port: 443,
-            path: `/v13/deployments?teamId=${teamId}`,
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }, {
-            name: finalRepoName,
-            project: projectId,
-            target: 'production',
-            gitSource: {
-              type: 'github',
-              repoId: repoId,
-              ref: 'main'
-            }
-          });
-        }
-      }
-
-      if (deployRes.statusCode !== 200 && deployRes.statusCode !== 201) {
-        const finalDeployErrBody = JSON.stringify(deployRes.body || {}).toUpperCase();
-        if (finalDeployErrBody.includes('REPO_NO_ACCESS')) {
-          console.warn('Deployment failed due to REPO_NO_ACCESS even after link attempt. Returning partial success so user can authorize later.');
-          return { success: true, projectId, response: { body: { id: 'partial-pending', url: `${finalRepoName}.vercel.app` } }, partialDeploy: true };
-        }
+        console.error('Vercel direct file deployment failed with status:', deployRes.statusCode, deployRes.body);
         return { success: false, errorStage: 'deployment', response: deployRes };
       }
 
+      console.log('Vercel deployment initialized successfully! Deployment ID:', deployRes.body.id);
       return { success: true, projectId, response: deployRes };
     }
 
@@ -1808,6 +1776,14 @@ Corpo do artigo em HTML limpo. Use tags <h2>, <h3>, <p>, <ul>, <li> para estrutu
   } catch (err) {
     console.error('Generation Error:', err);
     res.status(500).json({ error: 'Erro inesperado na geração do site', details: err.message });
+  } finally {
+    if (typeof tempDir !== 'undefined' && fs.existsSync(tempDir)) {
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch (rmErr) {
+        console.warn('Could not remove temp folder:', rmErr.message);
+      }
+    }
   }
 });
 
