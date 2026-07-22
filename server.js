@@ -7299,7 +7299,119 @@ app.post('/api/multi-generator/start', async (req, res) => {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
       
-      console.log(`[Fábrica Escala] Concluída a geração de todos os posts para ${repoName}!`);
+      console.log(`[Fábrica Escala] Concluída a geração de todos os posts para ${cleanRepoName}! Disparando deploy automático final na Vercel com todos os artigos...`);
+
+      try {
+        const contentsRes = await apiRequest({
+          hostname: 'api.github.com',
+          port: 443,
+          path: `/repos/${ownerRepo}/contents/src/content/blog`,
+          method: 'GET',
+          headers: {
+            'Authorization': `token ${gToken}`,
+            'User-Agent': 'SaaS-Generator-App',
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (contentsRes.statusCode === 200 && Array.isArray(contentsRes.body)) {
+          const mdFiles = contentsRes.body.filter(f => f.name.endsWith('.md') || f.name.endsWith('.mdx'));
+          const blogFilesPayload = [];
+
+          for (const fileObj of mdFiles) {
+            const fileRes = await apiRequest({
+              hostname: 'api.github.com',
+              port: 443,
+              path: `/repos/${ownerRepo}/contents/${fileObj.path}`,
+              method: 'GET',
+              headers: {
+                'Authorization': `token ${gToken}`,
+                'User-Agent': 'SaaS-Generator-App'
+              }
+            });
+            if (fileRes.statusCode === 200 && fileRes.body && fileRes.body.content) {
+              const content = Buffer.from(fileRes.body.content, 'base64').toString('utf8');
+              blogFilesPayload.push({
+                file: `src/content/blog/${fileObj.name}`,
+                data: content
+              });
+            }
+          }
+
+          const themeLower = cleanRepoName.replace(/^afiliados-blog-/, '').toLowerCase();
+          const templateFolder = (themeLower.includes('multicategorias') || themeLower.includes('analisamelhor')) 
+            ? 'template-multicategorias' 
+            : (themeLower.includes('inteligencia') ? 'template-inteligencia' : (themeLower.includes('livreiro') ? 'template-livreiro' : 'template-produtos'));
+          const templateDir = path.join(__dirname, templateFolder);
+          const baseFiles = getVercelSourceFiles(templateDir);
+          const cleanBaseFiles = baseFiles.filter(f => f.file !== 'src/content/blog/bem-vindo.md' && f.file !== 'src/content/blog/primeiro-post.md');
+
+          const finalPayloadFiles = [...cleanBaseFiles, ...blogFilesPayload];
+
+          let projectId = null;
+          const vToken = DEFAULT_VERCEL_TOKEN;
+          const vTeam = DEFAULT_VERCEL_TEAM;
+
+          const getProj = await apiRequest({
+            hostname: 'api.vercel.com',
+            port: 443,
+            path: `/v9/projects/${cleanRepoName}?teamId=${vTeam}`,
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${vToken}` }
+          });
+
+          if (getProj.statusCode === 200 && getProj.body && getProj.body.id) {
+            projectId = getProj.body.id;
+          } else {
+            const createProj = await apiRequest({
+              hostname: 'api.vercel.com',
+              port: 443,
+              path: `/v9/projects?teamId=${vTeam}`,
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${vToken}`,
+                'Content-Type': 'application/json'
+              }
+            }, {
+              name: cleanRepoName,
+              framework: 'astro'
+            });
+            if (createProj.body && createProj.body.id) projectId = createProj.body.id;
+          }
+
+          if (projectId) {
+            await apiRequest({
+              hostname: 'api.vercel.com',
+              port: 443,
+              path: `/v9/projects/${projectId}?teamId=${vTeam}`,
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${vToken}`,
+                'Content-Type': 'application/json'
+              }
+            }, { ssoProtection: null });
+
+            const finalDeploy = await apiRequest({
+              hostname: 'api.vercel.com',
+              port: 443,
+              path: `/v13/deployments?teamId=${vTeam}`,
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${vToken}`,
+                'Content-Type': 'application/json'
+              }
+            }, {
+              name: cleanRepoName,
+              project: projectId,
+              target: 'production',
+              files: finalPayloadFiles
+            });
+            console.log(`[Fábrica Escala] Deploy final Vercel executado com status: ${finalDeploy.statusCode}! ID: ${finalDeploy.body ? finalDeploy.body.id : 'n/a'}`);
+          }
+        }
+      } catch (deployErr) {
+        console.error('[Fábrica Escala] Erro no deploy final Vercel:', deployErr.message);
+      }
     } catch (err) {
       console.error('[Fábrica Escala] Erro crítico no loop de background:', err.message);
     }
