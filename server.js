@@ -965,7 +965,8 @@ app.post('/api/generate', checkAuth, async (req, res) => {
     githubToken,
     vercelToken,
     vercelTeamId,
-    colorPalette
+    colorPalette,
+    domain
   } = req.body;
 
   let userGithubToken = "";
