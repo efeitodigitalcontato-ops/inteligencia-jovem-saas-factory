@@ -1427,11 +1427,6 @@ if (btnGetIdeas) {
     
     // Pegamos a chave da API salva no state ou localStorage
     const apiKey = State.credentials.geminiApiKey || localStorage.getItem('user_gemini_key') || '';
-    
-    if (!apiKey) {
-      showToast('Chave de API do Gemini não configurada!', 'error');
-      return;
-    }
 
     btnGetIdeas.disabled = true;
     btnGetIdeas.textContent = '🔍 Fazendo Busca em Tempo Real no Google...';
@@ -1496,7 +1491,32 @@ Retorne APENAS o JSON bruto. Não inclua wraps de marcação de bloco de código
         throw new Error(data.error || 'Falha desconhecida na API do Gemini.');
       }
       
-      const ideas = data.ideas.slice(0, 20);
+      let ideas = (data.ideas && data.ideas.length > 0) ? data.ideas.slice(0, 20) : [];
+      if (ideas.length === 0) {
+        const fallbacks = [
+          `Guia Completo de ${keyword}: Tudo o Que Você Precisa Saber em 2026`,
+          `Os 5 Melhores Modelos de ${keyword} com Melhor Custo-Benefício`,
+          `${keyword} Vale a Pena? Análise Detalhada e Opinião Sincera`,
+          `Como Escolher o Ideal: ${keyword} Sem Errar na Compra`,
+          `Principais Vantagens e Desvantagens de ${keyword} Reveladas`,
+          `${keyword}: Comparativo Definitivo entre as Melhores Opções`,
+          `Segredos para Utilizar ${keyword} com Máximo Desempenho`,
+          `Manutenção e Cuidados Essenciais com ${keyword} no Dia a Dia`,
+          `Tudo Sobre ${keyword}: Respostas para as Dúvidas Mais Frequentes`,
+          `Onde Comprar ${keyword} com a Melhor Garantia e Desconto`,
+          `${keyword} para Iniciantes: Passo a Passo Simples para Não Errar`,
+          `Análise Crítica: ${keyword} É Bom Mesmo ou É Puro Marketing?`,
+          `Os Erros Mais Comuns ao Escolher ${keyword} e Como Evitá-los`,
+          `${keyword}: Guia de Compras Atualizado para 2026`,
+          `Qual o Melhor Tipo de ${keyword} para as Suas Necessidades?`,
+          `Review Completo: ${keyword} Testado na Prática`,
+          `Vale o Investimento? Análise de Custo-Benefício de ${keyword}`,
+          `Recursos Indispensáveis que Todo ${keyword} Deve Ter`,
+          `Top Dicas para Aproveitar ao Máximo o Seu ${keyword}`,
+          `Conclusão Definitiva: Qual o Melhor ${keyword} para Comprar Hoje`
+        ];
+        ideas = fallbacks.map(t => ({ title: t }));
+      }
         
         const listContainer = document.getElementById('titles-list');
         if (listContainer) {
