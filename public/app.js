@@ -224,15 +224,12 @@ function showView(viewName) {
     ASMR.playWhoosh();
   }
   Object.keys(el.views).forEach(name => {
-    if (el.views[name]) {
-      if (name === viewName) {
-        el.views[name].classList.add('active');
-      } else {
-        el.views[name].classList.remove('active');
-      }
+    if (name === viewName) {
+      el.views[name].classList.add('active');
+    } else {
+      el.views[name].classList.remove('active');
     }
   });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (viewName === 'settings') {
     updateTwoFactorUI();
@@ -443,10 +440,17 @@ function init() {
   }
 
   // Pre-populate settings form
-  el.setGithubToken.value = State.credentials.githubToken || '';
-  el.setVercelToken.value = State.credentials.vercelToken || '';
-  el.setVercelTeam.value = State.credentials.vercelTeamId || '';
-  el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+  if (el.setGithubToken) el.setGithubToken.value = State.credentials.githubToken || '';
+  if (el.setVercelToken) el.setVercelToken.value = State.credentials.vercelToken || '';
+  if (el.setVercelTeam) el.setVercelTeam.value = State.credentials.vercelTeamId || '';
+  if (el.setGeminiKey) el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+}
+
+// Auto-run init on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => init());
+} else {
+  init();
 }
 
 // Update UI based on auth state
@@ -461,12 +465,12 @@ function updateAuthUI(isLoggedIn) {
     dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
     el.userDisplayEmail.textContent = State.user.email;
     el.dashUserName.textContent = State.user.name || 'Empreendedor';
-    // safiraTrigger disabled
+    if (safiraTrigger) safiraTrigger.classList.remove('hidden');
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
     dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
     dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
-    // safiraTrigger disabled
+    if (safiraTrigger) safiraTrigger.classList.add('hidden');
     if (comeceTrigger) comeceTrigger.classList.add('hidden');
     if (typeof closeSafiraChat === 'function') closeSafiraChat();
   }
@@ -602,44 +606,16 @@ Object.keys(navViewMap).forEach(href => {
   }
 });
 
-if (el.loginNavBtn) {
-  el.loginNavBtn.addEventListener('click', (e) => {
-    if (e) e.preventDefault();
-    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
-    if (State.user) {
-      showView('dashboard');
-    } else {
-      showView('auth');
-      if (el.tabLoginBtn) el.tabLoginBtn.click();
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (el.registerNavBtn) {
-  el.registerNavBtn.addEventListener('click', (e) => {
-    if (e) e.preventDefault();
-    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
-    showView('auth');
-    if (el.tabRegisterBtn) el.tabRegisterBtn.click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-if (el.heroCtaBtn) {
-  el.heroCtaBtn.addEventListener('click', (e) => {
-    if (e) e.preventDefault();
-    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
-    showView('auth');
-    if (el.tabRegisterBtn) el.tabRegisterBtn.click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-el.logoutBtn.addEventListener('click', logout);
-el.dashNewBlogBtn.addEventListener('click', () => showView('newSite'));
+if (el.loginNavBtn) el.loginNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabLoginBtn) el.tabLoginBtn.click(); });
+if (el.registerNavBtn) el.registerNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabRegisterBtn) el.tabRegisterBtn.click(); });
+if (el.heroCtaBtn) el.heroCtaBtn.addEventListener('click', () => { showView('auth'); if (el.tabRegisterBtn) el.tabRegisterBtn.click(); });
+if (el.logoutBtn) el.logoutBtn.addEventListener('click', logout);
+if (el.dashNewBlogBtn) el.dashNewBlogBtn.addEventListener('click', () => showView('newSite'));
 const emptyBtn = document.getElementById('empty-state-create-btn');
 if (emptyBtn) emptyBtn.addEventListener('click', () => showView('newSite'));
 
 el.authTriggerBtns.forEach(btn => {
-  btn.addEventListener('click', () => { showView('auth'); el.tabRegisterBtn.click(); });
+  if (btn) btn.addEventListener('click', () => { showView('auth'); if (el.tabRegisterBtn) el.tabRegisterBtn.click(); });
 });
 
 // Auth Tabs switching
@@ -3775,13 +3751,31 @@ function renderSavedBacklinks() {
 
 let safiraHistory = [];
 
-function toggleSafiraChat() { return; }
+function toggleSafiraChat() {
+  const sidebar = document.getElementById('safira-chat-sidebar');
+  const backdrop = document.getElementById('safira-backdrop');
+  if (sidebar && backdrop) {
+    sidebar.classList.toggle('active');
+    backdrop.classList.toggle('active');
+  }
 }
 
-function openSafiraChat() { return; }
+function openSafiraChat() {
+  const sidebar = document.getElementById('safira-chat-sidebar');
+  const backdrop = document.getElementById('safira-backdrop');
+  if (sidebar && backdrop) {
+    sidebar.classList.add('active');
+    backdrop.classList.add('active');
+  }
 }
 
-function closeSafiraChat() { return; }
+function closeSafiraChat() {
+  const sidebar = document.getElementById('safira-chat-sidebar');
+  const backdrop = document.getElementById('safira-backdrop');
+  if (sidebar && backdrop) {
+    sidebar.classList.remove('active');
+    backdrop.classList.remove('active');
+  }
 }
 
 function formatSafiraMessage(text) {
@@ -6751,12 +6745,12 @@ function updateAuthUI(isLoggedIn) {
     dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
     el.userDisplayEmail.textContent = State.user.email;
     el.dashUserName.textContent = State.user.name || 'Empreendedor';
-    // safiraTrigger disabled
+    if (safiraTrigger) safiraTrigger.classList.remove('hidden');
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
     dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
     dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
-    // safiraTrigger disabled
+    if (safiraTrigger) safiraTrigger.classList.add('hidden');
     if (comeceTrigger) comeceTrigger.classList.add('hidden');
     if (typeof closeSafiraChat === 'function') closeSafiraChat();
   }
