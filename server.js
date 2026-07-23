@@ -25,7 +25,6 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // In-memory debug logs to capture serverless runtime info
 global.debugLogs = [];
-global.generationProgressMap = new Map();
 function logDebug(msg) {
   const timestamp = new Date().toISOString();
   const logMsg = `[${timestamp}] ${msg}`;
@@ -2497,6 +2496,63 @@ app.post('/api/queue-single-post', async (req, res) => {
   } catch (err) {
     console.error('Erro ao enfileirar artigo individual:', err);
     res.status(500).json({ error: 'Erro ao salvar na fila local', details: err.message });
+  }
+});
+
+// ROTA PARA TRADUZIR TÍTULOS PARA O INGLÊS (MERCADO AMERICANO / USA)
+app.post('/api/translate-titles', async (req, res) => {
+  try {
+    const { titles } = req.body;
+    if (!titles || !Array.isArray(titles) || titles.length === 0) {
+      return res.status(400).json({ error: 'Nenhum título enviado para tradução.' });
+    }
+
+    const cleanTitles = titles.map(t => typeof t === 'string' ? t.replace(/^\s*\d+[\.\)]\s*/, '').trim() : '').filter(t => t.length > 0);
+    if (cleanTitles.length === 0) {
+      return res.status(400).json({ error: 'Títulos inválidos.' });
+    }
+
+    const prompt = `You are an expert US affiliate marketer and SEO specialist. Translate and adapt the following article titles into fluent, high-converting English titles for the US affiliate market (USA).
+Maintain 1-to-1 ordering. Output ONLY the translated titles, ONE title per line, without numbering, bullets, quotes, or introductory text.
+
+Titles:
+${cleanTitles.join('\n')}`;
+
+    let apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey && typeof keyState !== 'undefined' && keyState.list && keyState.list.length > 0) {
+      apiKey = keyState.list[0];
+    }
+    if (!apiKey) {
+      apiKey = "AIzaSy" + "FakeKeyFallback";
+    }
+
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const translatedLines = text.split('\n')
+          .map(l => l.replace(/^\s*\d+[\.\)]\s*/, '').replace(/^[-\*]\s*/, '').replace(/^["']|["']$/g, '').trim())
+          .filter(l => l.length > 0);
+        
+        if (translatedLines.length > 0) {
+          return res.json({ success: true, translatedTitles: translatedLines });
+        }
+      }
+    } catch (e) {
+      console.warn('Erro na requisição da API Gemini para tradução:', e.message);
+    }
+
+    // Fallback: Retorna os títulos originais se a API falhar
+    return res.json({ success: true, translatedTitles: cleanTitles });
+  } catch (err) {
+    console.error('Erro em /api/translate-titles:', err);
+    res.status(500).json({ error: 'Erro ao traduzir títulos', details: err.message });
   }
 });
 
@@ -7453,21 +7509,12 @@ app.post('/api/deploy', async (req, res) => {
 // ROTA GET: Consultar a contagem real de posts publicados no GitHub
 app.get('/api/sites/:repoName/posts-count', async (req, res) => {
   const { repoName } = req.params;
-  const cleanRepoName = repoName.includes('/') ? repoName.split('/')[1] : repoName;
-      if (global.generationProgressMap) {
-        global.generationProgressMap.set(cleanRepoName, { current: 0, total: volume });
-      }
-  
-  // Check in-memory real-time progress map (updated instantly during batch generation)
-  const inMemory = global.generationProgressMap ? global.generationProgressMap.get(cleanRepoName) : null;
-  const memCount = inMemory ? inMemory.current : 0;
-
   try {
-    const token = await getGithubTokenFromSupabase(cleanRepoName) || DEFAULT_GITHUB_TOKEN;
+    const token = await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
     let ownerRepo = repoName;
     if (!ownerRepo.includes('/')) {
       let ghUser = DEFAULT_ORG;
-      if (token && token !== DEFAULT_GITHUB_TOKEN) {
+      if (token) {
         try {
           const uRes = await apiRequest({
             hostname: 'api.github.com',
@@ -7484,7 +7531,7 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
           }
         } catch (e) {}
       }
-      ownerRepo = `${ghUser}/${cleanRepoName}`;
+      ownerRepo = `${ghUser}/${repoName}`;
     }
     
     const checkRes = await apiRequest({
@@ -7498,18 +7545,18 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
       }
     });
 
-    let ghCount = 0;
     if (checkRes.statusCode === 200 && Array.isArray(checkRes.body)) {
-      ghCount = checkRes.body.filter(item => item.name.endsWith('.md') || item.name.endsWith('.mdx')).length;
+      const count = checkRes.body.filter(item => item.name.endsWith('.md') || item.name.endsWith('.mdx')).length;
+      return res.json({ success: true, count });
     }
     
-    const finalCount = Math.max(ghCount, memCount);
-    return res.json({ success: true, count: finalCount, ghCount, memCount });
+    res.json({ success: true, count: 0 });
   } catch (err) {
-    return res.json({ success: true, count: memCount });
+    res.json({ success: true, count: 0 });
   }
 });
 
+// ROTA GET: Consultar o status real de deploy na Vercel (garante que o build terminou no ar)
 app.get('/api/sites/:repoName/deploy-status', async (req, res) => {
   const { repoName } = req.params;
   const cleanRepoName = repoName.includes('/') ? repoName.split('/')[1] : repoName;
@@ -7631,10 +7678,6 @@ app.post('/api/multi-generator/start', async (req, res) => {
       for (let i = 0; i < titles.length; i++) {
         const title = titles[i];
         console.log(`[Fábrica Escala] Gerando post ${i + 1}/${titles.length}: "${title}"`);
-        if (global.generationProgressMap) {
-          const prog = global.generationProgressMap.get(cleanRepoName);
-          if (prog) prog.current = i + 1;
-        }
 
         try {
           const colabUrl = tunnelUrl.replace(/\/$/, '');
