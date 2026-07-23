@@ -4960,7 +4960,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // SAFIRA ONBOARDING MODAL LOGIC
 // ============================================================================
 
-function openSafiraOnboarding() {
+window.openSafiraOnboarding = function openSafiraOnboarding() {
   const safiraModal = document.getElementById('safira-onboarding-modal');
   if (!safiraModal) return;
   // Pre-fill if exists
@@ -6760,7 +6760,7 @@ let ninjaJourneyState = {
 // Eventos de clique no modal
 document.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'btn-ninja-do-all') {
-    openNinjaDoAllModal();
+    openSafiraOnboarding();
   }
   if (e.target && e.target.id === 'btn-close-ninja-modal') {
     closeNinjaDoAllModal();
