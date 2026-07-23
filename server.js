@@ -3843,7 +3843,7 @@ app.post('/api/auth/google', async (req, res) => {
 
     res.json({
       success: true,
-      token: authData.session.access_token,
+      token: (authData.session && authData.session.access_token) ? authData.session.access_token : (authData.user ? authData.user.id : ''),
       user: {
         name: profile.name,
         email: profile.email,
