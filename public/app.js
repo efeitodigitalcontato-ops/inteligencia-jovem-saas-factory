@@ -340,27 +340,24 @@ function checkGeminiKeyWarning() {
   
   if (!banner) return;
   
-  // Show banner only if logged in and geminiApiKey is missing
   if (State.user && (!State.user.geminiApiKey || State.user.geminiApiKey.trim() === '')) {
     banner.style.display = 'block';
   } else {
     banner.style.display = 'none';
   }
   
-  // Wire up show tutorial button once if not already wired
-  if (showTutorialBtn && !showTutorialBtn.dataset.wired) {
+  if (showTutorialBtn && showTutorialBtn.dataset && !showTutorialBtn.dataset.wired) {
     showTutorialBtn.dataset.wired = 'true';
     showTutorialBtn.addEventListener('click', () => {
-      if (tutorial.style.display === 'none') {
+      if (tutorial && tutorial.style.display === 'none') {
         tutorial.style.display = 'block';
         showTutorialBtn.textContent = 'Ocultar Tutorial';
-      } else {
+      } else if (tutorial) {
         tutorial.style.display = 'none';
         showTutorialBtn.textContent = 'Como Obter a Chave';
       }
     });
     
-    // Wire up links to go to settings
     const goSettingsLinks = ['link-go-to-settings', 'link-go-to-settings-tutorial'];
     goSettingsLinks.forEach(id => {
       const link = document.getElementById(id);
@@ -373,7 +370,6 @@ function checkGeminiKeyWarning() {
     });
   }
 }
-
 
 // Toast Notifications
 function showToast(message, type = 'success') {
@@ -572,27 +568,31 @@ function renderBlogList() {
 }
 
 // Dynamic input handler for Theme selector
-el.siteTheme.addEventListener('change', (e) => {
-  if (e.target.value === 'custom') {
-    el.customThemeGroup.classList.remove('hidden');
-    el.siteCustomTheme.required = true;
-    el.siteRepoName.value = '';
-  } else {
-    el.customThemeGroup.classList.add('hidden');
-    el.siteCustomTheme.required = false;
-    el.siteCustomTheme.value = '';
-    el.siteRepoName.value = `afiliados-blog-${e.target.value}`;
-  }
-});
+if (el.siteTheme) {
+  el.siteTheme.addEventListener('change', (e) => {
+    if (e.target.value === 'custom') {
+      if (el.customThemeGroup) el.customThemeGroup.classList.remove('hidden');
+      if (el.siteCustomTheme) el.siteCustomTheme.required = true;
+      if (el.siteRepoName) el.siteRepoName.value = '';
+    } else {
+      if (el.customThemeGroup) el.customThemeGroup.classList.add('hidden');
+      if (el.siteCustomTheme) el.siteCustomTheme.required = false;
+      if (el.siteCustomTheme) el.siteCustomTheme.value = '';
+      if (el.siteRepoName) el.siteRepoName.value = `afiliados-blog-${e.target.value}`;
+    }
+  });
+}
 
 // Update slug on custom theme change
-el.siteCustomTheme.addEventListener('input', (e) => {
-  el.siteRepoName.value = sluggify(`afiliados-blog-${e.target.value}`);
-});
+if (el.siteCustomTheme) {
+  el.siteCustomTheme.addEventListener('input', (e) => {
+    if (el.siteRepoName) el.siteRepoName.value = sluggify(`afiliados-blog-${e.target.value}`);
+  });
+}
 
 // Trigger change event to initialize fields on load
 setTimeout(() => {
-  if (el.siteTheme) {
+  if (el.siteTheme && typeof el.siteTheme.dispatchEvent === 'function') {
     el.siteTheme.dispatchEvent(new Event('change'));
   }
 }, 500);
@@ -600,9 +600,12 @@ setTimeout(() => {
 // EVENT LISTENERS
 
 // View Routing clicks
-el.navLogo.addEventListener('click', () => showView(State.user ? 'dashboard' : 'landing'));
-document.querySelector('a[href="#dashboard"]').addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); });
-document.querySelector('a[href="#niche"]').addEventListener('click', (e) => { e.preventDefault(); showView('niche'); });
+if (el.navLogo) el.navLogo.addEventListener('click', () => showView(State.user ? 'dashboard' : 'landing'));
+const dashLink = document.querySelector('a[href="#dashboard"]');
+if (dashLink) dashLink.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); });
+const nicheLink = document.querySelector('a[href="#niche"]');
+if (nicheLink) nicheLink.addEventListener('click', (e) => { e.preventDefault(); showView('niche'); });
+
 const navViewMap = {
   '#new-site': 'newSite',
   '#multi-generator': 'multiGenerator',
@@ -2966,7 +2969,7 @@ async function renderProPartnerSites() {
 }
 
 const partnerForm = document.getElementById('pro-partner-site-form');
-if (partnerForm && !partnerForm.dataset.wired) {
+if (partnerForm && partnerForm.dataset && !partnerForm.dataset.wired) {
   partnerForm.dataset.wired = 'true';
   partnerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
