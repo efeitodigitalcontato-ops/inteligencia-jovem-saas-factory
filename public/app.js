@@ -224,12 +224,15 @@ function showView(viewName) {
     ASMR.playWhoosh();
   }
   Object.keys(el.views).forEach(name => {
-    if (name === viewName) {
-      el.views[name].classList.add('active');
-    } else {
-      el.views[name].classList.remove('active');
+    if (el.views[name]) {
+      if (name === viewName) {
+        el.views[name].classList.add('active');
+      } else {
+        el.views[name].classList.remove('active');
+      }
     }
   });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (viewName === 'settings') {
     updateTwoFactorUI();
@@ -599,9 +602,37 @@ Object.keys(navViewMap).forEach(href => {
   }
 });
 
-if (el.loginNavBtn) el.loginNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabLoginBtn) el.tabLoginBtn.click(); });
-el.registerNavBtn.addEventListener('click', () => { showView('auth'); el.tabRegisterBtn.click(); });
-el.heroCtaBtn.addEventListener('click', () => { showView('auth'); el.tabRegisterBtn.click(); });
+if (el.loginNavBtn) {
+  el.loginNavBtn.addEventListener('click', (e) => {
+    if (e) e.preventDefault();
+    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
+    if (State.user) {
+      showView('dashboard');
+    } else {
+      showView('auth');
+      if (el.tabLoginBtn) el.tabLoginBtn.click();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (el.registerNavBtn) {
+  el.registerNavBtn.addEventListener('click', (e) => {
+    if (e) e.preventDefault();
+    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
+    showView('auth');
+    if (el.tabRegisterBtn) el.tabRegisterBtn.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+if (el.heroCtaBtn) {
+  el.heroCtaBtn.addEventListener('click', (e) => {
+    if (e) e.preventDefault();
+    if (typeof ASMR !== 'undefined') ASMR.playWhoosh();
+    showView('auth');
+    if (el.tabRegisterBtn) el.tabRegisterBtn.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 el.logoutBtn.addEventListener('click', logout);
 el.dashNewBlogBtn.addEventListener('click', () => showView('newSite'));
 const emptyBtn = document.getElementById('empty-state-create-btn');
