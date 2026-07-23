@@ -2694,3 +2694,11 @@ input:focus, select:focus, textarea:focus {
   width: 0 !important;
   height: 0 !important;
 }
+
+/* FORCE HIDE SAFIRA CHAT */
+#open-safira-btn, #safira-chat-sidebar, #safira-backdrop, #safira-floating-trigger, .safira-floating-trigger, .safira-sidebar, .safira-backdrop {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
