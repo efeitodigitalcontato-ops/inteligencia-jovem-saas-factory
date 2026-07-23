@@ -475,8 +475,8 @@ function updateAuthUI(isLoggedIn) {
   if (isLoggedIn) {
     dynamicPrivateLinks.forEach(link => link.classList.remove('hidden'));
     dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
-    el.userDisplayEmail.textContent = State.user.email;
-    el.dashUserName.textContent = State.user.name || 'Empreendedor';
+    if (el.userDisplayEmail && State.user) el.userDisplayEmail.textContent = State.user.email || '';
+    if (el.dashUserName && State.user) el.dashUserName.textContent = State.user.name || 'Empreendedor';
     if (safiraTrigger) safiraTrigger.classList.remove('hidden');
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
@@ -502,9 +502,11 @@ function logout() {
 
 // Render user blog sites
 function renderBlogList() {
-  el.siteListCount.textContent = `${State.sites.length} site(s) criado(s)`;
-  el.statTotalBlogs.textContent = State.sites.length;
-  el.statArticlesCount.textContent = State.sites.length * 5; // Simulating initial generated articles
+  if (el.siteListCount) el.siteListCount.textContent = `${State.sites.length} site(s) criado(s)`;
+  if (el.statTotalBlogs) el.statTotalBlogs.textContent = State.sites.length;
+  if (el.statArticlesCount) el.statArticlesCount.textContent = State.sites.length * 5; // Simulating initial generated articles
+
+  if (!el.blogListTbody) return;
 
   if (State.sites.length === 0) {
     el.blogListTbody.innerHTML = `
@@ -631,19 +633,23 @@ el.authTriggerBtns.forEach(btn => {
 });
 
 // Auth Tabs switching
-el.tabLoginBtn.addEventListener('click', () => {
-  el.tabLoginBtn.classList.add('active');
-  el.tabRegisterBtn.classList.remove('active');
-  el.loginForm.classList.add('active');
-  el.registerForm.classList.remove('active');
-});
+if (el.tabLoginBtn) {
+  el.tabLoginBtn.addEventListener('click', () => {
+    if (el.tabLoginBtn) el.tabLoginBtn.classList.add('active');
+    if (el.tabRegisterBtn) el.tabRegisterBtn.classList.remove('active');
+    if (el.loginForm) el.loginForm.classList.add('active');
+    if (el.registerForm) el.registerForm.classList.remove('active');
+  });
+}
 
-el.tabRegisterBtn.addEventListener('click', () => {
-  el.tabRegisterBtn.classList.add('active');
-  el.tabLoginBtn.classList.remove('active');
-  el.registerForm.classList.add('active');
-  el.loginForm.classList.remove('active');
-});
+if (el.tabRegisterBtn) {
+  el.tabRegisterBtn.addEventListener('click', () => {
+    if (el.tabRegisterBtn) el.tabRegisterBtn.classList.add('active');
+    if (el.tabLoginBtn) el.tabLoginBtn.classList.remove('active');
+    if (el.registerForm) el.registerForm.classList.add('active');
+    if (el.loginForm) el.loginForm.classList.remove('active');
+  });
+}
 
 // --- TWO-FACTOR AUTHENTICATION FRONTEND ENGINE ---
 let tempLoginEmail = null;
@@ -660,16 +666,16 @@ function handleLoginSuccess(user) {
   };
   
   // Pre-populate settings form
-  el.setGithubToken.value = State.credentials.githubToken || '';
-  el.setVercelToken.value = State.credentials.vercelToken || '';
-  el.setVercelTeam.value = State.credentials.vercelTeamId || '';
-  el.setGeminiKey.value = State.credentials.geminiApiKey || '';
+  if (el.setGithubToken) el.setGithubToken.value = State.credentials.githubToken || '';
+  if (el.setVercelToken) el.setVercelToken.value = State.credentials.vercelToken || '';
+  if (el.setVercelTeam) el.setVercelTeam.value = State.credentials.vercelTeamId || '';
+  if (el.setGeminiKey) el.setGeminiKey.value = State.credentials.geminiApiKey || '';
   
   updateAuthUI(true);
   renderBlogList();
   updateTwoFactorUI();
   
-  showToast(`Bem-vindo, ${user.name}!`);
+  showToast(`Bem-vindo, ${user.name || 'Empreendedor'}!`);
   showView('dashboard');
 
   // Trigger Safira Onboarding Se necessário
@@ -683,26 +689,30 @@ function updateTwoFactorUI() {
   const isEnabled = !!State.user.twoFactorEnabled;
   
   if (isEnabled) {
-    el.twoFactorStatus.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="color: #10b981; font-size: 1.25rem;">●</span>
-        <span>A autenticação de dois fatores (2FA) está <strong style="color: #10b981;">ATIVADA</strong> em sua conta.</span>
-      </div>
-    `;
-    el.btnEnable2fa.style.display = 'none';
-    el.twoFactorSetupSteps.style.display = 'none';
-    el.twoFactorDisableSteps.style.display = 'block';
-    el.twoFactorDisableCode.value = '';
+    if (el.twoFactorStatus) {
+      el.twoFactorStatus.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: #10b981; font-size: 1.25rem;">●</span>
+          <span>A autenticação de dois fatores (2FA) está <strong style="color: #10b981;">ATIVADA</strong> em sua conta.</span>
+        </div>
+      `;
+    }
+    if (el.btnEnable2fa) el.btnEnable2fa.style.display = 'none';
+    if (el.twoFactorSetupSteps) el.twoFactorSetupSteps.style.display = 'none';
+    if (el.twoFactorDisableSteps) el.twoFactorDisableSteps.style.display = 'block';
+    if (el.twoFactorDisableCode) el.twoFactorDisableCode.value = '';
   } else {
-    el.twoFactorStatus.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="color: #ef4444; font-size: 1.25rem;">●</span>
-        <span>A autenticação de dois fatores (2FA) está <strong style="color: #ef4444;">DESATIVADA</strong> em sua conta.</span>
-      </div>
-    `;
-    el.btnEnable2fa.style.display = 'inline-block';
-    el.twoFactorSetupSteps.style.display = 'none';
-    el.twoFactorDisableSteps.style.display = 'none';
+    if (el.twoFactorStatus) {
+      el.twoFactorStatus.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: #ef4444; font-size: 1.25rem;">●</span>
+          <span>A autenticação de dois fatores (2FA) está <strong style="color: #ef4444;">DESATIVADA</strong> em sua conta.</span>
+        </div>
+      `;
+    }
+    if (el.btnEnable2fa) el.btnEnable2fa.style.display = 'inline-block';
+    if (el.twoFactorSetupSteps) el.twoFactorSetupSteps.style.display = 'none';
+    if (el.twoFactorDisableSteps) el.twoFactorDisableSteps.style.display = 'none';
   }
 }
 
