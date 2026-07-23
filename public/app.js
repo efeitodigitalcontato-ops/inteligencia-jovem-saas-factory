@@ -4264,12 +4264,12 @@ function showSafiraComicBubble(selector, stepIndex) {
   bubble.innerHTML = `
     <div class="safira-hq-avatar">💎</div>
     <div class="safira-hq-bubble-title">Safira</div>
-    <div class="safira-hq-bubble-step">Etapa ${stepIndex} de 7 — ${title}</div>
+    <div class="safira-hq-bubble-step">Etapa ${stepIndex === 7 ? 6 : stepIndex} de 6 — ${title}</div>
     <div class="safira-hq-bubble-text">${text}</div>
     <div class="safira-hq-buttons">
-      ${stepIndex > 1 ? `<button class="safira-hq-btn safira-hq-btn-prev" onclick="advanceComeceRapidoComic(${stepIndex - 1})">◀ Voltar</button>` : '<div></div>'}
+      ${stepIndex > 1 ? `<button class="safira-hq-btn safira-hq-btn-prev" onclick="advanceComeceRapidoComic(${stepIndex === 7 ? 5 : stepIndex - 1})">◀ Voltar</button>` : '<div></div>'}
       ${stepIndex < 7 
-        ? `<button class="safira-hq-btn safira-hq-btn-next" onclick="advanceComeceRapidoComic(${stepIndex + 1})">Avançar ▶</button>`
+        ? `<button class="safira-hq-btn safira-hq-btn-next" onclick="advanceComeceRapidoComic(${stepIndex === 5 ? 7 : stepIndex + 1})">Avançar ▶</button>`
         : `<button class="safira-hq-btn safira-hq-btn-next" onclick="finishComeceRapidoComic()">Finalizar 🎉</button>`
       }
       <button class="safira-hq-btn safira-hq-btn-close" onclick="closeComeceRapidoComic()" title="Encerrar Guia">✕</button>
