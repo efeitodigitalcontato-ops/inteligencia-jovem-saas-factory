@@ -37,8 +37,10 @@ linha()
 # ETAPA 1 — Instalar Ollama
 # ══════════════════════════════════════════════════════════════
 print('\\n[1/5] 🔧 Instalando Ollama...')
-os.system('apt-get update -qq && apt-get install -y pciutils lshw zstd -qq 2>/dev/null')
-os.system('curl -fsSL https://ollama.com/install.sh | sh 2>/dev/null')
+os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
+if os.system('which ollama >/dev/null 2>&1') != 0:
+    os.system('apt-get install -y -qq zstd >/dev/null 2>&1')
+    os.system('curl -fsSL https://ollama.com/download/ollama-linux-amd64.tar.zst | zstd -d | tar -xf - -C /usr/local')
 ok('Ollama instalado!')
 
 
@@ -188,13 +190,14 @@ PRIMEIRA LINHA (obrigatório):
         slug = re.sub(r'[\\s_]+', '-', slug).strip('-')[:80]
 
         # Frontmatter
+        hero_img  = f"/images/posts/{slug}.jpg"
         pub_date  = datetime.now().strftime('%Y-%m-%d')
         tags_yaml = '\\n'.join([f'  - "{tg}"' for tg in tags_list]) if tags_list else '  - "colchão"'
         markdown  = f"""---
 title: {json.dumps(titulo, ensure_ascii=False)}
 description: {json.dumps(seo_desc, ensure_ascii=False)}
 pubDate: "{pub_date}"
-heroImage: "/images/{slug}.jpg"
+heroImage: "{hero_img}"
 tags:
 {tags_yaml}
 ---
@@ -802,6 +805,19 @@ async function generateOne(titulo, repo, ghToken, ghEmail) {
             } else if (data.type === 'done_article') {
               appendLog('\n' + (data.msg || '📥 Enfileirando artigo no navegador...'), 'info');
               
+              const affInput = document.getElementById('affiliateLink') || document.getElementById('cn-affiliate-link');
+              const affLink = affInput ? affInput.value.trim() : '';
+
+              let markdown = data.markdown || '';
+              if (affLink && !markdown.includes(affLink)) {
+                const ctaBlock = `\n\n---\n### 🛒 Onde Comprar pelo Melhor Preço\nAproveite a oferta oficial com desconto exclusivo, garantia e frete rápido:\n\n👉 [**Ver Oferta Especial na Loja Oficial**](${affLink})\n---\n`;
+                if (/##\s*(Perguntas Frequentes|FAQ)/i.test(markdown)) {
+                  markdown = markdown.replace(/(##\s*(Perguntas Frequentes|FAQ))/i, ctaBlock + '\n\n$1');
+                } else {
+                  markdown += ctaBlock;
+                }
+              }
+
               // Salvar no localStorage do navegador
               const queueKey = `ninja_queue_${repo}`;
               let localQueue = [];
@@ -811,7 +827,7 @@ async function generateOne(titulo, repo, ghToken, ghEmail) {
               
               localQueue.push({
                 fileName: data.slug + '.md',
-                content: data.markdown
+                content: markdown
               });
               localStorage.setItem(queueKey, JSON.stringify(localQueue));
               

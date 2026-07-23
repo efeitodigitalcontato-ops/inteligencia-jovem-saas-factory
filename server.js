@@ -2244,6 +2244,7 @@ author: "Redação"
 
 // FUNÇÃO PARA CONSOLIDAR A FILA DE UM REPOSITÓRIO ESPECÍFICO E DAR PUSH
 async function consolidateRepoQueue(repoName, customGithubToken, customUserEmail) {
+  repoName = (repoName || '').trim().replace(/\.git$/, '').replace(/^https?:\/\/github\.com\/[^\/]+\//, '');
   const repoQueueDir = path.join(QUEUE_DIR, repoName);
   const repoImagesQueueDir = path.join(repoQueueDir, 'images');
   const configFile = path.join(repoQueueDir, '_config.json');
@@ -7007,6 +7008,7 @@ app.post('/api/generate-bulk-sse', async (req, res) => {
 
 // FUNÇÃO PARA CONSOLIDAR ARTIGOS DIRETAMENTE RECEBIDOS NA REQUEST (STATELESS/VERCEL-SAFE)
 async function consolidateArticlesDirectly(repoName, articles, gToken, userEmail) {
+  repoName = (repoName || '').trim().replace(/\.git$/, '').replace(/^https?:\/\/github\.com\/[^\/]+\//, '');
   try {
     const owner = await resolveRepoOwner(gToken, repoName);
     const repo = repoName;
