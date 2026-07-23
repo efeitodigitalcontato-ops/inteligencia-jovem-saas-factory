@@ -223,13 +223,25 @@ function showView(viewName) {
   if (typeof ASMR !== 'undefined') {
     ASMR.playWhoosh();
   }
-  Object.keys(el.views).forEach(name => {
-    if (name === viewName) {
-      el.views[name].classList.add('active');
-    } else {
-      el.views[name].classList.remove('active');
-    }
-  });
+
+  // Desativar todas as seções ativas no DOM
+  document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
+  // Resolver a seção de destino dinamicamente no DOM
+  const kebab = viewName.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+  let target = document.getElementById('view-' + kebab) ||
+               document.getElementById(viewName) ||
+               document.getElementById('view-' + viewName);
+
+  if (!target && typeof el !== 'undefined' && el.views && el.views[viewName]) {
+    target = el.views[viewName];
+  }
+
+  if (target) {
+    target.classList.add('active');
+  } else {
+    console.warn('Seção de visão não encontrada para:', viewName);
+  }
 
   if (viewName === 'settings') {
     updateTwoFactorUI();
