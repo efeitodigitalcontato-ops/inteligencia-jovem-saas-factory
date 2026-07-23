@@ -1,0 +1,87 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import siteConfig from '../siteConfig.json';
+
+const allPosts = await getCollection('blog');
+
+// Filtrar artigos da categoria USA
+const usaPosts = allPosts
+  .filter(post => {
+    const cat = (post.data.category || '').toLowerCase();
+    const tags = Array.isArray(post.data.tags) ? post.data.tags.map(t => t.toLowerCase()) : [];
+    return cat === 'usa' || cat === 'us' || cat === 'american' || tags.includes('usa') || tags.includes('english');
+  })
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+
+const defaultFallbackImg = "https://images.pexels.com/photos/3993444/pexels-photo-3993444.jpeg?auto=compress&cs=tinysrgb&w=800";
+function getValidHeroImage(imgUrl) {
+  if (!imgUrl || typeof imgUrl !== 'string') return defaultFallbackImg;
+  const trimmed = imgUrl.trim();
+  if (!trimmed || trimmed === '' || trimmed.startsWith('/wp-content/')) return defaultFallbackImg;
+  return trimmed;
+}
+---
+
+<Layout title={`🇺🇸 USA Edition - English Articles & Reviews | ${siteConfig.title}`} description="Browse all English articles and in-depth buying guides focused on the American market.">
+  <main style="max-width: 1100px; margin: 0 auto; padding: 2.5rem 1rem;">
+    
+    <!-- USA Header Banner -->
+    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #4338ca; border-radius: 16px; padding: 2.5rem; color: #ffffff; margin-bottom: 3rem; box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.3);">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+        <span style="font-size: 2.5rem;">🇺🇸</span>
+        <div>
+          <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0; color: #ffffff;">US Market — English Articles</h1>
+          <p style="font-size: 1rem; color: #c7d2fe; margin-top: 0.25rem; margin-bottom: 0;">Independent product reviews, top-rated buying guides, and expert recommendations for American shoppers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- USA Articles Grid -->
+    {usaPosts.length > 0 ? (
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
+        {usaPosts.map(post => (
+          <article style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column;">
+            <a href={`/${post.slug}`} style="text-decoration: none; color: inherit; display: block; overflow: hidden;">
+              <img 
+                src={getValidHeroImage(post.data?.heroImage)} 
+                alt={post.data.title} 
+                loading="lazy" 
+                width="360" 
+                height="200" 
+                style="width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s ease;"
+                onerror={`this.onerror=null; this.src='${defaultFallbackImg}';`}
+              />
+            </a>
+            <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <span style="background: #e0e7ff; color: #3730a3; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 6px; display: inline-block; margin-bottom: 0.75rem;">
+                  🇺🇸 USA CATEGORY
+                </span>
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 0.5rem; line-height: 1.4;">
+                  <a href={`/${post.slug}`} style="color: #0f172a; text-decoration: none;">{post.data.title}</a>
+                </h2>
+                <p style="font-size: 0.95rem; color: #64748b; line-height: 1.5; margin-bottom: 1.25rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                  {post.data.description}
+                </p>
+              </div>
+              <div style="border-top: 1px solid #f1f5f9; padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #94a3b8;">
+                <span>{new Date(post.data.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <a href={`/${post.slug}`} style="color: #4f46e5; font-weight: 600; text-decoration: none;">Read Article &rarr;</a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div style="text-align: center; padding: 4rem 2rem; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px;">
+        <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🇺🇸</span>
+        <h3 style="font-size: 1.4rem; color: #1e293b; margin-bottom: 0.5rem;">Nenhum artigo publicado na categoria USA ainda</h3>
+        <p style="color: #64748b; max-width: 500px; margin: 0 auto 1.5rem; font-size: 0.95rem;">
+          Utilize o novo botão <strong>🇺🇸 Mercado Americano (USA)</strong> na Máquina Infinita do Gerador Ninja para traduzir e publicar seus primeiros artigos em inglês nesta seção!
+        </p>
+        <a href="/" style="display: inline-block; background: #4f46e5; color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600;">Voltar para a Home</a>
+      </div>
+    )}
+  </main>
+</Layout>
