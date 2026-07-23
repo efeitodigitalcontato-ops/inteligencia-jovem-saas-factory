@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
@@ -16,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css?v=1.1.2">
+  <link rel="stylesheet" href="app.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="dark-theme">
@@ -44,7 +41,10 @@
         <a href="#backlink-tracker" class="nav-link private-only hidden">Backlinks</a>
         <a href="#neto-salva" class="nav-link private-only hidden">Backup</a>
         <a href="#settings" class="nav-link private-only hidden">Configurações</a>
-        </nav>
+        <a href="#" id="open-safira-btn" class="nav-link private-only hidden" style="color: var(--secondary); font-weight: bold; border: 1px solid var(--secondary-glow); padding: 2px 8px; border-radius: 8px; background: var(--secondary-glow);">💬 Safira</a>
+
+
+      </nav>
       <div class="nav-auth-buttons">
         <button class="btn btn-outline public-only" id="login-nav-btn">Entrar</button>
         <button class="btn btn-primary public-only" id="register-nav-btn">Solicitar Cadastro</button>
@@ -1209,6 +1209,11 @@
                 onmouseover="this.style.background='rgba(168,85,247,0.2)'" onmouseout="this.style.background='rgba(168,85,247,0.1)'">
                 🖼️ Buscar Imagens Pexels
               </button>
+              <button onclick="cnTranslateAndGenerateUSA()" id="cn-usa-btn"
+                style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(59,130,246,0.4); background:linear-gradient(135deg, rgba(30,58,138,0.4), rgba(59,130,246,0.2)); color:#93c5fd; font-family:inherit; font-size:0.88rem; font-weight:700; cursor:pointer; transition:all 0.3s; display:inline-flex; align-items:center; gap:0.4rem;"
+                onmouseover="this.style.background='rgba(59,130,246,0.3)'" onmouseout="this.style.background='rgba(30,58,138,0.4)'">
+                🇺🇸 Mercado Americano (USA)
+              </button>
               <button onclick="cnTriggerDeploy()"
                 style="padding:0.9rem 1.2rem; border-radius:12px; border:1px solid rgba(16,185,129,0.3); background:rgba(16,185,129,0.08); color:#6ee7b7; font-family:inherit; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.3s;"
                 onmouseover="this.style.background='rgba(16,185,129,0.18)'" onmouseout="this.style.background='rgba(16,185,129,0.08)'">
@@ -2292,7 +2297,44 @@
   </footer>
 
   <!-- Backdrop for Safira Chat -->
-  
+  <div id="safira-backdrop" class="safira-backdrop"></div>
+
+  <!-- Safira Chat Sidebar Panel -->
+  <div id="safira-chat-sidebar" class="safira-sidebar">
+    <div class="safira-header">
+      <div class="safira-header-title">
+        <div class="safira-avatar">💎</div>
+        <div class="safira-status-info">
+          <h3>Agente Safira</h3>
+          <span class="safira-status-online">Online</span>
+        </div>
+      </div>
+      <button id="safira-close-btn" class="safira-close-btn" title="Fechar">&times;</button>
+    </div>
+    
+    <div id="safira-messages" class="safira-messages">
+      <!-- Welcome Message from Safira -->
+      <div class="safira-message assistant">
+        <p>Olá! Eu sou a <strong>Safira</strong>, sua assistente virtual de inteligência artificial no Gerador Ninja. 💎</p>
+        <p>Tenho conhecimento sobre todos os nossos agentes.</p>
+        <p>Como posso ajudar você hoje? Se precisar, posso executar tarefas como backup, auditorias ou verificações direto por aqui!</p>
+      </div>
+    </div>
+
+    <!-- Suggestions for Quick Actions -->
+    <div class="safira-suggestions">
+      <button class="safira-suggestion-chip" id="safira-sug-lego">🧱 Agente Lego</button>
+      <button class="safira-suggestion-chip" id="safira-sug-backup">💾 Fazer Backup</button>
+      <button class="safira-suggestion-chip" id="safira-sug-silo">📐 Reestruturar SILO</button>
+      <button class="safira-suggestion-chip" id="safira-sug-seo">🔍 Posições SEO</button>
+    </div>
+
+    <!-- Input Form -->
+    <form id="safira-chat-form" class="safira-input-area">
+      <input type="text" id="safira-chat-input" class="safira-input" placeholder="Pergunte à Safira..." required autocomplete="off">
+      <button type="submit" class="safira-send-btn" title="Enviar">⚡</button>
+    </form>
+  </div>
 
   <!-- Floating Comece Rápido Button (Visible only when logged in) -->
   <div id="comece-rapido-trigger" class="comece-rapido-floating-btn hidden" title="Começar Rápido">
@@ -2308,10 +2350,14 @@
   </div>
 
   <!-- Floating Safira Button (Visible only when logged in) -->
+  <div id="safira-floating-trigger" class="safira-floating-trigger hidden" title="Falar com a Safira">
+    💎
+  </div>
+
   <!-- Scripts -->
   <script src="niche_data.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="app.js?v=1.1.2" defer></script>
+  <script src="app.js" defer></script>
   <script src="generator.js" defer></script>
 
   <!-- ============================================================ -->
@@ -2635,8 +2681,6 @@ except KeyboardInterrupt:
     // ── Init ───────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
       var saved_url = localStorage.getItem('cnUrl') || '';
-      var saved_aff = localStorage.getItem('cnAffiliateLink') || '';
-      if (document.getElementById('cn-affiliate-link') && saved_aff) { document.getElementById('cn-affiliate-link').value = saved_aff; }
       var el_url    = document.getElementById('cn-ngrok-url');
       var el_code   = document.getElementById('cn-cell3-code');
 
@@ -2806,8 +2850,6 @@ except KeyboardInterrupt:
     };
 
     // ── Salvar URL ─────────────────────────────────────────────────
-    
-    window.cnOnImageModeChange = function() { var mode = document.getElementById('cn-image-mode').value; var customIn = document.getElementById('cn-custom-image-url'); if (customIn) customIn.style.display = (mode === 'custom') ? 'block' : 'none'; };
     window.cnSaveUrl = function() {
       var v = (document.getElementById('cn-ngrok-url').value || '').trim().replace(/\/$/, '');
       localStorage.setItem('cnUrl', v);
@@ -2911,7 +2953,11 @@ except KeyboardInterrupt:
                 }
               } else {
                 var backdrop = document.getElementById('safira-backdrop');
-                /* safira chat disabled */}
+                var sidebar = document.getElementById('safira-chat-sidebar');
+                if (backdrop && sidebar) {
+                  backdrop.classList.remove('active');
+                  sidebar.classList.remove('active');
+                }
               }
 
               // Show HQ balloon
@@ -2953,7 +2999,29 @@ except KeyboardInterrupt:
 
         // Abre a Safira e envia as instruções
         var backdrop = document.getElementById('safira-backdrop');
-        /* safira chat disabled */}, 50);
+        var sidebar = document.getElementById('safira-chat-sidebar');
+        if (backdrop && sidebar) {
+          backdrop.classList.add('active');
+          sidebar.classList.add('active');
+          
+          var msgArea = document.getElementById('safira-messages');
+          if (msgArea) {
+            // Remove previous tutorial and progress bar if any
+            var oldTut = document.getElementById('safira-tutorial-msg');
+            if (oldTut) oldTut.remove();
+
+            var newMsg = document.createElement('div');
+            newMsg.id = 'safira-tutorial-msg';
+            newMsg.className = 'safira-message assistant';
+            newMsg.innerHTML = '<p>✨ <b>Código Copiado com Sucesso!</b> Agora faça o seguinte:<br><br>1. Uma janelinha do Colab acabou de abrir.<br>2. Se aparecer uma tela de boas-vindas, clique no botão azul <b>"Novo notebook"</b> no canto inferior (ou no meio da tela).<br>3. Com o novo arquivo aberto, clique no espaço em branco para digitar.<br>4. Aperte <b>Ctrl + V</b> (Colar) para colar o código.<br>5. Clique no botão de ▶️ (Play) redondo ao lado do código para iniciar a máquina.<br>6. ⚠️ <b>MUITO IMPORTANTE: Não feche a janelinha do Colab! Apenas minimize-a.</b><br>7. <b>Copie o link que foi gerado ao final do Colab</b> e cole-o no campo aqui no painel.<br>8. Pronto! A janela do Colab sairá da sua frente automaticamente.</p>' +
+              '<div id="safira-colab-progress" style="margin-top:15px; padding: 0.8rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; text-align:center; overflow:hidden; position:relative;">' +
+              '<div style="position:absolute; top:0; left:0; height:100%; width:100%; background:linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.4) 50%, transparent 100%); animation: cnLoading 1.5s infinite;"></div>' +
+              '<span style="color:#34d399; font-weight:bold; font-size:0.8rem; position:relative; z-index:1;">⚙️ Aguardando a Máquina Infinita carregar no Colab...</span>' +
+              '</div>';
+            msgArea.appendChild(newMsg);
+            setTimeout(function() {
+              msgArea.scrollTop = newMsg.offsetTop - msgArea.offsetTop;
+            }, 50);
           }
         }
       }
@@ -3092,17 +3160,25 @@ except KeyboardInterrupt:
     }
 
     // ── Gerar 1 artigo via SSE ─────────────────────────────────────
-    function cnGenerateOne(titulo, repo, ghToken) {
+    function cnGenerateOne(titulo, repo, ghToken, isUSA) {
       return new Promise(function(resolve) {
         cnClearLog();
         var prog = document.getElementById('cn-prog-status');
-        if (prog) prog.textContent = '🧠 ' + titulo.substring(0, 50) + '...';
+        if (prog) prog.textContent = '🧠 ' + (isUSA ? '🇺🇸 [USA] ' : '') + titulo.substring(0, 50) + '...';
         var affLink = (document.getElementById('cn-affiliate-link') || {}).value || '';
 
         fetch(cn_base + '/gerar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ titulo: titulo, repo: repo, gh_token: ghToken, gh_email: 'efeitodigitalcontato@gmail.com', link_afiliado: affLink })
+          body: JSON.stringify({
+            titulo: titulo,
+            repo: repo,
+            gh_token: ghToken,
+            gh_email: 'efeitodigitalcontato@gmail.com',
+            link_afiliado: affLink,
+            lang: isUSA ? 'en' : 'pt',
+            category: isUSA ? 'USA' : null
+          })
         })
         .then(function(res) {
           if (!res.ok) { cnLog('❌ Erro HTTP ' + res.status, 'err'); return resolve(false); }
@@ -3134,6 +3210,18 @@ except KeyboardInterrupt:
                       d.markdown = applyAffiliateLinkToMarkdown(d.markdown, affLink);
                     }
 
+                    // Se for modo USA, forçar a categoria USA no Frontmatter
+                    if (isUSA) {
+                      if (/category:\s*["']?(.*?)["']?/i.test(d.markdown)) {
+                        d.markdown = d.markdown.replace(/category:\s*["']?(.*?)["']?\s*$/m, 'category: "USA"');
+                      } else {
+                        d.markdown = d.markdown.replace(/^---\s*\n/, '---\ncategory: "USA"\n');
+                      }
+                      if (!d.markdown.includes('tags:')) {
+                        d.markdown = d.markdown.replace(/^---\s*\n/, '---\ntags: ["USA", "English"]\n');
+                      }
+                    }
+
                     // Salvar no localStorage
                     var queueKey = 'ninja_queue_' + repo;
                     var localQueue = [];
@@ -3154,7 +3242,7 @@ except KeyboardInterrupt:
                       })
                     }).catch(function(){});
 
-                    cnLog('\n✅ Artigo salvo na fila temporária do navegador.', 'ok');
+                    cnLog('\n✅ Artigo ' + (isUSA ? '(Mercado Americano / USA) ' : '') + 'salvo na fila temporária do navegador.', 'ok');
                     if (typeof ASMR !== 'undefined' && ASMR.playCashRegister) {
                       ASMR.playCashRegister();
                     }
@@ -3176,7 +3264,7 @@ except KeyboardInterrupt:
     }
 
     // ── Iniciar geração em lote ────────────────────────────────────
-    window.cnStartGeneration = async function() {
+    window.cnStartGeneration = async function(isUSA) {
       if (!cn_base) { alert('Configure e teste a URL do Colab primeiro!'); return; }
       var repo    = (document.getElementById('cn-blog-select') || {}).value || '';
       
@@ -3238,7 +3326,7 @@ except KeyboardInterrupt:
       cnClearLog();
       cnChips(0, 0, cn_total);
       cnStartTimer();
-      cnLog('🚀 Iniciando ' + cn_total + ' artigos com Gemma 2:27b', 'info');
+      cnLog('🚀 Iniciando ' + cn_total + ' artigos' + (isUSA ? ' (Mercado Americano / USA)' : '') + ' com Gemma 2:27b', 'info');
 
       for (var i = 0; i < raw.length; i++) {
         if (cn_stop) { cnLog('\n⏹ Parado.', 'info'); break; }
@@ -3248,7 +3336,7 @@ except KeyboardInterrupt:
         cnChips(cn_ok, cn_fail, pending);
         cnLog('\n[' + (i+1) + '/' + cn_total + '] ' + titulo, 'info');
 
-        var ok = await cnGenerateOne(titulo, repo, ghToken);
+        var ok = await cnGenerateOne(titulo, repo, ghToken, isUSA);
         cn_done_cnt++;
         if (ok) cn_ok++; else cn_fail++;
         cnChips(cn_ok, cn_fail, cn_total - cn_done_cnt);
@@ -3299,6 +3387,54 @@ except KeyboardInterrupt:
       } else {
         if (status) status.textContent = '⚠️ ' + cn_ok + ' ok · ' + cn_fail + ' falha(s)';
         cnLog('\n⚠️ ' + cn_ok + '/' + cn_total + ' concluídos.', 'info');
+      }
+    };
+
+    // ── Traduzir Títulos e Gerar em Inglês (Mercado Americano / USA) ─────
+    window.cnTranslateAndGenerateUSA = async function() {
+      var topicsElem = document.getElementById('cn-topics');
+      if (!topicsElem) return;
+      var rawText = topicsElem.value || '';
+      var rawLines = rawText.split('\n')
+        .map(function(l){ return l.replace(/^\s*\d+[\.\)]\s*/,'').trim(); })
+        .filter(function(l){ return l.length > 0; });
+
+      if (rawLines.length === 0) {
+        alert('Cole pelo menos 1 título no campo de temas para traduzir e gerar em inglês!');
+        return;
+      }
+
+      var btn = document.getElementById('cn-usa-btn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '🇺🇸 Traduzindo Títulos...'; }
+      if (typeof cnToast === 'function') cnToast('🇺🇸 Traduzindo títulos para o Inglês (Mercado Americano)...');
+      cnLog('\n🇺🇸 [MERCADO AMERICANO] Traduzindo ' + rawLines.length + ' títulos para o Inglês...', 'info');
+
+      try {
+        var res = await fetch('/api/translate-titles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titles: rawLines })
+        });
+
+        if (res.ok) {
+          var data = await res.json();
+          if (data.translatedTitles && data.translatedTitles.length > 0) {
+            topicsElem.value = data.translatedTitles.join('\n');
+            if (typeof cnCountTopics === 'function') cnCountTopics();
+            if (typeof cnToast === 'function') cnToast('✅ Títulos traduzidos para o Inglês com sucesso!');
+            cnLog('\n✅ Títulos traduzidos para o Inglês (Mercado Americano):\n' + data.translatedTitles.map(function(t, i){ return (i+1) + '. ' + t; }).join('\n'), 'ok');
+          }
+        } else {
+          if (typeof cnToast === 'function') cnToast('⚠️ Não foi possível traduzir via API, gerando com títulos atuais.');
+        }
+      } catch (err) {
+        console.error('Erro ao traduzir títulos:', err);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🇺🇸 Mercado Americano (USA)'; }
+      }
+
+      if (confirm('Títulos em inglês prontos! Deseja iniciar a geração dos artigos agora para a categoria USA?')) {
+        window.cnStartGeneration(true); // Passa isUSA = true
       }
     };
 
