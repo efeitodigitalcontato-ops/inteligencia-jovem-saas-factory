@@ -3744,28 +3744,13 @@ function renderSavedBacklinks() {
 
 let safiraHistory = [];
 
-function toggleSafiraChat() {
-  const sidebar = document.getElementById('safira-chat-sidebar');
-  const backdrop = document.getElementById('safira-backdrop');
-  if (sidebar && backdrop) {
-    sidebar.classList.toggle('active');
-    backdrop.classList.toggle('active');
-  }
+function toggleSafiraChat() { return; }
 }
 
-function openSafiraChat() {
-  // Safira Chat desativado - a Safira é exclusiva do tutorial Comece Rápido
-  return;
-}
+function openSafiraChat() { return; }
 }
 
-function closeSafiraChat() {
-  const sidebar = document.getElementById('safira-chat-sidebar');
-  const backdrop = document.getElementById('safira-backdrop');
-  if (sidebar && backdrop) {
-    sidebar.classList.remove('active');
-    backdrop.classList.remove('active');
-  }
+function closeSafiraChat() { return; }
 }
 
 function formatSafiraMessage(text) {

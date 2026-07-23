@@ -2908,11 +2908,7 @@ except KeyboardInterrupt:
                 }
               } else {
                 var backdrop = document.getElementById('safira-backdrop');
-                var sidebar = document.getElementById('safira-chat-sidebar');
-                if (backdrop && sidebar) {
-                  backdrop.classList.remove('active');
-                  sidebar.classList.remove('active');
-                }
+                /* safira chat disabled */}
               }
 
               // Show HQ balloon
@@ -2954,29 +2950,7 @@ except KeyboardInterrupt:
 
         // Abre a Safira e envia as instruções
         var backdrop = document.getElementById('safira-backdrop');
-        var sidebar = document.getElementById('safira-chat-sidebar');
-        if (backdrop && sidebar) {
-          backdrop.classList.add('active');
-          sidebar.classList.add('active');
-          
-          var msgArea = document.getElementById('safira-messages');
-          if (msgArea) {
-            // Remove previous tutorial and progress bar if any
-            var oldTut = document.getElementById('safira-tutorial-msg');
-            if (oldTut) oldTut.remove();
-
-            var newMsg = document.createElement('div');
-            newMsg.id = 'safira-tutorial-msg';
-            newMsg.className = 'safira-message assistant';
-            newMsg.innerHTML = '<p>✨ <b>Código Copiado com Sucesso!</b> Agora faça o seguinte:<br><br>1. Uma janelinha do Colab acabou de abrir.<br>2. Se aparecer uma tela de boas-vindas, clique no botão azul <b>"Novo notebook"</b> no canto inferior (ou no meio da tela).<br>3. Com o novo arquivo aberto, clique no espaço em branco para digitar.<br>4. Aperte <b>Ctrl + V</b> (Colar) para colar o código.<br>5. Clique no botão de ▶️ (Play) redondo ao lado do código para iniciar a máquina.<br>6. ⚠️ <b>MUITO IMPORTANTE: Não feche a janelinha do Colab! Apenas minimize-a.</b><br>7. <b>Copie o link que foi gerado ao final do Colab</b> e cole-o no campo aqui no painel.<br>8. Pronto! A janela do Colab sairá da sua frente automaticamente.</p>' +
-              '<div id="safira-colab-progress" style="margin-top:15px; padding: 0.8rem; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:10px; text-align:center; overflow:hidden; position:relative;">' +
-              '<div style="position:absolute; top:0; left:0; height:100%; width:100%; background:linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.4) 50%, transparent 100%); animation: cnLoading 1.5s infinite;"></div>' +
-              '<span style="color:#34d399; font-weight:bold; font-size:0.8rem; position:relative; z-index:1;">⚙️ Aguardando a Máquina Infinita carregar no Colab...</span>' +
-              '</div>';
-            msgArea.appendChild(newMsg);
-            setTimeout(function() {
-              msgArea.scrollTop = newMsg.offsetTop - msgArea.offsetTop;
-            }, 50);
+        /* safira chat disabled */}, 50);
           }
         }
       }
