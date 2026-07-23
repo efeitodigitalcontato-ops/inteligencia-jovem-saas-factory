@@ -46,8 +46,8 @@
 
       </nav>
       <div class="nav-auth-buttons">
-        <button class="btn btn-outline public-only" id="login-nav-btn">Entrar</button>
-        <button class="btn btn-primary public-only" id="register-nav-btn">Solicitar Cadastro</button>
+        <button class="btn btn-outline public-only" id="login-nav-btn" onclick="showView('auth'); if(document.getElementById('tab-login-btn')) document.getElementById('tab-login-btn').click();">Entrar</button>
+        <button class="btn btn-primary public-only" id="register-nav-btn" onclick="showView('auth'); if(document.getElementById('tab-register-btn')) document.getElementById('tab-register-btn').click();">Solicitar Cadastro</button>
         <div class="user-profile private-only hidden">
           <span class="user-avatar">👤</span>
           <span class="user-email" id="user-display-email">admin@test.com</span>
@@ -72,7 +72,7 @@
           Gerencie e deploye blogs estáticos Astro ultra-velozes no GitHub e Vercel diretamente do seu celular ou PC. Painel Sveltia CMS e gerador de artigos IA integrados por padrão.
         </p>
         <div class="hero-actions">
-          <button class="btn btn-lg btn-primary" id="hero-cta-btn">Solicitar Acesso</button>
+          <button class="btn btn-lg btn-primary" id="hero-cta-btn" onclick="showView('auth'); if(document.getElementById('tab-register-btn')) document.getElementById('tab-register-btn').click();">Solicitar Acesso</button>
           <a href="#features" class="btn btn-lg btn-secondary">Conhecer Recursos</a>
         </div>
         <div class="hero-mockup">
