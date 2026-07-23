@@ -25,6 +25,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // In-memory debug logs to capture serverless runtime info
 global.debugLogs = [];
+global.generationProgressMap = new Map();
 function logDebug(msg) {
   const timestamp = new Date().toISOString();
   const logMsg = `[${timestamp}] ${msg}`;
@@ -7452,12 +7453,21 @@ app.post('/api/deploy', async (req, res) => {
 // ROTA GET: Consultar a contagem real de posts publicados no GitHub
 app.get('/api/sites/:repoName/posts-count', async (req, res) => {
   const { repoName } = req.params;
+  const cleanRepoName = repoName.includes('/') ? repoName.split('/')[1] : repoName;
+      if (global.generationProgressMap) {
+        global.generationProgressMap.set(cleanRepoName, { current: 0, total: volume });
+      }
+  
+  // Check in-memory real-time progress map (updated instantly during batch generation)
+  const inMemory = global.generationProgressMap ? global.generationProgressMap.get(cleanRepoName) : null;
+  const memCount = inMemory ? inMemory.current : 0;
+
   try {
-    const token = await getGithubTokenFromSupabase(repoName) || DEFAULT_GITHUB_TOKEN;
+    const token = await getGithubTokenFromSupabase(cleanRepoName) || DEFAULT_GITHUB_TOKEN;
     let ownerRepo = repoName;
     if (!ownerRepo.includes('/')) {
       let ghUser = DEFAULT_ORG;
-      if (token) {
+      if (token && token !== DEFAULT_GITHUB_TOKEN) {
         try {
           const uRes = await apiRequest({
             hostname: 'api.github.com',
@@ -7474,7 +7484,7 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
           }
         } catch (e) {}
       }
-      ownerRepo = `${ghUser}/${repoName}`;
+      ownerRepo = `${ghUser}/${cleanRepoName}`;
     }
     
     const checkRes = await apiRequest({
@@ -7488,18 +7498,18 @@ app.get('/api/sites/:repoName/posts-count', async (req, res) => {
       }
     });
 
+    let ghCount = 0;
     if (checkRes.statusCode === 200 && Array.isArray(checkRes.body)) {
-      const count = checkRes.body.filter(item => item.name.endsWith('.md') || item.name.endsWith('.mdx')).length;
-      return res.json({ success: true, count });
+      ghCount = checkRes.body.filter(item => item.name.endsWith('.md') || item.name.endsWith('.mdx')).length;
     }
     
-    res.json({ success: true, count: 0 });
+    const finalCount = Math.max(ghCount, memCount);
+    return res.json({ success: true, count: finalCount, ghCount, memCount });
   } catch (err) {
-    res.json({ success: true, count: 0 });
+    return res.json({ success: true, count: memCount });
   }
 });
 
-// ROTA GET: Consultar o status real de deploy na Vercel (garante que o build terminou no ar)
 app.get('/api/sites/:repoName/deploy-status', async (req, res) => {
   const { repoName } = req.params;
   const cleanRepoName = repoName.includes('/') ? repoName.split('/')[1] : repoName;
@@ -7621,6 +7631,10 @@ app.post('/api/multi-generator/start', async (req, res) => {
       for (let i = 0; i < titles.length; i++) {
         const title = titles[i];
         console.log(`[Fábrica Escala] Gerando post ${i + 1}/${titles.length}: "${title}"`);
+        if (global.generationProgressMap) {
+          const prog = global.generationProgressMap.get(cleanRepoName);
+          if (prog) prog.current = i + 1;
+        }
 
         try {
           const colabUrl = tunnelUrl.replace(/\/$/, '');
