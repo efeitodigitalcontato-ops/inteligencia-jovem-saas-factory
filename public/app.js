@@ -458,12 +458,12 @@ function updateAuthUI(isLoggedIn) {
     dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
     el.userDisplayEmail.textContent = State.user.email;
     el.dashUserName.textContent = State.user.name || 'Empreendedor';
-    if (safiraTrigger) safiraTrigger.classList.remove('hidden');
+    // safiraTrigger disabled
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
     dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
     dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
-    if (safiraTrigger) safiraTrigger.classList.add('hidden');
+    // safiraTrigger disabled
     if (comeceTrigger) comeceTrigger.classList.add('hidden');
     if (typeof closeSafiraChat === 'function') closeSafiraChat();
   }
@@ -3754,12 +3754,9 @@ function toggleSafiraChat() {
 }
 
 function openSafiraChat() {
-  const sidebar = document.getElementById('safira-chat-sidebar');
-  const backdrop = document.getElementById('safira-backdrop');
-  if (sidebar && backdrop) {
-    sidebar.classList.add('active');
-    backdrop.classList.add('active');
-  }
+  // Safira Chat desativado - a Safira é exclusiva do tutorial Comece Rápido
+  return;
+}
 }
 
 function closeSafiraChat() {
@@ -6738,12 +6735,12 @@ function updateAuthUI(isLoggedIn) {
     dynamicPublicLinks.forEach(link => link.classList.add('hidden'));
     el.userDisplayEmail.textContent = State.user.email;
     el.dashUserName.textContent = State.user.name || 'Empreendedor';
-    if (safiraTrigger) safiraTrigger.classList.remove('hidden');
+    // safiraTrigger disabled
     if (comeceTrigger) comeceTrigger.classList.remove('hidden');
   } else {
     dynamicPrivateLinks.forEach(link => link.classList.add('hidden'));
     dynamicPublicLinks.forEach(link => link.classList.remove('hidden'));
-    if (safiraTrigger) safiraTrigger.classList.add('hidden');
+    // safiraTrigger disabled
     if (comeceTrigger) comeceTrigger.classList.add('hidden');
     if (typeof closeSafiraChat === 'function') closeSafiraChat();
   }
