@@ -220,7 +220,7 @@ function showView(viewName) {
   if (typeof stopMotivationalPhrases === 'function') {
     stopMotivationalPhrases();
   }
-  if (typeof ASMR !== 'undefined') {
+  if (typeof ASMR !== 'undefined' && ASMR.playWhoosh) {
     ASMR.playWhoosh();
   }
 
@@ -241,6 +241,30 @@ function showView(viewName) {
     target.classList.add('active');
   } else {
     console.warn('Seção de visão não encontrada para:', viewName);
+  }
+
+  if (viewName === 'auth') {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const twoFactorForm = document.getElementById('two-factor-login-form');
+    const tabLoginBtn = document.getElementById('tab-login-btn');
+    const tabRegisterBtn = document.getElementById('tab-register-btn');
+    const tabs = document.querySelector('.auth-tabs');
+
+    if (loginForm) {
+      loginForm.classList.add('active');
+      loginForm.style.display = 'block';
+    }
+    if (registerForm) {
+      registerForm.classList.remove('active');
+      registerForm.style.display = 'none';
+    }
+    if (twoFactorForm) {
+      twoFactorForm.style.display = 'none';
+    }
+    if (tabLoginBtn) tabLoginBtn.classList.add('active');
+    if (tabRegisterBtn) tabRegisterBtn.classList.remove('active');
+    if (tabs) tabs.style.display = 'flex';
   }
 
   if (viewName === 'settings') {
@@ -623,7 +647,16 @@ Object.keys(navViewMap).forEach(href => {
   }
 });
 
-if (el.loginNavBtn) el.loginNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabLoginBtn) el.tabLoginBtn.click(); });
+if (el.loginNavBtn) {
+  el.loginNavBtn.addEventListener('click', (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (typeof ASMR !== 'undefined' && ASMR.playWhoosh) ASMR.playWhoosh();
+    showView('auth');
+    const btn = el.tabLoginBtn || document.getElementById('tab-login-btn');
+    if (btn) btn.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 if (el.registerNavBtn) el.registerNavBtn.addEventListener('click', () => { showView('auth'); if (el.tabRegisterBtn) el.tabRegisterBtn.click(); });
 if (el.heroCtaBtn) el.heroCtaBtn.addEventListener('click', () => { showView('auth'); if (el.tabRegisterBtn) el.tabRegisterBtn.click(); });
 if (el.logoutBtn) el.logoutBtn.addEventListener('click', logout);
@@ -5166,8 +5199,10 @@ async function completeOnboardingOnly() {
 
 // Programmatic CSS Injection for satisfying visual effects
 (function injectASMRStyles() {
-  const style = document.createElement('style');
-  style.textContent = `
+  try {
+    const style = document.createElement('style');
+    style.id = 'asmr-styles';
+    style.textContent = `
     /* Satisfying UI Ripple Emitter */
     .asmr-ripple {
       position: absolute;
@@ -5403,7 +5438,13 @@ async function completeOnboardingOnly() {
       50% { transform: scale(1.25); opacity: 0.8; }
     }
   `;
-  document.head.appendChild(style);
+    const targetHead = document.head || document.querySelector('head') || document.body || document.documentElement;
+    if (targetHead && typeof targetHead.appendChild === 'function') {
+      targetHead.appendChild(style);
+    }
+  } catch (err) {
+    console.warn('Could not inject ASMR styles:', err);
+  }
 })();
 
 // Web Audio API Sound Synthesizer (No assets needed!)
